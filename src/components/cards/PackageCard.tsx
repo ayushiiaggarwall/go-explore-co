@@ -16,7 +16,7 @@ export default function PackageCard({ package: pkg, onBook }: PackageCardProps) 
   const { actualTheme } = useTheme();
 
   // Check if this package should have the glare effect
-  const hasGlareEffect = ['Romantic Paris Getaway', 'Tokyo Adventure', 'Tropical Bali Escape'].includes(pkg.name);
+  const hasGlareEffect = false;
   
   // Define colors based on theme for glare cards
   const getGlareTextColor = (baseColor: string) => {
