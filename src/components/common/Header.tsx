@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plane, Menu, X, LogOut, LayoutDashboard } from 'lucide-react';
+import { Plane, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../ui/ThemeToggle';
 
@@ -115,6 +115,14 @@ export default function Header() {
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg py-1 z-50">
                     <Link
+                      to="/profile"
+                      className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Profile Settings
+                    </Link>
+                    <Link
                       to="/dashboard"
                       className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
                       onClick={() => setIsUserMenuOpen(false)}
@@ -228,6 +236,14 @@ export default function Header() {
                     </div>
                     Welcome, {user.user_metadata?.full_name || user.email}
                   </div>
+                  <Link
+                    to="/profile"
+                    className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Settings className="w-4 h-4" />
+                    Profile Settings
+                  </Link>
                   <Link
                     to="/dashboard"
                     className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"

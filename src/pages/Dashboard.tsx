@@ -8,7 +8,7 @@ import Button from '../components/ui/Button';
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [activeTab, setActiveTab] = useState<'bookings' | 'profile'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings'>('bookings');
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -170,67 +170,30 @@ export default function Dashboard() {
             >
               My Bookings ({bookings.length})
             </button>
-            <button
-              onClick={() => setActiveTab('profile')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'profile'
-                  ? 'border-sky-500 text-sky-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-              }`}
-            >
-              Profile Settings
-            </button>
           </nav>
         </div>
 
         {/* Content */}
-        {activeTab === 'bookings' && (
-          <div>
-            {bookings.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-muted-foreground mb-4">
-                  <Calendar className="w-16 h-16 mx-auto" />
-                </div>
-                <h3 className="text-lg font-medium text-foreground mb-2">No bookings yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Start exploring and book your first trip with TravelEase.
-                </p>
-                <Button onClick={() => window.location.href = '/search'}>
-                  Start Booking
-                </Button>
+        <div>
+          {bookings.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-muted-foreground mb-4">
+                <Calendar className="w-16 h-16 mx-auto" />
               </div>
-            ) : (
-              <div>
-                {bookings.map(renderBookingCard)}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'profile' && (
-          <div className="bg-card rounded-lg shadow-md p-6 border border-border">
-            <h3 className="text-lg font-semibold mb-6 text-foreground">Profile Information</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Full Name
-                </label>
-                <div className="text-foreground">{user?.user_metadata?.full_name || user?.email}</div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Email Address
-                </label>
-                <div className="text-foreground">{user?.email}</div>
-              </div>
-              <div className="pt-4">
-                <Button variant="outline">
-                  Edit Profile
-                </Button>
-              </div>
+              <h3 className="text-lg font-medium text-foreground mb-2">No bookings yet</h3>
+              <p className="text-muted-foreground mb-6">
+                Start exploring and book your first trip with TravelEase.
+              </p>
+              <Button onClick={() => window.location.href = '/search'}>
+                Start Booking
+              </Button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div>
+              {bookings.map(renderBookingCard)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
