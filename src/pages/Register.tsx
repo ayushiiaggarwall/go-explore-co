@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { validateEmail, validateRequired, validatePassword } from '../utils/validation';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/input';
+import { BauhausCard } from '../components/ui/bauhaus-card';
 
 export default function Register() {
   const { register, isLoading } = useAuth();
@@ -79,7 +80,7 @@ export default function Register() {
           Or{' '}
           <Link
             to="/login"
-            className="font-medium text-sky-600 hover:text-sky-500"
+            className="font-medium text-primary hover:text-primary/80"
           >
             sign in to your existing account
           </Link>
@@ -87,8 +88,12 @@ export default function Register() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-border">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <BauhausCard 
+          accentColor="hsl(var(--primary))"
+          backgroundColor="hsl(var(--card))"
+          borderRadius="1rem"
+        >
+          <form className="space-y-6 w-full" onSubmit={handleSubmit}>
             <Input
               label="Full name"
               name="name"
@@ -164,15 +169,15 @@ export default function Register() {
                 name="agree-terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 text-sky-600 focus:ring-sky-500 border-border rounded bg-background"
+                className="h-4 w-4 text-primary focus:ring-primary border-border rounded bg-background"
               />
               <label htmlFor="agree-terms" className="ml-2 block text-sm text-foreground">
                 I agree to the{' '}
-                <a href="#" className="text-sky-600 hover:text-sky-500">
+                <a href="#" className="text-primary hover:text-primary/80">
                   Terms and Conditions
                 </a>{' '}
                 and{' '}
-                <a href="#" className="text-sky-600 hover:text-sky-500">
+                <a href="#" className="text-primary hover:text-primary/80">
                   Privacy Policy
                 </a>
               </label>
@@ -189,7 +194,7 @@ export default function Register() {
           </form>
 
           {successMessage && (
-            <div className="mt-6 bg-green-50 border border-green-200 rounded-md p-4">
+            <div className="mt-6 bg-green-50 border border-green-200 rounded-md p-4 w-full">
               <p className="text-sm text-green-800">{successMessage}</p>
               <p className="text-sm text-green-600 mt-2">
                 After verifying your email, you can{' '}
@@ -199,7 +204,7 @@ export default function Register() {
               </p>
             </div>
           )}
-        </div>
+        </BauhausCard>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { validateEmail, validateRequired } from '../utils/validation';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/input';
+import { BauhausCard } from '../components/ui/bauhaus-card';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ export default function Login() {
           Or{' '}
           <Link
             to="/register"
-            className="font-medium text-sky-600 hover:text-sky-500"
+            className="font-medium text-primary hover:text-primary/80"
           >
             create a new account
           </Link>
@@ -79,8 +80,12 @@ export default function Login() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-border">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <BauhausCard 
+          accentColor="hsl(var(--primary))"
+          backgroundColor="hsl(var(--card))"
+          borderRadius="1rem"
+        >
+          <form className="space-y-6 w-full" onSubmit={handleSubmit}>
             <Input
               label="Email address"
               name="email"
@@ -122,7 +127,7 @@ export default function Login() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-sky-600 focus:ring-sky-500 border-border rounded bg-background"
+                  className="h-4 w-4 text-primary focus:ring-primary border-border rounded bg-background"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
                   Remember me
@@ -130,7 +135,7 @@ export default function Login() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-sky-600 hover:text-sky-500">
+                <a href="#" className="font-medium text-primary hover:text-primary/80">
                   Forgot your password?
                 </a>
               </div>
@@ -146,7 +151,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-6">
+          <div className="mt-6 w-full">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border" />
@@ -162,7 +167,7 @@ export default function Login() {
               </p>
             </div>
           </div>
-        </div>
+        </BauhausCard>
       </div>
     </div>
   );
