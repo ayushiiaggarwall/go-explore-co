@@ -75,6 +75,37 @@ export default function Header() {
               {isTravelToolsOpen && (
                 <div className="absolute left-0 top-full mt-1 w-52 bg-card border border-border rounded-lg shadow-xl py-2 z-50 animate-fade-in">
                   <Link
+                    to="/search?type=flights"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                    onClick={() => setIsTravelToolsOpen(false)}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    Book Flight
+                  </Link>
+                  <Link
+                    to="/search?type=hotels"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                    onClick={() => setIsTravelToolsOpen(false)}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Book Hotels
+                  </Link>
+                  <Link
+                    to="/search?type=packages"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                    onClick={() => setIsTravelToolsOpen(false)}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    Explore Packages
+                  </Link>
+                  <div className="border-t border-border my-2"></div>
+                  <Link
                     to="/recommendations"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                     onClick={() => setIsTravelToolsOpen(false)}
@@ -209,6 +240,27 @@ export default function Header() {
                   Home
                 </Link>
               )}
+              <Link
+                to="/search?type=flights"
+                className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Book Flight
+              </Link>
+              <Link
+                to="/search?type=hotels"
+                className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Book Hotels
+              </Link>
+              <Link
+                to="/search?type=packages"
+                className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Explore Packages
+              </Link>
               <Link
                 to="/recommendations"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
