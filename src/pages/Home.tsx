@@ -35,7 +35,7 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-strong">
               Your Journey Begins Here
             </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white drop-shadow-md">
+            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white drop-shadow-medium-plus">
               Discover amazing destinations, book the perfect accommodations, and create unforgettable memories with TravelEase.
             </p>
           </div>
