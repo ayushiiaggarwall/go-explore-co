@@ -135,9 +135,9 @@ export default function Login() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-primary hover:text-primary/80">
+                <Link to="/forgot-password" className="font-medium text-primary hover:text-primary/80">
                   Forgot your password?
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -151,22 +151,6 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-6 w-full">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-card text-muted-foreground">Demo Credentials</span>
-              </div>
-            </div>
-
-            <div className="mt-6 bg-muted/50 rounded-md p-4">
-              <p className="text-sm text-muted-foreground">
-                Use any email and password to test the login functionality.
-              </p>
-            </div>
-          </div>
         </BauhausCard>
       </div>
     </div>

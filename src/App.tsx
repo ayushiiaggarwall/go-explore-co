@@ -17,6 +17,8 @@ import VisaInfo from './pages/VisaInfo';
 import CurrencyConverter from './pages/CurrencyConverter';
 import FlightApiTest from './pages/FlightApiTest';
 import EmailConfirmation from './pages/EmailConfirmation';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -41,6 +43,8 @@ function App() {
                 <Route path="/currency-converter" element={<CurrencyConverter />} />
                 <Route path="/flight-api-test" element={<FlightApiTest />} />
                 <Route path="/email-confirmation" element={<EmailConfirmation />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
               </Routes>
             </main>
             <Footer />
