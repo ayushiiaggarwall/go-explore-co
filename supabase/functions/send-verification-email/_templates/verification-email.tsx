@@ -27,50 +27,77 @@ export const VerificationEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Heading style={h1}>✈️ TravelEase</Heading>
+          <Heading style={h1}>
+            <span style={logoIcon}>✈️</span> TravelEase
+          </Heading>
+          <Text style={headerSubtext}>Your Journey Begins Here</Text>
         </Section>
         
         <Section style={content}>
-          <Heading style={h2}>Verify your email address</Heading>
-          
-          <Text style={text}>
-            Welcome to TravelEase! To complete your registration and start planning your amazing trips, 
-            please verify your email address by clicking the button below.
-          </Text>
-
-          <Section style={buttonContainer}>
-            <Button
-              style={button}
-              href={confirmationUrl}
-            >
-              Verify Email Address
-            </Button>
+          <Section style={welcomeSection}>
+            <Heading style={h2}>Welcome aboard! 🎉</Heading>
+            <Text style={welcomeText}>
+              We're excited to have you join the TravelEase community! You're just one step away from 
+              discovering amazing destinations, planning unforgettable trips, and creating memories that will last a lifetime.
+            </Text>
           </Section>
 
-          <Text style={text}>
-            If the button doesn't work, you can also click on this link:
-          </Text>
-          
-          <Link
-            href={confirmationUrl}
-            style={link}
-          >
-            {confirmationUrl}
-          </Link>
+          <Section style={verificationSection}>
+            <Heading style={h3}>Verify your email address</Heading>
+            <Text style={text}>
+              To unlock all the features of TravelEase and start your travel journey, please verify your email address.
+            </Text>
 
-          <Text style={text}>
-            Or enter this verification code manually: <strong style={code}>{token}</strong>
-          </Text>
+            <Section style={buttonContainer}>
+              <Button
+                style={button}
+                href={confirmationUrl}
+              >
+                🔓 Verify My Email
+              </Button>
+            </Section>
 
-          <Text style={footerText}>
-            If you didn't create an account with TravelEase, you can safely ignore this email.
-          </Text>
+            <Text style={alternativeText}>
+              Having trouble with the button? Copy and paste this link into your browser:
+            </Text>
+            
+            <Link
+              href={confirmationUrl}
+              style={link}
+            >
+              {confirmationUrl}
+            </Link>
+
+            <Section style={codeSection}>
+              <Text style={codeLabel}>Or enter this verification code manually:</Text>
+              <Text style={code}>{token}</Text>
+            </Section>
+          </Section>
+
+          <Section style={featuresSection}>
+            <Heading style={featuresTitle}>What awaits you:</Heading>
+            <Text style={featureItem}>🏨 Discover amazing hotels and accommodations</Text>
+            <Text style={featureItem}>✈️ Find the best flight deals</Text>
+            <Text style={featureItem}>🎯 Get personalized travel recommendations</Text>
+            <Text style={featureItem}>💱 Access our currency converter tool</Text>
+            <Text style={featureItem}>📋 Plan and organize your complete itinerary</Text>
+          </Section>
+
+          <Section style={securitySection}>
+            <Text style={securityText}>
+              🔒 <strong>Security Notice:</strong> If you didn't create a TravelEase account, please ignore this email. 
+              Your security is our priority.
+            </Text>
+          </Section>
         </Section>
 
         <Section style={footer}>
           <Text style={footerText}>
-            Happy travels! 🌍<br />
-            The TravelEase Team
+            Ready to explore the world? 🌍<br />
+            <strong>The TravelEase Team</strong>
+          </Text>
+          <Text style={footerSubtext}>
+            Making travel planning effortless, one trip at a time.
           </Text>
         </Section>
       </Container>
@@ -174,4 +201,119 @@ const footerText = {
   lineHeight: "20px",
   margin: "8px 0",
   textAlign: "center" as const,
+};
+
+const logoIcon = {
+  fontSize: "36px",
+  marginRight: "8px",
+};
+
+const headerSubtext = {
+  color: "#666666",
+  fontSize: "16px",
+  margin: "8px 0 0 0",
+  textAlign: "center" as const,
+  fontStyle: "italic",
+};
+
+const welcomeSection = {
+  backgroundColor: "#f8fbff",
+  padding: "24px",
+  borderRadius: "12px",
+  margin: "24px 0",
+  border: "1px solid #e3f2fd",
+};
+
+const welcomeText = {
+  color: "#333333",
+  fontSize: "16px",
+  lineHeight: "26px",
+  margin: "16px 0 0 0",
+  textAlign: "center" as const,
+};
+
+const verificationSection = {
+  margin: "32px 0",
+};
+
+const h3 = {
+  color: "#333333",
+  fontSize: "20px",
+  fontWeight: "600",
+  lineHeight: "28px",
+  margin: "0 0 16px 0",
+  textAlign: "center" as const,
+};
+
+const alternativeText = {
+  color: "#666666",
+  fontSize: "14px",
+  lineHeight: "20px",
+  margin: "24px 0 12px 0",
+  textAlign: "center" as const,
+};
+
+const codeSection = {
+  backgroundColor: "#f8f9fa",
+  padding: "20px",
+  borderRadius: "8px",
+  margin: "24px 0",
+  textAlign: "center" as const,
+  border: "1px solid #e9ecef",
+};
+
+const codeLabel = {
+  color: "#666666",
+  fontSize: "14px",
+  margin: "0 0 8px 0",
+  textAlign: "center" as const,
+};
+
+const featuresSection = {
+  backgroundColor: "#fff8e1",
+  padding: "24px",
+  borderRadius: "12px",
+  margin: "32px 0",
+  border: "1px solid #fff3c4",
+};
+
+const featuresTitle = {
+  color: "#e65100",
+  fontSize: "18px",
+  fontWeight: "600",
+  margin: "0 0 16px 0",
+  textAlign: "center" as const,
+};
+
+const featureItem = {
+  color: "#333333",
+  fontSize: "15px",
+  lineHeight: "24px",
+  margin: "8px 0",
+  paddingLeft: "8px",
+};
+
+const securitySection = {
+  backgroundColor: "#f3e5f5",
+  padding: "20px",
+  borderRadius: "8px",
+  margin: "32px 0",
+  border: "1px solid #e1bee7",
+};
+
+const securityText = {
+  color: "#4a148c",
+  fontSize: "14px",
+  lineHeight: "22px",
+  margin: "0",
+  textAlign: "center" as const,
+};
+
+const footerSubtext = {
+  color: "#999999",
+  fontSize: "12px",
+  lineHeight: "16px",
+  margin: "8px 0 0 0",
+  textAlign: "center" as const,
+  fontStyle: "italic",
 };
