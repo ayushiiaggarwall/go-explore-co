@@ -62,7 +62,7 @@ export default function SearchForm({ className = '' }: SearchFormProps) {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <form onSubmit={handleSubmit} className={`bg-blue-900 dark:bg-blue-900 rounded-lg shadow-lg p-6 ${className}`}>
+    <form onSubmit={handleSubmit} className={`bg-blue-950 dark:bg-blue-950 rounded-lg shadow-lg p-6 ${className}`}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* From */}
         <div className="relative">
