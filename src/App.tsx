@@ -19,6 +19,8 @@ import FlightApiTest from './pages/FlightApiTest';
 import EmailConfirmation from './pages/EmailConfirmation';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Profile from './pages/Profile';
+import { Toaster } from './components/ui/toaster';
 
 function App() {
   return (
@@ -45,9 +47,11 @@ function App() {
                 <Route path="/email-confirmation" element={<EmailConfirmation />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/profile" element={<Profile />} />
               </Routes>
             </main>
             <Footer />
+            <Toaster />
           </div>
         </Router>
       </AuthProvider>
