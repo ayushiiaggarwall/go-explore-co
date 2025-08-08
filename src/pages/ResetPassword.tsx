@@ -19,22 +19,48 @@ export default function ResetPassword() {
   const [isValidLink, setIsValidLink] = useState(false);
 
   useEffect(() => {
-    // Simply check if we have the required parameters
-    const accessToken = searchParams.get('access_token');
-    const type = searchParams.get('type');
-    
-    console.log('Reset password URL params:', { 
-      accessToken: accessToken?.substring(0, 10) + '...', 
-      type 
-    });
-    
-    if (accessToken && type === 'recovery') {
-      setIsValidLink(true);
-      setError('');
-    } else {
-      setIsValidLink(false);
-      setError('Invalid reset link. Please request a new password reset.');
-    }
+    const handlePasswordReset = async () => {
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const type = searchParams.get('type');
+      
+      console.log('Reset password URL params:', { 
+        accessToken: accessToken?.substring(0, 10) + '...', 
+        refreshToken: refreshToken?.substring(0, 10) + '...',
+        type 
+      });
+      
+      if (accessToken && type === 'recovery') {
+        try {
+          // Set session using the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || ''
+          });
+          
+          console.log('Session set result:', { data: !!data.session, error });
+          
+          if (error) {
+            console.error('Session error:', error);
+            setError('Invalid reset link. Please request a new password reset.');
+            setIsValidLink(false);
+          } else {
+            console.log('Session established successfully');
+            setIsValidLink(true);
+            setError('');
+          }
+        } catch (err) {
+          console.error('Error setting session:', err);
+          setError('Invalid reset link. Please request a new password reset.');
+          setIsValidLink(false);
+        }
+      } else {
+        setIsValidLink(false);
+        setError('Invalid reset link. Please request a new password reset.');
+      }
+    };
+
+    handlePasswordReset();
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
