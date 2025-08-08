@@ -6,7 +6,25 @@ import { formatPrice, formatDate } from '../utils/validation';
 import Button from '../components/ui/Button';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      window.location.href = '/';
+    }
+  }, [user, isLoading]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [activeTab, setActiveTab] = useState<'bookings' | 'profile'>('bookings');
 
