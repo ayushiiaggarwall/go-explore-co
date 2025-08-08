@@ -1,237 +1,277 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import Navigation from "@/components/ui/navigation";
-import { MapPin, Phone, Mail, Clock, MessageCircle, Send } from "lucide-react";
+import React, { useState } from 'react';
+import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
+import { validateEmail, validateRequired, validatePhone } from '../utils/validation';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/input';
 
-const Contact = () => {
+export default function Contact() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: ""
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!validateRequired(formData.name)) {
+      newErrors.name = 'Name is required';
+    }
+    if (!validateEmail(formData.email)) {
+      newErrors.email = 'Valid email is required';
+    }
+    if (formData.phone && !validatePhone(formData.phone)) {
+      newErrors.phone = 'Valid phone number is required';
+    }
+    if (!validateRequired(formData.subject)) {
+      newErrors.subject = 'Subject is required';
+    }
+    if (!validateRequired(formData.message)) {
+      newErrors.message = 'Message is required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Mock form submission
-    setTimeout(() => {
-      alert("Thank you! Your message has been sent successfully.");
-      setFormData({ name: "", email: "", subject: "", message: "" });
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // Simulate form submission
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setSubmitted(true);
+    setIsSubmitting(false);
+    
+    // Reset form
     setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+      name: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: ''
     });
   };
 
-  const contactInfo = [
-    {
-      icon: MapPin,
-      title: "Visit Us",
-      details: ["123 Travel Street", "Adventure City, AC 12345", "United States"]
-    },
-    {
-      icon: Phone,
-      title: "Call Us",
-      details: ["+1 (555) 123-4567", "+1 (555) 987-6543", "Toll-free: 1-800-WANDER"]
-    },
-    {
-      icon: Mail,
-      title: "Email Us",
-      details: ["hello@wanderwise.com", "support@wanderwise.com", "bookings@wanderwise.com"]
-    },
-    {
-      icon: Clock,
-      title: "Business Hours",
-      details: ["Monday - Friday: 9:00 AM - 8:00 PM", "Saturday: 10:00 AM - 6:00 PM", "Sunday: 10:00 AM - 4:00 PM"]
-    }
-  ];
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-white rounded-lg shadow-md p-8">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Send className="w-8 h-8 text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Message Sent!</h2>
+            <p className="text-gray-600 mb-6">
+              Thank you for contacting us. We'll get back to you within 24 hours.
+            </p>
+            <Button onClick={() => setSubmitted(false)}>
+              Send Another Message
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      {/* Hero Section */}
-      <section className="py-20 ocean-gradient text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Get in Touch</h1>
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
-            We're here to help make your travel dreams come true. Reach out to our friendly team anytime.
-          </p>
+      {/* Header */}
+      <section className="bg-gradient-to-r from-blue-600 to-sky-500 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+            <p className="text-xl max-w-2xl mx-auto">
+              Get in touch with our travel experts. We're here to help make your travel dreams come true.
+            </p>
+          </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <div>
-            <Card className="card-elevated">
-              <CardHeader>
-                <CardTitle className="text-2xl flex items-center space-x-2">
-                  <MessageCircle className="w-6 h-6" />
-                  <span>Send us a Message</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        placeholder="Your full name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="your@email.com"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
-                    <Input
-                      id="subject"
-                      name="subject"
-                      placeholder="What can we help you with?"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      placeholder="Tell us more about your inquiry..."
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      rows={6}
-                      required
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full btn-primary" disabled={isLoading}>
-                    <Send className="w-4 h-4 mr-2" />
-                    {isLoading ? "Sending..." : "Send Message"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Contact Information */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-4">Contact Information</h2>
-              <p className="text-muted-foreground text-lg">
-                Our travel experts are ready to assist you with planning your perfect journey. 
-                Contact us through any of the methods below.
+              <h2 className="text-2xl font-bold text-foreground mb-6">Get in Touch</h2>
+              <p className="text-muted-foreground">
+                Have a question about your booking or need travel advice? 
+                Our experienced team is ready to assist you.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {contactInfo.map((info, index) => (
-                <Card key={index} className="travel-card">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 ocean-gradient rounded-xl flex items-center justify-center flex-shrink-0">
-                        <info.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">{info.title}</h3>
-                        <div className="space-y-1">
-                          {info.details.map((detail, idx) => (
-                            <p key={idx} className="text-sm text-muted-foreground">
-                              {detail}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <MapPin className="w-6 h-6 text-sky-500 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-foreground">Address</h3>
+                  <p className="text-muted-foreground">
+                    123 Travel Street<br />
+                    New York, NY 10001<br />
+                    United States
+                  </p>
+                </div>
+              </div>
 
-            {/* FAQ Section */}
-            <Card className="travel-card">
-              <CardHeader>
-                <CardTitle>Frequently Asked Questions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              <div className="flex items-start space-x-4">
+                <Phone className="w-6 h-6 text-sky-500 mt-1" />
                 <div>
-                  <h4 className="font-semibold text-foreground">How can I modify my booking?</h4>
-                  <p className="text-sm text-muted-foreground">
-                    You can modify most bookings through your dashboard or by contacting our support team.
+                  <h3 className="font-semibold text-foreground">Phone</h3>
+                  <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                  <p className="text-muted-foreground">+1 (555) 123-4568</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <Mail className="w-6 h-6 text-sky-500 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-foreground">Email</h3>
+                  <p className="text-muted-foreground">info@travelease.com</p>
+                  <p className="text-muted-foreground">support@travelease.com</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <Clock className="w-6 h-6 text-sky-500 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-foreground">Business Hours</h3>
+                  <p className="text-muted-foreground">
+                    Monday - Friday: 9:00 AM - 6:00 PM<br />
+                    Saturday: 10:00 AM - 4:00 PM<br />
+                    Sunday: Closed
                   </p>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-foreground">What is your cancellation policy?</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Cancellation policies vary by provider. Check your booking confirmation for specific terms.
-                  </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Form */}
+          <div className="lg:col-span-2">
+            <div className="bg-card rounded-lg shadow-md p-8 border border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-6">Send us a Message</h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <Input
+                    label="Full Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    error={errors.name}
+                    required
+                  />
+                  <Input
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    error={errors.email}
+                    required
+                  />
                 </div>
-                <div>
-                  <h4 className="font-semibold text-foreground">Do you offer travel insurance?</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Yes, we partner with leading insurance providers to offer comprehensive travel protection.
-                  </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <Input
+                    label="Phone Number (Optional)"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    error={errors.phone}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Subject
+                    </label>
+                    <select
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      className="block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
+                      required
+                    >
+                      <option value="">Select a subject</option>
+                      <option value="booking">Booking Inquiry</option>
+                      <option value="support">Customer Support</option>
+                      <option value="cancellation">Cancellation</option>
+                      <option value="refund">Refund Request</option>
+                      <option value="feedback">Feedback</option>
+                      <option value="other">Other</option>
+                    </select>
+                    {errors.subject && (
+                      <p className="text-sm text-red-600 mt-1">{errors.subject}</p>
+                    )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Message
+                  </label>
+                  <textarea
+                    name="message"
+                    rows={6}
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder="Tell us how we can help you..."
+                    className="block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
+                    required
+                  />
+                  {errors.message && (
+                    <p className="text-sm text-red-600 mt-1">{errors.message}</p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  isLoading={isSubmitting}
+                  size="lg"
+                  className="w-full sm:w-auto"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Message
+                </Button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {/* Map Section */}
+        <div className="mt-16">
+          <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
+            <div className="h-96 bg-muted flex items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <MapPin className="w-12 h-12 mx-auto mb-4" />
+                <p>Interactive Map</p>
+                <p className="text-sm">123 Travel Street, New York, NY 10001</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Map Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Find Our Office</h2>
-            <p className="text-muted-foreground">
-              Visit us in person at our headquarters in Adventure City
-            </p>
-          </div>
-          
-          <Card className="overflow-hidden card-elevated">
-            <div className="bg-muted/50 h-64 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <MapPin className="w-12 h-12 text-primary mx-auto" />
-                <p className="text-lg font-semibold">Interactive Map</p>
-                <p className="text-muted-foreground">123 Travel Street, Adventure City</p>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </section>
     </div>
   );
-};
-
-export default Contact;
+}
