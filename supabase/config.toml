@@ -39,7 +39,10 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 
-# Use Supabase's built-in email templates (customize in dashboard)
+# Custom verification email using React Email
+[auth.hook.send_email]
+enabled = true
+uri = "https://ioifldpjlfotqvtaidem.supabase.co/functions/v1/send-verification-email"
 
 [edge_runtime]
 enabled = true
