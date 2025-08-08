@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plane, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -10,6 +10,23 @@ export default function Header() {
   const [isTravelToolsOpen, setIsTravelToolsOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const travelToolsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (travelToolsRef.current && !travelToolsRef.current.contains(event.target as Node)) {
+        setIsTravelToolsOpen(false);
+      }
+    };
+
+    if (isTravelToolsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isTravelToolsOpen]);
 
   const getInitials = (name: string) => {
     const parts = name.split(' ');
@@ -45,7 +62,7 @@ export default function Header() {
                 Home
               </Link>
             )}
-            <div className="relative">
+            <div className="relative" ref={travelToolsRef}>
               <button 
                 onClick={() => setIsTravelToolsOpen(!isTravelToolsOpen)}
                 className="text-muted-foreground hover:text-primary transition-colors font-medium flex items-center gap-1"
