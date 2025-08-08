@@ -63,7 +63,7 @@ export default function SearchForm({ className = '' }: SearchFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className={`bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6 ${className}`}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-center justify-items-center mx-auto max-w-fit">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-center justify-items-center mx-auto max-w-fit text-center">
         {/* From */}
         <div className="relative">
           <Input
