@@ -120,8 +120,8 @@ export default function Home() {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Flights</h3>
-                <p className="text-muted-foreground mb-4">Compare and book flights from hundreds of airlines worldwide.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium">
+                <p className="text-muted-foreground mb-4 text-center">Compare and book flights from hundreds of airlines worldwide.</p>
+                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
                   Search Flights →
                 </Link>
               </div>
@@ -133,8 +133,8 @@ export default function Home() {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Hotels</h3>
-                <p className="text-muted-foreground mb-4">Find and book the perfect accommodation for your stay.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium">
+                <p className="text-muted-foreground mb-4 text-center">Find and book the perfect accommodation for your stay.</p>
+                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
                   Search Hotels →
                 </Link>
               </div>
@@ -146,8 +146,8 @@ export default function Home() {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Packages</h3>
-                <p className="text-muted-foreground mb-4">Save with our curated vacation packages and deals.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium">
+                <p className="text-muted-foreground mb-4 text-center">Save with our curated vacation packages and deals.</p>
+                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
                   View Packages →
                 </Link>
               </div>
