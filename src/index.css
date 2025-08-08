@@ -2,39 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Travel Agency Design System - Ocean Theme */
 
 @layer base {
   :root {
+    /* Core Brand Colors - Ocean Blues & Coral */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 213 31% 13%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 213 31% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 213 31% 13%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 199 89% 48%;        /* Ocean Blue #0EA5E9 */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 200 98% 39%;      /* Deep Ocean #0284C7 */
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 22 93% 53%;          /* Coral #F97316 */
+    --accent-foreground: 0 0% 100%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 199 89% 48%;
+
+    /* Travel-specific Design Tokens */
+    --ocean-gradient: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    --sunset-gradient: linear-gradient(135deg, hsl(var(--accent)), hsl(22 100% 60%));
+    --hero-gradient: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--secondary) / 0.8));
+    
+    /* Elevation & Shadows */
+    --shadow-card: 0 4px 6px -1px hsl(var(--primary) / 0.1), 0 2px 4px -1px hsl(var(--primary) / 0.06);
+    --shadow-floating: 0 20px 25px -5px hsl(var(--primary) / 0.1), 0 10px 10px -5px hsl(var(--primary) / 0.04);
+    --shadow-hero: 0 25px 50px -12px hsl(var(--primary) / 0.25);
+
+    /* Typography Scale */
+    --font-display: 'Inter', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
     --radius: 0.5rem;
 
@@ -100,6 +117,109 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
+  }
+}
+
+@layer components {
+  /* Hero Section Styles */
+  .hero-gradient {
+    background: var(--hero-gradient);
+  }
+  
+  .ocean-gradient {
+    background: var(--ocean-gradient);
+  }
+  
+  .sunset-gradient {
+    background: var(--sunset-gradient);
+  }
+
+  /* Card Styles */
+  .card-floating {
+    box-shadow: var(--shadow-floating);
+  }
+  
+  .card-elevated {
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Interactive Elements */
+  .travel-card {
+    @apply bg-card rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] card-elevated;
+  }
+  
+  .travel-card:hover {
+    box-shadow: var(--shadow-floating);
+  }
+
+  /* Search Bar */
+  .search-container {
+    @apply bg-white/95 backdrop-blur-sm rounded-2xl p-6 card-floating;
+  }
+
+  /* Buttons */
+  .btn-hero {
+    @apply bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-4 rounded-xl;
+    transition: var(--transition-smooth);
+  }
+  
+  .btn-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .btn-primary {
+    @apply ocean-gradient text-primary-foreground font-semibold px-6 py-3 rounded-lg;
+    transition: var(--transition-smooth);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Animations */
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .slide-up {
+    animation: slideUp 0.8s ease-out;
+  }
+  
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
