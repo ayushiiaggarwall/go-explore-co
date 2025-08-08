@@ -37,8 +37,7 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {user ? (
-              <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors font-medium flex items-center gap-2">
-                <LayoutDashboard className="w-4 h-4" />
+              <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors font-medium">
                 Dashboard
               </Link>
             ) : (
@@ -180,10 +179,9 @@ export default function Header() {
               {user ? (
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                  className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <LayoutDashboard className="w-4 h-4" />
                   Dashboard
                 </Link>
               ) : (
