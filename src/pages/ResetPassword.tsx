@@ -18,29 +18,38 @@ export default function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    // Check if we have the required tokens in the URL
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
-    
-    console.log('Reset password params:', { accessToken, refreshToken, type });
-    
-    if (!accessToken || type !== 'recovery') {
-      console.error('Missing or invalid reset tokens');
-      setError('Invalid reset link. Please request a new password reset.');
-    } else {
-      // Set the session with the tokens from URL
-      // Note: refresh_token might be empty for password reset flows
-      const sessionData: any = {
-        access_token: accessToken,
-      };
+    const handlePasswordReset = async () => {
+      // Check if we have the required tokens in the URL
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const type = searchParams.get('type');
       
-      if (refreshToken) {
-        sessionData.refresh_token = refreshToken;
+      console.log('Reset password params:', { accessToken, refreshToken, type });
+      
+      if (!accessToken || type !== 'recovery') {
+        console.error('Missing or invalid reset tokens');
+        setError('Invalid reset link. Please request a new password reset.');
+        return;
       }
-      
-      supabase.auth.setSession(sessionData);
-    }
+
+      try {
+        // Set the session with the tokens from URL
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || ''
+        });
+
+        if (error) {
+          console.error('Session error:', error);
+          setError('Invalid reset link. Please request a new password reset.');
+        }
+      } catch (err) {
+        console.error('Error setting session:', err);
+        setError('Invalid reset link. Please request a new password reset.');
+      }
+    };
+
+    handlePasswordReset();
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
