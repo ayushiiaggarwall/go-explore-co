@@ -25,15 +25,21 @@ export default function ResetPassword() {
     
     console.log('Reset password params:', { accessToken, refreshToken, type });
     
-    if (!accessToken || !refreshToken || type !== 'recovery') {
+    if (!accessToken || type !== 'recovery') {
       console.error('Missing or invalid reset tokens');
       setError('Invalid reset link. Please request a new password reset.');
     } else {
       // Set the session with the tokens from URL
-      supabase.auth.setSession({
+      // Note: refresh_token might be empty for password reset flows
+      const sessionData: any = {
         access_token: accessToken,
-        refresh_token: refreshToken
-      });
+      };
+      
+      if (refreshToken) {
+        sessionData.refresh_token = refreshToken;
+      }
+      
+      supabase.auth.setSession(sessionData);
     }
   }, [searchParams]);
 
