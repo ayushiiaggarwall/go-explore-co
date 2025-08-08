@@ -1,16 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, RefreshCw, Calculator, Sparkles } from 'lucide-react';
 import Input from '../components/ui/input';
 import Button from '../components/ui/Button';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { geminiApi } from '../services/geminiApi';
 
-interface ExchangeRate {
-  from: string;
-  to: string;
-  rate: number;
-  lastUpdated: string;
-}
 
 // Mock exchange rates (in a real app, this would come from an API)
 const mockExchangeRates: { [key: string]: number } = {

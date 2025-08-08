@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Filter, SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import { mockHotels, mockFlights, mockPackages } from '../services/mockData';
 import { tripAdvisorApi, TripAdvisorHotel } from '../services/tripAdvisorApi';
 import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
@@ -9,7 +9,6 @@ import HotelCard from '../components/cards/HotelCard';
 import FlightCard from '../components/cards/FlightCard';
 import PackageCard from '../components/cards/PackageCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import Button from '../components/ui/Button';
 import Input from '../components/ui/input';
 
 type SearchType = 'hotels' | 'flights' | 'packages';

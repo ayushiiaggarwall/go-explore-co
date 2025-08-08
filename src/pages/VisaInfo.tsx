@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Import as Passport, Clock, CheckCircle, AlertCircle, FileText, DollarSign, Sparkles } from 'lucide-react';
-import Input from '../components/ui/input';
 import Button from '../components/ui/Button';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { geminiApi } from '../services/geminiApi';

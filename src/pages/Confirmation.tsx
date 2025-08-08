@@ -1,4 +1,3 @@
-import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { CheckCircle, Calendar, MapPin, Mail, Phone, User, Download } from 'lucide-react';
 import { Booking } from '../types';

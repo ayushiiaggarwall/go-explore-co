@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Plane, Hotel, MapPin, Star, Users, Shield, Clock } from 'lucide-react';
+import { Plane, Hotel, MapPin, Star, Shield, Clock } from 'lucide-react';
 import SearchForm from '../components/forms/SearchForm';
 import PackageCard from '../components/cards/PackageCard';
 import { mockPackages } from '../services/mockData';

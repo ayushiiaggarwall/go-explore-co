@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Book, Film, Star, MapPin, Search, Sparkles } from 'lucide-react';
 import Input from '../components/ui/input';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star, Clock, Check } from 'lucide-react';
 import { Package } from '../../types';
 import { formatPrice } from '../../utils/validation';

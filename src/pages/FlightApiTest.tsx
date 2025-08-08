@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { skyscannerApi } from '../services/skyscannerApi';
 
 export default function FlightApiTest() {

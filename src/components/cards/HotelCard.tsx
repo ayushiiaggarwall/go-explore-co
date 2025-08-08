@@ -1,5 +1,4 @@
-import React from 'react';
-import { Star, MapPin, Wifi, Car } from 'lucide-react';
+import { Star, MapPin, Wifi } from 'lucide-react';
 import { Hotel } from '../../types';
 import { formatPrice } from '../../utils/validation';
 import Button from '../ui/Button';

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, MapPin, Star, Phone, Mail, User, Trash2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Booking } from '../types';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, Users, MapPin, Star, CreditCard, Shield } from 'lucide-react';
 import { Hotel, Flight, Package } from '../types';

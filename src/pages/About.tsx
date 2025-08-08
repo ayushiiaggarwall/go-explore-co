@@ -1,5 +1,4 @@
-import React from 'react';
-import { Users, Award, Shield, Heart, Plane, Globe, Star, CheckCircle } from 'lucide-react';
+import { Shield, Heart, Globe, Star, CheckCircle } from 'lucide-react';
 
 export default function About() {
   return (

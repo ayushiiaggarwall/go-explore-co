@@ -1,4 +1,3 @@
-import React from 'react';
 import { Plane, Clock } from 'lucide-react';
 import { Flight } from '../../types';
 import { formatPrice } from '../../utils/validation';
