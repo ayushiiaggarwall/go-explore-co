@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plane, Menu, X, User, LogOut } from 'lucide-react';
+import { Plane, Menu, X, LogOut, Settings, Home, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../ui/ThemeToggle';
 
@@ -10,6 +10,13 @@ export default function Header() {
   const [isTravelToolsOpen, setIsTravelToolsOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const getInitials = (name: string) => {
+    const parts = name.split(' ');
+    const firstName = parts[0]?.[0] || '';
+    const lastName = parts[1]?.[0] || '';
+    return (firstName + lastName).toUpperCase();
+  };
 
   const handleLogout = () => {
     logout();
@@ -29,6 +36,17 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            {user ? (
+              <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors font-medium flex items-center gap-2">
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard
+              </Link>
+            ) : (
+              <Link to="/" className="text-muted-foreground hover:text-primary transition-colors font-medium flex items-center gap-2">
+                <Home className="w-4 h-4" />
+                Home
+              </Link>
+            )}
             <div className="relative">
               <button 
                 onClick={() => setIsTravelToolsOpen(!isTravelToolsOpen)}
@@ -89,26 +107,37 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                  className="flex items-center space-x-3 text-muted-foreground hover:text-sky-500 transition-colors"
                 >
-                  <User className="w-5 h-5" />
-                  <span>{user.user_metadata?.full_name || user.email}</span>
+                  <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold">
+                    {getInitials(user.user_metadata?.full_name || user.email || 'U')}
+                  </div>
+                  <span className="hidden sm:block">{user.user_metadata?.full_name || user.email}</span>
                 </button>
                 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg py-1 z-50">
                     <Link
-                      to="/dashboard"
-                      className="block px-4 py-2 text-sm text-foreground hover:bg-accent"
+                      to="/profile"
+                      className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Profile Settings
+                    </Link>
+                    <Link
+                      to="/dashboard"
+                      className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4 mr-2" />
                       My Bookings
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent"
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent"
                     >
-                      <LogOut className="w-4 h-4 inline mr-2" />
+                      <LogOut className="w-4 h-4 mr-2" />
                       Logout
                     </button>
                   </div>
@@ -149,6 +178,25 @@ export default function Header() {
                 <span className="text-sm font-medium text-foreground">Theme</span>
                 <ThemeToggle />
               </div>
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  to="/"
+                  className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Home className="w-4 h-4" />
+                  Home
+                </Link>
+              )}
               <Link
                 to="/recommendations"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
@@ -187,14 +235,26 @@ export default function Header() {
               
               {user ? (
                 <div className="border-t pt-4">
-                  <div className="px-3 py-2 text-foreground font-medium">
+                  <div className="flex items-center gap-3 px-3 py-2 text-foreground font-medium">
+                    <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold">
+                      {getInitials(user.user_metadata?.full_name || user.email || 'U')}
+                    </div>
                     Welcome, {user.user_metadata?.full_name || user.email}
                   </div>
                   <Link
-                    to="/dashboard"
-                    className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                    to="/profile"
+                    className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
+                    <Settings className="w-4 h-4" />
+                    Profile Settings
+                  </Link>
+                  <Link
+                    to="/dashboard"
+                    className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
                     My Bookings
                   </Link>
                   <button
@@ -202,8 +262,9 @@ export default function Header() {
                       handleLogout();
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                    className="flex items-center gap-2 w-full text-left px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
                   >
+                    <LogOut className="w-4 h-4" />
                     Logout
                   </button>
                 </div>
