@@ -52,12 +52,12 @@ export default function Login() {
       return;
     }
     
-    const success = await login(formData.email, formData.password);
+    const result = await login(formData.email, formData.password);
     
-    if (success) {
+    if (result.success) {
       navigate(from, { replace: true });
     } else {
-      setErrors({ email: 'Invalid email or password' });
+      setErrors({ email: result.error || 'Invalid email or password' });
     }
   };
 

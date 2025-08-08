@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { validateEmail, validateRequired, validatePassword } from '../utils/validation';
@@ -7,7 +7,6 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/input';
 
 export default function Register() {
-  const navigate = useNavigate();
   const { register, isLoading } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -51,6 +50,8 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const [successMessage, setSuccessMessage] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -58,12 +59,13 @@ export default function Register() {
       return;
     }
     
-    const success = await register(formData.name, formData.email, formData.password);
+    const result = await register(formData.name, formData.email, formData.password);
     
-    if (success) {
-      navigate('/');
+    if (result.success) {
+      setSuccessMessage('Registration successful! Please check your email to verify your account.');
+      setFormData({ name: '', email: '', password: '', confirmPassword: '' });
     } else {
-      setErrors({ email: 'Registration failed. Please try again.' });
+      setErrors({ email: result.error || 'Registration failed. Please try again.' });
     }
   };
 
@@ -185,6 +187,18 @@ export default function Register() {
               Create account
             </Button>
           </form>
+
+          {successMessage && (
+            <div className="mt-6 bg-green-50 border border-green-200 rounded-md p-4">
+              <p className="text-sm text-green-800">{successMessage}</p>
+              <p className="text-sm text-green-600 mt-2">
+                After verifying your email, you can{' '}
+                <Link to="/login" className="font-medium text-green-700 hover:text-green-800">
+                  sign in here
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

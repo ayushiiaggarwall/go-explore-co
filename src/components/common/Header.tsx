@@ -92,7 +92,7 @@ export default function Header() {
                   className="flex items-center space-x-2 text-muted-foreground hover:text-sky-500 transition-colors"
                 >
                   <User className="w-5 h-5" />
-                  <span>{user.name}</span>
+                  <span>{user.user_metadata?.full_name || user.email}</span>
                 </button>
                 
                 {isUserMenuOpen && (
@@ -188,7 +188,7 @@ export default function Header() {
               {user ? (
                 <div className="border-t pt-4">
                   <div className="px-3 py-2 text-foreground font-medium">
-                    Welcome, {user.name}
+                    Welcome, {user.user_metadata?.full_name || user.email}
                   </div>
                   <Link
                     to="/dashboard"

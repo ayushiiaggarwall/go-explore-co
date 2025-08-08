@@ -136,7 +136,7 @@ export default function Dashboard() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">My Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
+          <p className="text-muted-foreground">Welcome back, {user?.user_metadata?.full_name || user?.email}!</p>
         </div>
 
         {/* Tabs */}
@@ -197,7 +197,7 @@ export default function Dashboard() {
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Full Name
                 </label>
-                <div className="text-foreground">{user?.name}</div>
+                <div className="text-foreground">{user?.user_metadata?.full_name || user?.email}</div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">

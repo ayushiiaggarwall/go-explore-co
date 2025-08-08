@@ -15,8 +15,8 @@ export default function BookingDetails() {
   const { type, item, searchParams } = location.state || {};
   
   const [formData, setFormData] = useState({
-    firstName: user?.name?.split(' ')[0] || '',
-    lastName: user?.name?.split(' ')[1] || '',
+    firstName: user?.user_metadata?.full_name?.split(' ')[0] || '',
+    lastName: user?.user_metadata?.full_name?.split(' ')[1] || '',
     email: user?.email || '',
     phone: '',
     cardNumber: '',
