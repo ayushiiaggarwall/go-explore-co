@@ -21,9 +21,19 @@ export default function ResetPassword() {
     // Check if we have the required tokens in the URL
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
+    const type = searchParams.get('type');
     
-    if (!accessToken || !refreshToken) {
+    console.log('Reset password params:', { accessToken, refreshToken, type });
+    
+    if (!accessToken || !refreshToken || type !== 'recovery') {
+      console.error('Missing or invalid reset tokens');
       setError('Invalid reset link. Please request a new password reset.');
+    } else {
+      // Set the session with the tokens from URL
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      });
     }
   }, [searchParams]);
 
