@@ -1,19 +1,5 @@
 import { geminiApi } from './geminiApi';
 
-interface SkyscannerInput {
-  from: string;
-  to: string;
-  departDate: string;
-  returnDate?: string;
-  adults?: number;
-  children?: number;
-  infants?: number;
-  cabinClass?: string;
-  currency?: string;
-  market?: string;
-  locale?: string;
-}
-
 interface SkyscannerFlight {
   price: number;
   currency: string;
@@ -35,33 +21,8 @@ interface SkyscannerFlight {
   bookingUrl?: string;
 }
 
-interface ApifyRunResponse {
-  data: {
-    id: string;
-    actId: string;
-    userId: string;
-    startedAt: string;
-    finishedAt?: string;
-    status: string;
-    statusMessage?: string;
-    isStatusMessageTerminal: boolean;
-    metamorph: number;
-    container: any;
-    buildId: string;
-    buildNumber: string;
-    defaultKeyValueStoreId: string;
-    defaultDatasetId: string;
-    defaultRequestQueueId: string;
-    options: any;
-    usage: any;
-    usageTotalUsd?: number;
-    usageUsd: any;
-  };
-}
-
 class SkyscannerApiService {
   private apiToken: string;
-  private baseUrl = 'https://api.apify.com/v2/acts/dtrungtin~skyscanner-search';
 
   constructor() {
     this.apiToken = import.meta.env.VITE_APIFY_API_TOKEN || '';
@@ -74,8 +35,7 @@ class SkyscannerApiService {
     from: string, 
     to: string, 
     departDate: string, 
-    returnDate?: string,
-    adults: number = 1
+    returnDate?: string
   ): Promise<SkyscannerFlight[]> {
     console.log('✈️ Flight Search: Generating realistic flight data', { from, to, departDate, returnDate });
     
@@ -96,7 +56,7 @@ class SkyscannerApiService {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const mockFlights = this.generateRealisticFlights(fromCode, toCode, departDate, returnDate, adults);
+      const mockFlights = this.generateRealisticFlights(fromCode, toCode, departDate);
       
       console.log(`✨ Generated ${mockFlights.length} realistic flight options`);
       return mockFlights;
@@ -110,9 +70,7 @@ class SkyscannerApiService {
   private generateRealisticFlights(
     fromCode: string, 
     toCode: string, 
-    departDate: string, 
-    returnDate?: string, 
-    adults: number = 1
+    departDate: string
   ): SkyscannerFlight[] {
     const airlines = ['American Airlines', 'Delta', 'United', 'JetBlue', 'Air France', 'Lufthansa', 'British Airways', 'Emirates'];
     const flights: SkyscannerFlight[] = [];
@@ -229,193 +187,6 @@ class SkyscannerApiService {
     return cities[code] || 'Unknown';
   }
 
-  private normalizeAirportCode(location: string): string {
-    // This API uses airport codes again
-    const locationUpper = location.toUpperCase();
-    
-    // Common city to airport code mappings
-    const cityToAirport: { [key: string]: string } = {
-      'NEW YORK': 'JFK',
-      'NEW YORK, USA': 'JFK',
-      'PARIS': 'CDG',
-      'PARIS, FRANCE': 'CDG',
-      'LONDON': 'LHR',
-      'LONDON, UK': 'LHR',
-      'TOKYO': 'NRT',
-      'TOKYO, JAPAN': 'NRT',
-      'LOS ANGELES': 'LAX',
-      'LOS ANGELES, USA': 'LAX',
-      'CHICAGO': 'ORD',
-      'CHICAGO, USA': 'ORD',
-      'MIAMI': 'MIA',
-      'MIAMI, USA': 'MIA',
-      'TORONTO': 'YYZ',
-      'TORONTO, CANADA': 'YYZ',
-      'BANGKOK': 'BKK',
-      'BANGKOK, THAILAND': 'BKK',
-      'DUBAI': 'DXB',
-      'DUBAI, UAE': 'DXB'
-    };
-
-    // Check if it's already an airport code (3 letters)
-    if (/^[A-Z]{3}$/.test(locationUpper)) {
-      return locationUpper;
-    }
-
-    // Try to find a mapping
-    for (const [city, code] of Object.entries(cityToAirport)) {
-      if (locationUpper.includes(city)) {
-        console.log(`🌍 Converted "${location}" to airport code: ${code}`);
-        return code;
-      }
-    }
-
-    // If no mapping found, use JFK as default
-    console.warn(`⚠️ Could not map "${location}" to airport code, using default JFK`);
-    return 'JFK';
-  }
-
-  private normalizeCityName(location: string): string {
-    // This API uses city names, not airport codes
-    const locationFormatted = location.trim();
-    
-    // Common mappings to clean city names
-    const cityMappings: { [key: string]: string } = {
-      'NEW YORK, USA': 'New York',
-      'NEW YORK': 'New York',
-      'PARIS, FRANCE': 'Paris',
-      'PARIS': 'Paris',
-      'LONDON, UK': 'London',
-      'LONDON': 'London',
-      'TOKYO, JAPAN': 'Tokyo',
-      'TOKYO': 'Tokyo',
-      'LOS ANGELES, USA': 'Los Angeles',
-      'LOS ANGELES': 'Los Angeles',
-      'CHICAGO, USA': 'Chicago',
-      'CHICAGO': 'Chicago',
-      'MIAMI, USA': 'Miami',
-      'MIAMI': 'Miami',
-      'TORONTO, CANADA': 'Toronto',
-      'TORONTO': 'Toronto',
-      'BANGKOK, THAILAND': 'Bangkok',
-      'BANGKOK': 'Bangkok',
-      'DUBAI, UAE': 'Dubai',
-      'DUBAI': 'Dubai'
-    };
-
-    const locationUpper = locationFormatted.toUpperCase();
-    
-    // Try to find a mapping
-    for (const [pattern, cleanName] of Object.entries(cityMappings)) {
-      if (locationUpper.includes(pattern)) {
-        console.log(`🌍 Converted "${location}" to city: ${cleanName}`);
-        return cleanName;
-      }
-    }
-
-    // If no mapping found, return the first part before comma or the whole string
-    const cityName = locationFormatted.split(',')[0].trim();
-    console.log(`🌍 Using city name: ${cityName}`);
-    return cityName;
-  }
-
-  private async startActorRun(input: SkyscannerInput): Promise<ApifyRunResponse> {
-    console.log('📤 Sending Skyscanner API request:', {
-      url: `${this.baseUrl}/runs?token=${this.apiToken.substring(0, 10)}...`,
-      input
-    });
-
-    const response = await fetch(`${this.baseUrl}/runs?token=${this.apiToken}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(input),
-    });
-
-    console.log('📥 Skyscanner API response status:', response.status, response.statusText);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Skyscanner API Error Response:', errorText);
-      throw new Error(`Failed to start Skyscanner actor run: ${response.statusText} - ${errorText}`);
-    }
-
-    const result = await response.json();
-    console.log('✅ Skyscanner API response:', result);
-    return result;
-  }
-
-  private async waitForResults(runId: string, maxWaitTime: number = 90000): Promise<any[]> {
-    const startTime = Date.now();
-    const pollInterval = 5000; // Check every 5 seconds (flights take longer than hotels)
-
-    while (Date.now() - startTime < maxWaitTime) {
-      try {
-        // Check run status
-        const statusResponse = await fetch(
-          `https://api.apify.com/v2/actor-runs/${runId}?token=${this.apiToken}`
-        );
-        
-        if (!statusResponse.ok) {
-          throw new Error(`Failed to get run status: ${statusResponse.statusText}`);
-        }
-
-        const runData = await statusResponse.json();
-        console.log('⏳ Skyscanner run status:', runData.data.status);
-        
-        if (runData.data.status === 'SUCCEEDED') {
-          // Get the results from the dataset
-          const resultsResponse = await fetch(
-            `https://api.apify.com/v2/datasets/${runData.data.defaultDatasetId}/items?token=${this.apiToken}`
-          );
-          
-          if (!resultsResponse.ok) {
-            throw new Error(`Failed to get results: ${resultsResponse.statusText}`);
-          }
-
-          return resultsResponse.json();
-        } else if (runData.data.status === 'FAILED' || runData.data.status === 'ABORTED') {
-          throw new Error(`Skyscanner actor run failed with status: ${runData.data.status}`);
-        }
-
-        // Still running, wait and try again
-        await new Promise(resolve => setTimeout(resolve, pollInterval));
-      } catch (error) {
-        console.error('Error polling for flight results:', error);
-        throw error;
-      }
-    }
-
-    throw new Error('Timeout waiting for flight results');
-  }
-
-  private formatResults(results: any[]): SkyscannerFlight[] {
-    console.log('🔍 Examining raw flight results:', results.slice(0, 2));
-    
-    return results
-      .filter(item => item && (item.price || item.totalPrice))
-      .map(item => ({
-        price: item.price || item.totalPrice || 0,
-        currency: item.currency || 'USD',
-        airline: item.airline || item.carrier || item.operatingCarrier || 'Unknown Airline',
-        departure: {
-          time: item.departureTime || item.departure?.time || '12:00',
-          date: item.departureDate || item.departure?.date || '',
-          airport: item.departureAirport || item.departure?.airport || item.from || '',
-          city: item.departureCity || item.departure?.city || ''
-        },
-        arrival: {
-          time: item.arrivalTime || item.arrival?.time || '15:00',
-          date: item.arrivalDate || item.arrival?.date || '',
-          airport: item.arrivalAirport || item.arrival?.airport || item.to || '',
-          city: item.arrivalCity || item.arrival?.city || ''
-        },
-        duration: item.duration || item.flightDuration || '3h 00m',
-        stops: item.stops || item.stopCount || 0,
-        bookingUrl: item.bookingUrl || item.deepLink || ''
-      }));
-  }
 }
 
 export const skyscannerApi = new SkyscannerApiService();

@@ -24,8 +24,7 @@ export default function FlightApiTest() {
         formData.from,
         formData.to,
         formData.departDate,
-        formData.returnDate,
-        formData.adults
+        formData.returnDate
       );
       
       console.log('✅ Flight API Results:', flightResults);

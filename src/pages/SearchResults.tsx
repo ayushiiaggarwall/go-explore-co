@@ -18,7 +18,6 @@ export default function SearchResults() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [searchType, setSearchType] = useState<SearchType>('hotels');
-  const [showFilters, setShowFilters] = useState(false);
   const [apiHotels, setApiHotels] = useState<TripAdvisorHotel[]>([]);
   const [apiFlights, setApiFlights] = useState<SkyscannerFlight[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -61,7 +60,7 @@ export default function SearchResults() {
       if (checkIn && checkOut && from && destination) {
         console.log('🛫 Flight Search Parameters:', { from, destination, checkIn, checkOut, guests });
         searchPromises.push(
-          skyscannerApi.searchFlights(from, destination, checkIn, checkOut, guests)
+          skyscannerApi.searchFlights(from, destination, checkIn, checkOut)
             .then(results => ({ type: 'flights', data: results }))
             .catch(error => ({ type: 'flights', error }))
         );
@@ -75,22 +74,22 @@ export default function SearchResults() {
       const results = await Promise.allSettled(searchPromises);
 
       // Process results
-      results.forEach((result, index) => {
+      results.forEach((result) => {
         if (result.status === 'fulfilled') {
           const { value } = result;
           if (value.type === 'hotels') {
-            if (value.data) {
+            if ('data' in value && value.data) {
               console.log('✅ Hotel API Results received:', value.data);
-              setApiHotels(value.data);
-            } else if (value.error) {
+              setApiHotels(value.data as TripAdvisorHotel[]);
+            } else if ('error' in value && value.error) {
               console.error('❌ Error fetching hotels:', value.error);
               setApiError(`Failed to fetch hotels from TripAdvisor: ${value.error instanceof Error ? value.error.message : 'Unknown error'}`);
             }
           } else if (value.type === 'flights') {
-            if (value.data) {
+            if ('data' in value && value.data) {
               console.log('✅ Flight API Results received:', value.data);
-              setApiFlights(value.data);
-            } else if (value.error) {
+              setApiFlights(value.data as SkyscannerFlight[]);
+            } else if ('error' in value && value.error) {
               console.error('❌ Error fetching flights:', value.error);
               setFlightError(`Failed to fetch flights from Skyscanner: ${value.error instanceof Error ? value.error.message : 'Unknown error'}`);
             }
