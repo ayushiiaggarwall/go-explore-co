@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plane, Menu, X, LogOut, Settings, Home, LayoutDashboard } from 'lucide-react';
+import { Plane, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../ui/ThemeToggle';
 
@@ -42,8 +42,7 @@ export default function Header() {
                 Dashboard
               </Link>
             ) : (
-              <Link to="/" className="text-muted-foreground hover:text-primary transition-colors font-medium flex items-center gap-2">
-                <Home className="w-4 h-4" />
+              <Link to="/" className="text-muted-foreground hover:text-primary transition-colors font-medium">
                 Home
               </Link>
             )}
@@ -190,10 +189,9 @@ export default function Header() {
               ) : (
                 <Link
                   to="/"
-                  className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                  className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <Home className="w-4 h-4" />
                   Home
                 </Link>
               )}
