@@ -39,53 +39,32 @@ export default function ResetPassword() {
       }
 
       try {
-        console.log('🔄 Attempting to set session...');
+        console.log('🔄 Verifying recovery token...');
         
-        // First try to set session with tokens
-        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || ''
+        // For password reset, we need to verify the token properly
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: accessToken,
+          type: 'recovery'
         });
         
-        console.log('Session result:', { 
-          hasSession: !!sessionData.session,
-          hasUser: !!sessionData.user,
-          error: sessionError?.message 
+        console.log('Verify OTP result:', { 
+          hasSession: !!data.session,
+          hasUser: !!data.user,
+          error: error?.message 
         });
         
-        if (sessionError) {
-          console.log('❌ Session error, trying alternative approach');
-          
-          // Alternative: Try exchanging the token
-          const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(accessToken);
-          
-          console.log('Exchange result:', {
-            hasSession: !!exchangeData.session,
-            error: exchangeError?.message
-          });
-          
-          if (exchangeError) {
-            throw exchangeError;
-          }
-        }
-        
-        // Check current session
-        const { data: currentSession } = await supabase.auth.getSession();
-        console.log('Current session:', { 
-          hasSession: !!currentSession.session,
-          hasUser: !!currentSession.session?.user 
-        });
-        
-        if (currentSession.session) {
-          console.log('✅ Session established successfully');
+        if (error) {
+          console.log('❌ Token verification failed:', error.message);
+          setError('Invalid reset link. Please request a new password reset.');
+          setIsValidLink(false);
+        } else {
+          console.log('✅ Token verified successfully');
           setIsValidLink(true);
           setError('');
-        } else {
-          throw new Error('No session established');
         }
         
       } catch (err: any) {
-        console.log('❌ All attempts failed:', err.message);
+        console.log('❌ Verification failed:', err.message);
         setError('Invalid reset link. Please request a new password reset.');
         setIsValidLink(false);
       }
