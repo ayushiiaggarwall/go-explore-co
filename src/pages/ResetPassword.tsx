@@ -16,48 +16,34 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isValidLink, setIsValidLink] = useState(false);
 
   useEffect(() => {
-    const handlePasswordReset = async () => {
-      // Check if we have the required tokens in the URL
-      const accessToken = searchParams.get('access_token');
-      const refreshToken = searchParams.get('refresh_token');
-      const type = searchParams.get('type');
-      
-      console.log('Reset password params:', { accessToken, refreshToken, type });
-      
-      if (!accessToken || type !== 'recovery') {
-        console.error('Missing or invalid reset tokens');
-        setError('Invalid reset link. Please request a new password reset.');
-        return;
-      }
-
-      try {
-        // For password reset, we need to verify the OTP token
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: accessToken,
-          type: 'recovery'
-        });
-
-        if (error) {
-          console.error('Token verification error:', error);
-          setError('Invalid reset link. Please request a new password reset.');
-        } else {
-          console.log('Token verified successfully');
-          // Clear any existing error if verification succeeds
-          setError('');
-        }
-      } catch (err) {
-        console.error('Error verifying token:', err);
-        setError('Invalid reset link. Please request a new password reset.');
-      }
-    };
-
-    handlePasswordReset();
+    // Simply check if we have the required parameters
+    const accessToken = searchParams.get('access_token');
+    const type = searchParams.get('type');
+    
+    console.log('Reset password URL params:', { 
+      accessToken: accessToken?.substring(0, 10) + '...', 
+      type 
+    });
+    
+    if (accessToken && type === 'recovery') {
+      setIsValidLink(true);
+      setError('');
+    } else {
+      setIsValidLink(false);
+      setError('Invalid reset link. Please request a new password reset.');
+    }
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isValidLink) {
+      setError('Invalid reset link. Please request a new password reset.');
+      return;
+    }
     
     if (!validatePassword(password)) {
       setError('Password must be at least 6 characters long');
