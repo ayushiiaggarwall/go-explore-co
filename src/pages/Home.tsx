@@ -119,7 +119,7 @@ export default function Home() {
                 <Plane className="w-16 h-16 text-white" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Flights</h3>
+                <h3 className="text-xl font-semibold mb-2 text-center">Flights</h3>
                 <p className="text-muted-foreground mb-4">Compare and book flights from hundreds of airlines worldwide.</p>
                 <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium">
                   Search Flights →
@@ -132,7 +132,7 @@ export default function Home() {
                 <Hotel className="w-16 h-16 text-white" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Hotels</h3>
+                <h3 className="text-xl font-semibold mb-2 text-center">Hotels</h3>
                 <p className="text-muted-foreground mb-4">Find and book the perfect accommodation for your stay.</p>
                 <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium">
                   Search Hotels →
@@ -145,7 +145,7 @@ export default function Home() {
                 <MapPin className="w-16 h-16 text-white" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Packages</h3>
+                <h3 className="text-xl font-semibold mb-2 text-center">Packages</h3>
                 <p className="text-muted-foreground mb-4">Save with our curated vacation packages and deals.</p>
                 <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium">
                   View Packages →
