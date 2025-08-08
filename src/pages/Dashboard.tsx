@@ -7,12 +7,22 @@ import Button from '../components/ui/Button';
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [activeTab, setActiveTab] = useState<'bookings' | 'profile'>('bookings');
 
   useEffect(() => {
     if (!isLoading && !user) {
       window.location.href = '/';
     }
   }, [user, isLoading]);
+
+  useEffect(() => {
+    // Load bookings from localStorage
+    const savedBookings = localStorage.getItem('userBookings');
+    if (savedBookings) {
+      setBookings(JSON.parse(savedBookings));
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -25,16 +35,6 @@ export default function Dashboard() {
   if (!user) {
     return null;
   }
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [activeTab, setActiveTab] = useState<'bookings' | 'profile'>('bookings');
-
-  useEffect(() => {
-    // Load bookings from localStorage
-    const savedBookings = localStorage.getItem('userBookings');
-    if (savedBookings) {
-      setBookings(JSON.parse(savedBookings));
-    }
-  }, []);
 
   const handleCancelBooking = (bookingId: string) => {
     const updatedBookings = bookings.map(booking =>
