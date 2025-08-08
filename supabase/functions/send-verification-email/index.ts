@@ -14,6 +14,10 @@ const corsHeaders = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log("=== WEBHOOK RECEIVED ===");
+  console.log("Method:", req.method);
+  console.log("Headers:", Object.fromEntries(req.headers));
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -50,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
 
       const emailResponse = await resend.emails.send({
-        from: "TravelEase <onboarding@resend.dev>",
+        from: "TravelEase <no-reply@resend.dev>",
         to: [user.email],
         subject: "Verify your email address for TravelEase",
         html,

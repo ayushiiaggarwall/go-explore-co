@@ -42,6 +42,7 @@ enable_confirmations = true
 [auth.hook.send_email]
 enabled = true
 uri = "https://ioifldpjlfotqvtaidem.supabase.co/functions/v1/send-verification-email"
+secrets = "SEND_EMAIL_HOOK_SECRET"
 
 [functions.send-verification-email]
 verify_jwt = false
