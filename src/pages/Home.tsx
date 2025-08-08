@@ -1,6 +1,7 @@
 import { Link, Navigate } from 'react-router-dom';
 import { Plane, Hotel, MapPin, Star, Shield, Clock } from 'lucide-react';
-import SearchForm from '../components/forms/SearchForm';
+import HotelSearchPanel from '../components/sections/HotelSearchPanel';
+import FlightSearchPanel from '../components/sections/FlightSearchPanel';
 import PackageCard from '../components/cards/PackageCard';
 import { mockPackages } from '../services/mockData';
 import { useAuth } from '../hooks/useAuth';
@@ -40,7 +41,10 @@ export default function Home() {
             </p>
           </div>
           
-          <SearchForm className="max-w-5xl mx-auto" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <HotelSearchPanel />
+            <FlightSearchPanel />
+          </div>
         </div>
       </section>
 
