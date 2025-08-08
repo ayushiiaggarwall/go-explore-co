@@ -62,7 +62,7 @@ export default function SearchForm({ className = '' }: SearchFormProps) {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <form onSubmit={handleSubmit} className={`bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6 ${className}`}>
+    <form onSubmit={handleSubmit} className={`bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6 text-center ${className}`}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-center justify-items-center mx-auto max-w-fit text-center">
         {/* From */}
         <div className="relative">
@@ -168,7 +168,7 @@ export default function SearchForm({ className = '' }: SearchFormProps) {
         </div>
       </div>
 
-      <div className="mt-6 flex justify-center">
+      <div className="mt-6 flex justify-center text-center">
         <Button type="submit" size="lg" className="w-full md:w-auto">
           <Search className="w-5 h-5 mr-2" />
           Search
