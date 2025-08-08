@@ -16,6 +16,7 @@ import Recommendations from './pages/Recommendations';
 import VisaInfo from './pages/VisaInfo';
 import CurrencyConverter from './pages/CurrencyConverter';
 import FlightApiTest from './pages/FlightApiTest';
+import EmailConfirmation from './pages/EmailConfirmation';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/visa-info" element={<VisaInfo />} />
                 <Route path="/currency-converter" element={<CurrencyConverter />} />
                 <Route path="/flight-api-test" element={<FlightApiTest />} />
+                <Route path="/email-confirmation" element={<EmailConfirmation />} />
               </Routes>
             </main>
             <Footer />

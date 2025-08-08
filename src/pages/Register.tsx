@@ -51,7 +51,7 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const [successMessage, setSuccessMessage] = useState('');
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,8 +63,8 @@ export default function Register() {
     const result = await register(formData.name, formData.email, formData.password);
     
     if (result.success) {
-      setSuccessMessage('Registration successful! Please check your email to verify your account.');
-      setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+      // Redirect to email confirmation page
+      window.location.href = '/email-confirmation';
     } else {
       setErrors({ email: result.error || 'Registration failed. Please try again.' });
     }
@@ -193,17 +193,6 @@ export default function Register() {
             </Button>
           </form>
 
-          {successMessage && (
-            <div className="mt-6 bg-green-50 border border-green-200 rounded-md p-4 w-full">
-              <p className="text-sm text-green-800">{successMessage}</p>
-              <p className="text-sm text-green-600 mt-2">
-                After verifying your email, you can{' '}
-                <Link to="/login" className="font-medium text-green-700 hover:text-green-800">
-                  sign in here
-                </Link>
-              </p>
-            </div>
-          )}
         </BauhausCard>
       </div>
     </div>
