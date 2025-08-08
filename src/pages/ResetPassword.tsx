@@ -33,18 +33,22 @@ export default function ResetPassword() {
       }
 
       try {
-        // Set the session with the tokens from URL
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || ''
+        // For password reset, we need to verify the OTP token
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: accessToken,
+          type: 'recovery'
         });
 
         if (error) {
-          console.error('Session error:', error);
+          console.error('Token verification error:', error);
           setError('Invalid reset link. Please request a new password reset.');
+        } else {
+          console.log('Token verified successfully');
+          // Clear any existing error if verification succeeds
+          setError('');
         }
       } catch (err) {
-        console.error('Error setting session:', err);
+        console.error('Error verifying token:', err);
         setError('Invalid reset link. Please request a new password reset.');
       }
     };
