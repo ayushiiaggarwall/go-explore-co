@@ -39,6 +39,8 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 
+# Remove the custom hook to use Supabase's built-in email system
+
 [edge_runtime]
 enabled = true
 policy = "per_worker"
