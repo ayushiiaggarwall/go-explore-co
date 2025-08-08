@@ -64,22 +64,6 @@ export default function SearchForm({ className = '' }: SearchFormProps) {
   return (
     <form onSubmit={handleSubmit} className={`bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6 text-center ${className}`}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-center justify-items-center mx-auto max-w-fit text-center">
-        {/* Guests & Rooms */}
-        <div className="space-y-4">
-          <div>
-            <Input
-              label="Guests"
-              name="guests"
-              type="number"
-              value={formData.guests}
-              onChange={handleInputChange}
-              min="1"
-              max="10"
-              icon={<Users className="w-5 h-5 text-gray-400" />}
-            />
-          </div>
-        </div>
-
         {/* From */}
         <div className="relative">
           <Input
@@ -165,6 +149,22 @@ export default function SearchForm({ className = '' }: SearchFormProps) {
             icon={<Calendar className="w-5 h-5 text-gray-400" />}
             required
           />
+        </div>
+
+        {/* Guests & Rooms */}
+        <div className="space-y-4">
+          <div>
+            <Input
+              label="Guests"
+              name="guests"
+              type="number"
+              value={formData.guests}
+              onChange={handleInputChange}
+              min="1"
+              max="10"
+              icon={<Users className="w-5 h-5 text-gray-400" />}
+            />
+          </div>
         </div>
       </div>
 
