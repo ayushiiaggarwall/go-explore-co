@@ -24,39 +24,70 @@ export default function ResetPassword() {
       const refreshToken = searchParams.get('refresh_token');
       const type = searchParams.get('type');
       
-      console.log('Reset password URL params:', { 
-        accessToken: accessToken?.substring(0, 10) + '...', 
-        refreshToken: refreshToken?.substring(0, 10) + '...',
-        type 
+      console.log('=== PASSWORD RESET DEBUG ===');
+      console.log('URL Params:', { 
+        accessToken: accessToken ? `${accessToken.substring(0, 10)}...` : 'MISSING',
+        refreshToken: refreshToken ? `${refreshToken.substring(0, 10)}...` : 'EMPTY',
+        type: type || 'MISSING'
       });
       
-      if (accessToken && type === 'recovery') {
-        try {
-          // Set session using the tokens from the URL
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken || ''
+      if (!accessToken || type !== 'recovery') {
+        console.log('❌ Invalid parameters');
+        setError('Invalid reset link. Please request a new password reset.');
+        setIsValidLink(false);
+        return;
+      }
+
+      try {
+        console.log('🔄 Attempting to set session...');
+        
+        // First try to set session with tokens
+        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || ''
+        });
+        
+        console.log('Session result:', { 
+          hasSession: !!sessionData.session,
+          hasUser: !!sessionData.user,
+          error: sessionError?.message 
+        });
+        
+        if (sessionError) {
+          console.log('❌ Session error, trying alternative approach');
+          
+          // Alternative: Try exchanging the token
+          const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(accessToken);
+          
+          console.log('Exchange result:', {
+            hasSession: !!exchangeData.session,
+            error: exchangeError?.message
           });
           
-          console.log('Session set result:', { data: !!data.session, error });
-          
-          if (error) {
-            console.error('Session error:', error);
-            setError('Invalid reset link. Please request a new password reset.');
-            setIsValidLink(false);
-          } else {
-            console.log('Session established successfully');
-            setIsValidLink(true);
-            setError('');
+          if (exchangeError) {
+            throw exchangeError;
           }
-        } catch (err) {
-          console.error('Error setting session:', err);
-          setError('Invalid reset link. Please request a new password reset.');
-          setIsValidLink(false);
         }
-      } else {
-        setIsValidLink(false);
+        
+        // Check current session
+        const { data: currentSession } = await supabase.auth.getSession();
+        console.log('Current session:', { 
+          hasSession: !!currentSession.session,
+          hasUser: !!currentSession.session?.user 
+        });
+        
+        if (currentSession.session) {
+          console.log('✅ Session established successfully');
+          setIsValidLink(true);
+          setError('');
+        } else {
+          throw new Error('No session established');
+        }
+        
+      } catch (err: any) {
+        console.log('❌ All attempts failed:', err.message);
         setError('Invalid reset link. Please request a new password reset.');
+        setIsValidLink(false);
       }
     };
 
