@@ -1,5 +1,6 @@
 import { Plane, Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { CenterUnderline, ComesInGoesOutUnderline } from '../ui/underline-animation';
 
 export default function Footer() {
   return (
@@ -27,10 +28,10 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link to="/" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Home</Link></li>
-              <li><Link to="/search" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Search</Link></li>
-              <li><Link to="/about" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">About Us</Link></li>
-              <li><Link to="/contact" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Contact</Link></li>
+              <li><Link to="/" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors"><CenterUnderline label="Home" /></Link></li>
+              <li><Link to="/search" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors"><CenterUnderline label="Search" /></Link></li>
+              <li><Link to="/about" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors"><CenterUnderline label="About Us" /></Link></li>
+              <li><Link to="/contact" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors"><CenterUnderline label="Contact" /></Link></li>
             </ul>
           </div>
 
@@ -38,9 +39,9 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Travel Tools</h3>
             <ul className="space-y-2">
-              <li><Link to="/recommendations" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Books & Movies</Link></li>
-              <li><Link to="/visa-info" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Visa Information</Link></li>
-              <li><Link to="/currency-converter" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Currency Converter</Link></li>
+              <li><Link to="/recommendations" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors"><ComesInGoesOutUnderline label="Books & Movies" direction="left" /></Link></li>
+              <li><Link to="/visa-info" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors"><ComesInGoesOutUnderline label="Visa Information" direction="right" /></Link></li>
+              <li><Link to="/currency-converter" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors"><ComesInGoesOutUnderline label="Currency Converter" direction="left" /></Link></li>
             </ul>
           </div>
 
@@ -50,15 +51,15 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center space-x-2">
                 <Phone className="w-5 h-5 text-sky-400" />
-                <span className="text-gray-300">+1 (555) 123-4567</span>
+                <span className="text-gray-300 cursor-pointer"><CenterUnderline label="+1 (555) 123-4567" /></span>
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="w-5 h-5 text-sky-400" />
-                <span className="text-gray-300">info@travelease.com</span>
+                <span className="text-gray-300 cursor-pointer"><CenterUnderline label="info@travelease.com" /></span>
               </li>
               <li className="flex items-center space-x-2">
                 <MapPin className="w-5 h-5 text-sky-400" />
-                <span className="text-gray-300">123 Travel St, NY 10001</span>
+                <span className="text-gray-300 cursor-pointer"><CenterUnderline label="123 Travel St, NY 10001" /></span>
               </li>
             </ul>
           </div>
