@@ -117,7 +117,7 @@ serve(async (req) => {
     // Calculate number of nights
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
 
-    const ACTOR_ID = 'maxcopell/tripadvisor';
+    const ACTOR_ID = 'apify/tripadvisor-scraper';
     const APIFY_API_TOKEN = Deno.env.get('APIFY_API_TOKEN');
 
     if (!APIFY_API_TOKEN) {

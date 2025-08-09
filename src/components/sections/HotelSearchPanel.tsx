@@ -48,7 +48,7 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
       rooms: formData.rooms.toString()
     });
     
-    navigate(`/hotel-search-results?${searchParams.toString()}`);
+    navigate(`/search-hotels?${searchParams.toString()}`);
   };
 
   

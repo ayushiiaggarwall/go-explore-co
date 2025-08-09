@@ -24,7 +24,7 @@ import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import FlightBooking from './pages/FlightBooking';
 import HotelBooking from './pages/HotelBooking';
-import HotelSearchResults from './pages/HotelSearchResults';
+
 import PackageExplorer from './pages/PackageExplorer';
 import PlanTrip from './pages/PlanTrip';
 import TripItinerary from './pages/TripItinerary';
@@ -42,7 +42,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/search-flights" element={<FlightSearchResults />} />
-                <Route path="/search-hotels" element={<HotelSearchResults />} />
+                <Route path="/search-hotels" element={<HotelBooking />} />
                 <Route path="/booking" element={<BookingDetails />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -60,7 +60,7 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/book-flight" element={<ProtectedRoute><FlightBooking /></ProtectedRoute>} />
                 <Route path="/book-hotel" element={<ProtectedRoute><HotelBooking /></ProtectedRoute>} />
-                <Route path="/hotel-search-results" element={<ProtectedRoute><HotelSearchResults /></ProtectedRoute>} />
+                
         <Route path="/plan-trip" element={<ProtectedRoute><PlanTrip /></ProtectedRoute>} />
         <Route path="/trip-itinerary" element={<TripItinerary />} />
         <Route path="/explore-packages" element={<PackageExplorer />} />
