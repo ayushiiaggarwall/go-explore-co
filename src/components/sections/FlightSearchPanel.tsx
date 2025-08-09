@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Users, Plane } from 'lucide-react';
 import Input from '../ui/input';
 import Button from '../ui/Button';
-import { DatePicker } from '../ui/date-picker';
+import { SimpleDatePicker } from '../ui/simple-date-picker';
 import { searchCities } from '../../data/cities';
 
 interface FlightSearchPanelProps {
@@ -165,7 +165,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
 
         <div className="grid grid-cols-2 gap-4">
           {/* Departure Date */}
-          <DatePicker
+          <SimpleDatePicker
             label="Departure"
             date={departureDate}
             onSelect={setDepartureDate}
@@ -175,7 +175,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
 
           {/* Return Date (only for round-trip) */}
           {formData.tripType === 'round-trip' && (
-            <DatePicker
+            <SimpleDatePicker
               label="Return"
               date={returnDate}
               onSelect={setReturnDate}

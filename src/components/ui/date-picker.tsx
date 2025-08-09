@@ -64,3 +64,5 @@ export function DatePicker({
     </div>
   )
 }
+
+DatePicker.displayName = "DatePicker"

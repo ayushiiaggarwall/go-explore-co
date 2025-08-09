@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Users } from 'lucide-react';
 import Input from '../ui/input';
 import Button from '../ui/Button';
-import { DatePicker } from '../ui/date-picker';
+import { SimpleDatePicker } from '../ui/simple-date-picker';
 import { searchCities } from '../../data/cities';
 
 interface HotelSearchPanelProps {
@@ -99,7 +99,7 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
 
         <div className="grid grid-cols-2 gap-4">
           {/* Check-in */}
-          <DatePicker
+          <SimpleDatePicker
             label="Check-in"
             date={checkInDate}
             onSelect={setCheckInDate}
@@ -108,7 +108,7 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
           />
 
           {/* Check-out */}
-          <DatePicker
+          <SimpleDatePicker
             label="Check-out"
             date={checkOutDate}
             onSelect={setCheckOutDate}
