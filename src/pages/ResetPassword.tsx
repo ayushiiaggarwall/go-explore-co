@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Lock, Eye, EyeOff } from 'lucide-react';
+import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { supabase } from '../integrations/supabase/client';
 import { validatePassword } from '../utils/validation';
 import Button from '../components/ui/Button';
@@ -8,7 +9,7 @@ import Input from '../components/ui/input';
 import { BauhausCard } from '../components/ui/bauhaus-card';
 
 export default function ResetPassword() {
-  const navigate = useNavigate();
+  const { smoothNavigate } = useSmoothNavigation();
   const [searchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -102,7 +103,7 @@ export default function ResetPassword() {
       if (error) {
         setError(error.message);
       } else {
-        navigate('/login', { 
+        smoothNavigate('/login', { 
           state: { message: 'Password updated successfully. Please log in with your new password.' }
         });
       }

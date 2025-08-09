@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Package, Globe, Calendar, Users, MapPin, Search } from 'lucide-react';
 import Input from '../components/ui/input';
 import Button from '../components/ui/Button';
-import { useNavigate } from 'react-router-dom';
+import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { searchCities } from '../data/cities';
 
 export default function PackageExplorer() {
-  const navigate = useNavigate();
+  const { smoothNavigate } = useSmoothNavigation();
   const [formData, setFormData] = useState({
     destination: '',
     startDate: '',
@@ -44,7 +44,7 @@ export default function PackageExplorer() {
       packageType: formData.packageType
     });
     
-    navigate(`/search?${searchParams.toString()}`);
+    smoothNavigate(`/search?${searchParams.toString()}`);
   };
 
   const today = new Date().toISOString().split('T')[0];

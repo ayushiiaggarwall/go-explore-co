@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Plane, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useSmoothNavigation } from '../../hooks/useSmoothNavigation';
 import ThemeToggle from '../ui/ThemeToggle';
 
 export default function Header() {
@@ -9,7 +10,7 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isTravelToolsOpen, setIsTravelToolsOpen] = useState(false);
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { smoothNavigate } = useSmoothNavigation();
   const travelToolsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function Header() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    smoothNavigate('/');
     setIsUserMenuOpen(false);
   };
 

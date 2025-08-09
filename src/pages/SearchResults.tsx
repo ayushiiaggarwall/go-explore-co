@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal } from 'lucide-react';
+import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { mockHotels, mockFlights, mockPackages } from '../services/mockData';
 import { tripAdvisorApi, TripAdvisorHotel } from '../services/tripAdvisorApi';
 import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
@@ -15,7 +16,7 @@ type SearchType = 'hotels' | 'flights' | 'packages';
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const { smoothNavigate } = useSmoothNavigation();
   const [loading, setLoading] = useState(true);
   const [searchType, setSearchType] = useState<SearchType>('hotels');
   const [apiHotels, setApiHotels] = useState<TripAdvisorHotel[]>([]);
@@ -106,7 +107,7 @@ export default function SearchResults() {
   }, [from, destination, checkIn, checkOut, guests]);
 
   const handleBookHotel = (hotel: Hotel) => {
-    navigate('/booking', { 
+    smoothNavigate('/booking', { 
       state: { 
         type: 'hotel', 
         item: hotel, 
@@ -121,7 +122,7 @@ export default function SearchResults() {
   };
 
   const handleBookFlight = (flight: Flight) => {
-    navigate('/booking', { 
+    smoothNavigate('/booking', { 
       state: { 
         type: 'flight', 
         item: flight, 
@@ -136,7 +137,7 @@ export default function SearchResults() {
   };
 
   const handleBookPackage = (pkg: Package) => {
-    navigate('/booking', { 
+    smoothNavigate('/booking', { 
       state: { 
         type: 'package', 
         item: pkg, 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import Input from '../components/ui/input';
 import Button from '../components/ui/Button';
 import { Calendar as CalendarComponent } from '../components/ui/calendar';
@@ -102,7 +102,7 @@ const INTEREST_CATEGORIES = {
 };
 
 export default function PlanTrip() {
-  const navigate = useNavigate();
+  const { smoothNavigate } = useSmoothNavigation();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     destination: '',
@@ -151,7 +151,7 @@ export default function PlanTrip() {
 
   const handleStartFromScratch = () => {
     // Navigate to general search or recommendations
-    navigate('/search');
+    smoothNavigate('/search');
   };
 
   const renderProgressDots = () => (
