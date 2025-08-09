@@ -27,7 +27,43 @@ export default function FlightSearchResults() {
     tripType: searchParams.get('tripType') || 'round-trip'
   };
 
+  // Time cleaning utility function
+  const cleanTimeFormat = (timeString: string): string => {
+    if (!timeString) return '00:00';
+    
+    try {
+      // Handle corrupted time like "19:23.04206639745962" or "22:3.606127428290847"
+      const corruptedTimeMatch = timeString.match(/^(\d{1,2}):(\d{1,2})[\.\d]*$/);
+      if (corruptedTimeMatch) {
+        const [, hours, minutes] = corruptedTimeMatch;
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+      }
+      
+      // If it's already in HH:MM format
+      if (/^\d{1,2}:\d{2}$/.test(timeString)) {
+        const [hours, minutes] = timeString.split(':');
+        return `${hours.padStart(2, '0')}:${minutes}`;
+      }
+      
+      // Handle simple time with extra decimals - extract only hours and minutes
+      const timeMatch = timeString.match(/^(\d{1,2})[:.](\d{1,2})/);
+      if (timeMatch) {
+        const [, hours, minutes] = timeMatch;
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+      }
+      
+      return timeString; // Return as-is if no issues found
+    } catch (error) {
+      console.warn('Error cleaning time:', timeString, error);
+      return '00:00';
+    }
+  };
+
   const handleBookApiLFlight = async (flight: SkyscannerFlight) => {
+    // Clean times before saving
+    const cleanedDepartureTime = cleanTimeFormat(flight.departure.time);
+    const cleanedArrivalTime = cleanTimeFormat(flight.arrival.time);
+    
     // Save booking to database
     await bookFlight({
       flight_number: flight.flightNumber,
@@ -35,15 +71,20 @@ export default function FlightSearchResults() {
       departure_city: flight.departure.city || searchData.from,
       arrival_city: flight.arrival.city || searchData.destination,
       departure_date: flight.departure.date || searchData.departureDate,
-      departure_time: flight.departure.time,
-      arrival_time: flight.arrival.time,
+      departure_time: cleanedDepartureTime,
+      arrival_time: cleanedArrivalTime,
       price: flight.price,
       passenger_count: searchData.passengers
     });
     
-    // Redirect to Skyscanner
+    // Redirect to Skyscanner with specific flight details
     if (flight.bookingUrl) {
       window.open(flight.bookingUrl, '_blank');
+    } else {
+      // Fallback URL if bookingUrl is not available
+      const airlineCode = typeof flight.airline === 'object' ? flight.airline.code : 'XX';
+      const fallbackUrl = `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/${searchData.departureDate.replace(/-/g, '')}/?adults=${searchData.passengers}&cabinclass=economy&rtn=0&preflight=${airlineCode}${flight.flightNumber}`;
+      window.open(fallbackUrl, '_blank');
     }
   };
 
@@ -220,7 +261,7 @@ export default function FlightSearchResults() {
 
                         <div className="flex items-center justify-between mb-4">
                           <div className="text-center">
-                            <div className="text-lg font-semibold text-foreground">{flight.departure.time}</div>
+                            <div className="text-lg font-semibold text-foreground">{cleanTimeFormat(flight.departure.time)}</div>
                             <div className="text-sm text-muted-foreground">{flight.departure.airport}</div>
                             <div className="text-xs text-muted-foreground">{flight.departure.city}</div>
                           </div>
@@ -239,7 +280,7 @@ export default function FlightSearchResults() {
                           </div>
                           
                           <div className="text-center">
-                            <div className="text-lg font-semibold text-foreground">{flight.arrival.time}</div>
+                            <div className="text-lg font-semibold text-foreground">{cleanTimeFormat(flight.arrival.time)}</div>
                             <div className="text-sm text-muted-foreground">{flight.arrival.airport}</div>
                             <div className="text-xs text-muted-foreground">{flight.arrival.city}</div>
                           </div>

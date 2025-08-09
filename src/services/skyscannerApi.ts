@@ -193,7 +193,7 @@ class SkyscannerApiService {
         },
         duration,
         stops,
-        bookingUrl: `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${departDate.replace(/-/g, '')}/?adults=1&cabinclass=economy&rtn=0`
+        bookingUrl: `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${departDate.replace(/-/g, '')}/?adults=1&cabinclass=economy&rtn=0&preflight=${airline.code}${flightNum}`
       });
     }
     

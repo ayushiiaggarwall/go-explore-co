@@ -177,18 +177,19 @@ serve(async (req) => {
       return `${randomCode}${flightNum}`;
     }
 
-    function buildSkyscannerSearchUrl(fromCode: string, toCode: string, date: string, passengers: number): string {
+    function buildSkyscannerFlightUrl(originCode: string, destCode: string, date: string, airlineCode: string, flightNum: string): string {
       try {
-        // Convert date to YYMMDD format
-        const dateObj = new Date(date);
-        const year = dateObj.getFullYear().toString().slice(-2);
-        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-        const day = dateObj.getDate().toString().padStart(2, '0');
-        const formattedDate = `${year}${month}${day}`;
+        // Skyscanner flight detail URL format (attempt to create a more specific URL)
+        // Format: https://www.skyscanner.com/transport/flights/{origin}/{dest}/{date}/{airline}{flightnumber}
+        const dateFormatted = date.replace(/-/g, ''); // YYYYMMDD format
         
-        return `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${formattedDate}/?adults=${passengers}&cabinclass=economy&rtn=0`;
+        // Primary URL - try to link to specific flight
+        const specificFlightUrl = `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/${dateFormatted}/?adults=1&cabinclass=economy&rtn=0&preflight=${airlineCode}${flightNum}`;
+        
+        return specificFlightUrl;
       } catch {
-        return `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/?adults=${passengers}`;
+        // Fallback to general search
+        return `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/?adults=1`;
       }
     }
 
@@ -221,8 +222,8 @@ serve(async (req) => {
         // Generate flight number
         const flightNumber = extractFlightNumber(carriers, index);
         
-        // Build Skyscanner URL for this specific search
-        const skyscannerUrl = buildSkyscannerSearchUrl(originAirport, destinationAirport, departDate, 1);
+        // Build specific Skyscanner URL for this flight
+        const skyscannerUrl = buildSkyscannerFlightUrl(originAirport, destinationAirport, departDate, airlineCode, flightNumber.replace(/[A-Z]/g, ''));
 
         return {
           price: Math.round(flight.price.amount || 0),

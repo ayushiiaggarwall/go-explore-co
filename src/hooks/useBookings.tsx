@@ -3,6 +3,38 @@ import { supabase } from '../integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
+// Time cleaning utility function
+function cleanTimeFormat(timeString: string): string {
+  if (!timeString) return '00:00';
+  
+  try {
+    // Handle corrupted time like "19:23.04206639745962" or "22:3.606127428290847"
+    const corruptedTimeMatch = timeString.match(/^(\d{1,2}):(\d{1,2})[\.\d]*$/);
+    if (corruptedTimeMatch) {
+      const [, hours, minutes] = corruptedTimeMatch;
+      return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+    
+    // If it's already in HH:MM format
+    if (/^\d{1,2}:\d{2}$/.test(timeString)) {
+      const [hours, minutes] = timeString.split(':');
+      return `${hours.padStart(2, '0')}:${minutes}`;
+    }
+    
+    // Handle simple time with extra decimals - extract only hours and minutes
+    const timeMatch = timeString.match(/^(\d{1,2})[:.](\d{1,2})/);
+    if (timeMatch) {
+      const [, hours, minutes] = timeMatch;
+      return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+    
+    return timeString; // Return as-is if no issues found
+  } catch (error) {
+    console.warn('Error cleaning time:', timeString, error);
+    return '00:00';
+  }
+}
+
 export interface FlightBooking {
   id: string;
   user_id: string;
@@ -63,7 +95,14 @@ export function useBookings() {
 
       if (hotelError) throw hotelError;
 
-      setFlightBookings(flights || []);
+      // Clean times when loading from database
+      const cleanedFlights = (flights || []).map(flight => ({
+        ...flight,
+        departure_time: cleanTimeFormat(flight.departure_time),
+        arrival_time: cleanTimeFormat(flight.arrival_time)
+      }));
+
+      setFlightBookings(cleanedFlights);
       setHotelBookings(hotels || []);
     } catch (error) {
       console.error('Error loading bookings:', error);
@@ -90,11 +129,18 @@ export function useBookings() {
     }
 
     try {
+      // Clean times before saving to database
+      const cleanedData = {
+        ...flightData,
+        departure_time: cleanTimeFormat(flightData.departure_time),
+        arrival_time: cleanTimeFormat(flightData.arrival_time)
+      };
+
       const { error } = await supabase
         .from('flight_bookings')
         .insert({
           user_id: user.id,
-          ...flightData
+          ...cleanedData
         });
 
       if (error) throw error;
@@ -156,6 +202,7 @@ export function useBookings() {
     loading,
     bookFlight,
     bookHotel,
-    loadBookings
+    loadBookings,
+    cleanTimeFormat // Export the utility function
   };
 }
