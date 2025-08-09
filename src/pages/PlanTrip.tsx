@@ -107,7 +107,8 @@ export default function PlanTrip() {
   const [formData, setFormData] = useState({
     destination: '',
     tripName: '',
-    date: undefined as Date | undefined,
+    startDate: undefined as Date | undefined,
+    endDate: undefined as Date | undefined,
     selectedInterests: [] as string[]
   });
   const [showDestinations, setShowDestinations] = useState(false);
@@ -271,17 +272,59 @@ export default function PlanTrip() {
                 </h2>
                 
                 <div className="space-y-6">
-                  <button className="px-6 py-3 border border-border rounded-xl text-muted-foreground hover:bg-muted transition-colors">
-                    Not sure yet!
-                  </button>
-                  
-                  <div className="bg-card border-2 border-gray-200 rounded-xl p-6">
-                    <CalendarComponent
-                      mode="single"
-                      selected={formData.date}
-                      onSelect={(date: Date | undefined) => setFormData(prev => ({ ...prev, date }))}
-                      className="w-full"
-                    />
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <button className="px-6 py-3 border border-border rounded-xl text-muted-foreground hover:bg-muted transition-colors">
+                        Not sure yet!
+                      </button>
+                    </div>
+                    
+                    <div className="bg-card border-2 border-gray-200 rounded-xl p-6">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Select your travel dates</h3>
+                        <p className="text-sm text-muted-foreground">Choose your departure and return dates</p>
+                      </div>
+                      
+                      <CalendarComponent
+                        mode="range"
+                        selected={{
+                          from: formData.startDate,
+                          to: formData.endDate
+                        }}
+                        onSelect={(range) => {
+                          if (range?.from) {
+                            setFormData(prev => ({
+                              ...prev,
+                              startDate: range.from,
+                              endDate: range.to
+                            }));
+                          }
+                        }}
+                        className="w-full"
+                        numberOfMonths={2}
+                      />
+                      
+                      {formData.startDate && (
+                        <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                          <div className="flex justify-between items-center text-sm">
+                            <div>
+                              <span className="font-medium">From: </span>
+                              <span className="text-muted-foreground">
+                                {format(formData.startDate, 'MMM dd, yyyy')}
+                              </span>
+                            </div>
+                            {formData.endDate && (
+                              <div>
+                                <span className="font-medium">To: </span>
+                                <span className="text-muted-foreground">
+                                  {format(formData.endDate, 'MMM dd, yyyy')}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <Button
@@ -372,7 +415,8 @@ export default function PlanTrip() {
                 </div>
                 <p className="text-base opacity-90 font-medium">
                   {formData.destination && `${formData.destination} • `}
-                  {formData.date ? format(formData.date, 'dd MMMM') : '3 August'} • 1 day
+                  {formData.startDate ? format(formData.startDate, 'dd MMM') : '3 August'}
+                  {formData.endDate ? ` - ${format(formData.endDate, 'dd MMM')}` : ''}
                 </p>
               </div>
             </div>
