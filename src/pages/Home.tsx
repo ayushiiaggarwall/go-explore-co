@@ -27,6 +27,7 @@ export default function Home() {
     }, 400);
   };
 
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
@@ -53,6 +54,7 @@ export default function Home() {
             {/* Hotels Button */}
             <Link 
               to="/book-hotel" 
+              onClick={() => window.scrollTo(0, 0)}
               className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-yellow-500/20"></div>
@@ -65,7 +67,8 @@ export default function Home() {
 
             {/* Flights Button */}
             <Link 
-              to="/book-flight" 
+              to="/book-flight"
+              onClick={() => window.scrollTo(0, 0)}
               className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-sky-500/20"></div>
@@ -80,7 +83,8 @@ export default function Home() {
           {/* Plan Trip Button - Centered below */}
           <div className="flex justify-center max-w-6xl mx-auto">
             <Link 
-              to="/plan-trip" 
+              to="/plan-trip"
+              onClick={() => window.scrollTo(0, 0)}
               className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105 w-full max-w-md"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"></div>
@@ -147,6 +151,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <Link
               to="/search"
+              onClick={() => window.scrollTo(0, 0)}
               className="inline-flex items-center px-6 py-3 bg-sky-500 text-white font-medium rounded-md hover:bg-sky-600 transition-colors"
             >
               View All Packages
@@ -171,7 +176,7 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Flights</h3>
                 <p className="text-muted-foreground mb-4 text-center">Compare and book flights from hundreds of airlines worldwide.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <Link to="/search" onClick={() => window.scrollTo(0, 0)} className="text-sky-500 hover:text-sky-600 font-medium block text-center">
                   Search Flights →
                 </Link>
               </div>
@@ -184,7 +189,7 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Hotels</h3>
                 <p className="text-muted-foreground mb-4 text-center">Find and book the perfect accommodation for your stay.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <Link to="/search" onClick={() => window.scrollTo(0, 0)} className="text-sky-500 hover:text-sky-600 font-medium block text-center">
                   Search Hotels →
                 </Link>
               </div>
@@ -197,7 +202,7 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Packages</h3>
                 <p className="text-muted-foreground mb-4 text-center">Save with our curated vacation packages and deals.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <Link to="/search" onClick={() => window.scrollTo(0, 0)} className="text-sky-500 hover:text-sky-600 font-medium block text-center">
                   View Packages →
                 </Link>
               </div>
