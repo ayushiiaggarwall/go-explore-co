@@ -309,8 +309,8 @@ export default function SearchResults() {
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
-          <div className="lg:w-64">
-            <div className="bg-card rounded-lg shadow-sm p-6 border border-border">
+          <div className="lg:w-80">
+            <div className="bg-card rounded-lg shadow-sm p-8 border border-border">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-foreground">Filters</h3>
                 <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
