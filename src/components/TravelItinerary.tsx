@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
   MapPin, Hotel, Plane, Clock, CheckCircle, Circle, Edit2, RotateCcw,
-  AlertCircle, Star, Calendar, Car, Coffee, Camera, ShoppingBag,
+  AlertCircle, Star, Calendar, Car, Coffee, Camera,
   RefreshCw, Loader2, Save
 } from 'lucide-react';
 import { geminiApi, ItineraryData, TripFormData } from '../services/geminiApi';
@@ -516,39 +516,6 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
               </div>
             </section>
 
-            {/* Hotels */}
-            <section>
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-                <Hotel className="w-5 h-5 mr-2 text-sky-500" />
-                Recommended Hotels
-              </h3>
-              <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-                {currentItinerary.hotels.map(hotel => (
-                  <div key={hotel.id} className="border border-border rounded-lg p-3">
-                    <h4 className="font-medium text-sm text-foreground">{hotel.name}</h4>
-                    <p className="text-xs text-muted-foreground mb-2">{hotel.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-green-600 font-medium">{hotel.estimatedPrice}</span>
-                      <Button 
-                        className="px-3 py-1 text-xs bg-sky-500 hover:bg-sky-600"
-                        onClick={() => {
-                          const searchParams = new URLSearchParams({
-                            destination: selectedCity,
-                            checkIn: tripData.startDate?.toISOString().split('T')[0] || '',
-                            checkOut: tripData.endDate?.toISOString().split('T')[0] || '',
-                            guests: '2',
-                            rooms: '1'
-                          });
-                          smoothNavigate(`/search-hotels?${searchParams.toString()}`);
-                        }}
-                      >
-                        Book Now
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
 
             {/* Transport */}
             <section>
@@ -588,9 +555,12 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
                   <span>Find Flights</span>
                 </Button>
                 
-                <Button className="w-full bg-purple-500 hover:bg-purple-600 flex items-center justify-center space-x-2">
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>Book Activities</span>
+                <Button 
+                  className="w-full bg-purple-500 hover:bg-purple-600 flex items-center justify-center space-x-2"
+                  onClick={() => smoothNavigate('/book-hotels')}
+                >
+                  <Hotel className="w-4 h-4" />
+                  <span>Find Hotels</span>
                 </Button>
               </div>
             </section>
