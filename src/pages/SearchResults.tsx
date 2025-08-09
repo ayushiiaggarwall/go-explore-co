@@ -325,6 +325,7 @@ export default function SearchResults() {
                     </label>
                     <div className="space-y-2">
                       <Input
+                        className="w-full"
                         type="range"
                         min="0"
                         max="1000"
