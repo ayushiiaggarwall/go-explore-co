@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal } from 'lucide-react';
 import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { mockFlights } from '../services/mockData';
+import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
 import { Flight } from '../types';
 import FlightCard from '../components/cards/FlightCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -13,6 +14,8 @@ export default function FlightSearchResults() {
   const { smoothNavigate } = useSmoothNavigation();
   const [loading, setLoading] = useState(true);
   const [flights, setFlights] = useState<Flight[]>([]);
+  const [apiFlights, setApiFlights] = useState<SkyscannerFlight[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [filteredFlights, setFilteredFlights] = useState<Flight[]>([]);
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [showFilters, setShowFilters] = useState(false);
@@ -29,15 +32,33 @@ export default function FlightSearchResults() {
   useEffect(() => {
     const fetchFlights = async () => {
       setLoading(true);
+      setApiError(null);
+      
       try {
-        // Use mock data for now
-        setFlights(mockFlights);
+        console.log('🛫 Flight Search Parameters:', searchData);
+        
+        // Fetch from Skyscanner API
+        const apiResults = await skyscannerApi.searchFlights(
+          searchData.from, 
+          searchData.destination, 
+          searchData.departureDate, 
+          searchData.returnDate
+        );
+        
+        if (apiResults && apiResults.length > 0) {
+          console.log('✅ Skyscanner API returned flights:', apiResults.length);
+          setApiFlights(apiResults);
+        } else {
+          console.log('⚠️ No flights from Skyscanner API, using mock data');
+        }
       } catch (error) {
-        console.error('Error fetching flights:', error);
-        setFlights(mockFlights);
-      } finally {
-        setLoading(false);
+        console.error('❌ Skyscanner API error:', error);
+        setApiError('Unable to fetch live flight data. Showing sample results.');
       }
+      
+      // Always load mock data as fallback
+      setFlights(mockFlights);
+      setLoading(false);
     };
 
     fetchFlights();
@@ -121,11 +142,75 @@ export default function FlightSearchResults() {
             </div>
 
             <div className="space-y-4">
-              {filteredFlights.map((flight) => (
-                <FlightCard key={flight.id} flight={flight} onBook={() => smoothNavigate('/booking-details')} />
-              ))}
+              {/* API Results Section */}
+              {apiFlights.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <h3 className="text-lg font-semibold text-foreground">Live Flight Results</h3>
+                    <span className="text-sm text-muted-foreground">({apiFlights.length} found)</span>
+                  </div>
+                  <div className="grid gap-4">
+                    {apiFlights.slice(0, 5).map((flight, index) => (
+                      <div key={index} className="bg-card rounded-lg border border-green-200 p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-4 mb-2">
+                              <span className="font-semibold text-lg">{flight.airline}</span>
+                              <span className="text-sm text-muted-foreground">{flight.stops === 0 ? 'Direct' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm">
+                              <div>
+                                <div className="font-medium">{flight.departure.time}</div>
+                                <div className="text-muted-foreground">{flight.departure.airport}</div>
+                              </div>
+                              <div className="text-muted-foreground">→</div>
+                              <div>
+                                <div className="font-medium">{flight.arrival.time}</div>
+                                <div className="text-muted-foreground">{flight.arrival.airport}</div>
+                              </div>
+                              <div className="text-muted-foreground">({flight.duration})</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-green-600">{flight.currency} {flight.price}</div>
+                            {flight.bookingUrl && (
+                              <a
+                                href={flight.bookingUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                              >
+                                Book Now
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {apiError && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-yellow-800 text-sm">{apiError}</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              {filteredFlights.length === 0 && (
+              {/* Fallback/Sample Results */}
+              {filteredFlights.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-foreground">Sample Results</h3>
+                    <span className="text-sm text-muted-foreground">({filteredFlights.length} sample flights)</span>
+                  </div>
+                  {filteredFlights.map((flight) => (
+                    <FlightCard key={flight.id} flight={flight} onBook={() => smoothNavigate('/booking-details')} />
+                  ))}
+                </div>
+              )}
+
+              {filteredFlights.length === 0 && apiFlights.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-lg text-muted-foreground mb-4">No flights found matching your criteria</p>
                   <button
