@@ -385,8 +385,13 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
                   type="text"
                   placeholder="Enter trip name to save..."
                   value={tripName}
-                  onChange={(e) => setTripName(e.target.value)}
-                  className="px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  onChange={(e) => {
+                    console.log('Trip name input changed:', e.target.value);
+                    setTripName(e.target.value);
+                  }}
+                  onFocus={() => console.log('Trip name input focused')}
+                  onBlur={() => console.log('Trip name input blurred')}
+                  className="px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500 bg-background text-foreground"
                 />
                 <Button
                   onClick={saveTripPlan}
