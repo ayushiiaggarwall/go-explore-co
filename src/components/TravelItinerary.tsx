@@ -512,17 +512,7 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
                 
                 <Button 
                   className="w-full bg-green-500 hover:bg-green-600 flex items-center justify-center space-x-2"
-                  onClick={() => {
-                    const searchParams = new URLSearchParams({
-                      from: tripData.cities[0] || '',
-                      destination: selectedCity,
-                      departureDate: tripData.startDate?.toISOString().split('T')[0] || '',
-                      returnDate: tripData.endDate?.toISOString().split('T')[0] || '',
-                      passengers: '1',
-                      tripType: 'round-trip'
-                    });
-                    smoothNavigate(`/search-flights?${searchParams.toString()}`);
-                  }}
+                  onClick={() => smoothNavigate('/book-flight')}
                 >
                   <Plane className="w-4 h-4" />
                   <span>Find Flights</span>
