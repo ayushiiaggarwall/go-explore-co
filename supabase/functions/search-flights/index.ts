@@ -49,46 +49,28 @@ serve(async (req) => {
     
     console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers });
 
-    // Primary: Use Google Flights scraper for better accuracy
+    // Primary: Use Skyscanner scraper for reliable data
     let actorResponse;
-    let actorType = 'google-flights';
+    let actorType = 'skyscanner';
     
-    try {
-      console.log('🚀 Trying Google Flights scraper first...');
-      actorResponse = await fetch(`https://api.apify.com/v2/acts/canadesk~google-flights/runs?token=${apifyToken}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          departure: from,
-          arrival: to,
-          departureDate: departDate,
-          returnDate: returnDate || null,
-          adults: passengers || 1,
-          children: 0,
-          infants: 0,
-          mode: returnDate ? "roundTrip" : "oneWay"
-        })
-      });
-    } catch (error) {
-      console.log('⚠️ Google Flights failed, trying free flight scraper...');
-      actorType = 'free-scraper';
-      actorResponse = await fetch(`https://api.apify.com/v2/acts/jindrich.bar~free-flight-ticket-scraper/runs?token=${apifyToken}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fromCode: from,
-          toCode: to,
-          fromDate: departDate,
-          toDate: returnDate || null,
-          adults: passengers || 1,
-          directFlightsOnly: false
-        })
-      });
-    }
+    console.log('🚀 Using Skyscanner scraper...');
+    actorResponse = await fetch(`https://api.apify.com/v2/acts/jupri~skyscanner-flight/runs?token=${apifyToken}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        origin: from,
+        destination: to,
+        departureDate: departDate,
+        returnDate: returnDate || undefined,
+        adults: passengers || 1,
+        children: 0,
+        infants: 0,
+        currency: 'USD',
+        locale: 'en-US'
+      })
+    });
 
     if (!actorResponse.ok) {
       console.error('❌ Failed to start Apify actor:', actorResponse.status);
@@ -130,62 +112,51 @@ serve(async (req) => {
 
     console.log(`✅ Flight search completed using ${actorType}, processing results...`);
 
-    // Transform results based on actor type
-
+    // Transform results for Skyscanner actor format
     let flights: SkyscannerFlight[] = [];
 
-    if (actorType === 'google-flights') {
-      // Handle Google Flights response format
-      flights = results
-        .filter((result: any) => result && result.flights && result.flights.length > 0)
-        .flatMap((result: any) => 
-          result.flights.slice(0, 20).map((flight: any) => ({
-            price: parseFloat(flight.price?.replace(/[^0-9.]/g, '') || '0'),
-            currency: 'USD',
-            airline: flight.airline || 'Unknown Airline',
-            departure: {
-              time: flight.departure?.time || '00:00',
-              date: departDate,
-              airport: flight.departure?.airport || from,
-              city: flight.departure?.airport?.replace(/[,\s]+\w+$/, '') || from
-            },
-            arrival: {
-              time: flight.arrival?.time || '00:00',
-              date: departDate,
-              airport: flight.arrival?.airport || to,
-              city: flight.arrival?.airport?.replace(/[,\s]+\w+$/, '') || to
-            },
-            duration: flight.duration || 'N/A',
-            stops: flight.stops || 0,
-            bookingUrl: flight.bookingUrl || `https://www.google.com/flights`
-          }))
-        );
-    } else {
-      // Handle Free Flight Scraper response format
-      flights = results
-        .filter((result: any) => result && result.price)
-        .slice(0, 20)
-        .map((flight: any) => ({
-          price: Math.round(flight.price || 0),
-          currency: flight.currency || 'USD',
-          airline: flight.airline || 'Unknown Airline',
+    // Handle Skyscanner response format
+    flights = results
+      .filter((result: any) => result && result.price && result.price.amount)
+      .slice(0, 20)
+      .map((flight: any) => {
+        // Extract departure and arrival times
+        const departureTime = flight.legs?.[0]?.departure ? 
+          new Date(flight.legs[0].departure).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: false 
+          }) : '00:00';
+        
+        const arrivalTime = flight.legs?.[0]?.arrival ? 
+          new Date(flight.legs[0].arrival).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: false 
+          }) : '00:00';
+
+        return {
+          price: Math.round(flight.price.amount || 0),
+          currency: flight.price.currency || 'USD',
+          airline: flight.legs?.[0]?.carriers?.marketing?.[0]?.name || 'Unknown Airline',
           departure: {
-            time: flight.departureTime || '00:00',
+            time: departureTime,
             date: departDate,
-            airport: from,
-            city: from.replace(/[,\s]+\w+$/, '')
+            airport: flight.legs?.[0]?.origin?.id || from,
+            city: flight.legs?.[0]?.origin?.name?.split(' ')[0] || from
           },
           arrival: {
-            time: flight.arrivalTime || '00:00',
+            time: arrivalTime,
             date: departDate,
-            airport: to,
-            city: to.replace(/[,\s]+\w+$/, '')
+            airport: flight.legs?.[0]?.destination?.id || to,
+            city: flight.legs?.[0]?.destination?.name?.split(' ')[0] || to
           },
-          duration: flight.duration || 'N/A',
-          stops: flight.stops === 'Direct' ? 0 : (flight.stops?.match(/\d+/) ? parseInt(flight.stops.match(/\d+/)[0]) : 0),
-          bookingUrl: flight.bookingUrl || `https://www.google.com/flights`
-        }));
-    }
+          duration: flight.legs?.[0]?.durationInMinutes ? 
+            `${Math.floor(flight.legs[0].durationInMinutes / 60)}h ${flight.legs[0].durationInMinutes % 60}m` : 'N/A',
+          stops: flight.legs?.[0]?.stopCount || 0,
+          bookingUrl: flight.deeplink || `https://www.skyscanner.com/`
+        };
+      });
 
     console.log(`✨ Returning ${flights.length} flight results`);
 
