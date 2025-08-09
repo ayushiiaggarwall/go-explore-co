@@ -4,11 +4,27 @@ import { useAuth } from '../hooks/useAuth';
 import { Booking } from '../types';
 import { formatPrice, formatDate } from '../utils/validation';
 import Button from '../components/ui/Button';
+import { supabase } from '../integrations/supabase/client';
+
+interface TripPlan {
+  id: string;
+  trip_name: string;
+  destination: string;
+  start_date: string;
+  end_date: string;
+  budget?: number | null;
+  travel_style?: string | null;
+  interests?: string[] | null;
+  cities?: string[] | null;
+  itinerary?: any;
+  created_at: string;
+}
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [activeTab, setActiveTab] = useState<'bookings'>('bookings');
+  const [tripPlans, setTripPlans] = useState<TripPlan[]>([]);
+  const [activeTab, setActiveTab] = useState<'bookings' | 'trips'>('bookings');
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -23,6 +39,41 @@ export default function Dashboard() {
       setBookings(JSON.parse(savedBookings));
     }
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      loadTripPlans();
+    }
+  }, [user]);
+
+  const loadTripPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('trip_plans')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTripPlans(data || []);
+    } catch (error) {
+      console.error('Error loading trip plans:', error);
+    }
+  };
+
+  const deleteTripPlan = async (planId: string) => {
+    try {
+      const { error } = await supabase
+        .from('trip_plans')
+        .delete()
+        .eq('id', planId);
+
+      if (error) throw error;
+      
+      setTripPlans(prev => prev.filter(plan => plan.id !== planId));
+    } catch (error) {
+      console.error('Error deleting trip plan:', error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -170,28 +221,108 @@ export default function Dashboard() {
             >
               My Bookings ({bookings.length})
             </button>
+            <button
+              onClick={() => setActiveTab('trips')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'trips'
+                  ? 'border-sky-500 text-sky-600'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+              }`}
+            >
+              Planned Trips ({tripPlans.length})
+            </button>
           </nav>
         </div>
 
         {/* Content */}
         <div>
-          {bookings.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground mb-4">
-                <Calendar className="w-16 h-16 mx-auto" />
+          {activeTab === 'bookings' ? (
+            bookings.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground mb-4">
+                  <Calendar className="w-16 h-16 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-foreground mb-2">No bookings yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Start exploring and book your first trip with TravelEase.
+                </p>
+                <Button onClick={() => window.location.href = '/search'}>
+                  Start Booking
+                </Button>
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">No bookings yet</h3>
-              <p className="text-muted-foreground mb-6">
-                Start exploring and book your first trip with TravelEase.
-              </p>
-              <Button onClick={() => window.location.href = '/search'}>
-                Start Booking
-              </Button>
-            </div>
+            ) : (
+              <div>
+                {bookings.map(renderBookingCard)}
+              </div>
+            )
           ) : (
-            <div>
-              {bookings.map(renderBookingCard)}
-            </div>
+            tripPlans.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground mb-4">
+                  <MapPin className="w-16 h-16 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-foreground mb-2">No trip plans yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Start planning your next adventure with our AI-powered trip planner.
+                </p>
+                <Button onClick={() => window.location.href = '/plan-trip'}>
+                  Plan a Trip
+                </Button>
+              </div>
+            ) : (
+              <div>
+                {tripPlans.map(plan => (
+                  <div key={plan.id} className="bg-card rounded-lg shadow-md p-6 mb-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">{plan.trip_name}</h3>
+                        <p className="text-muted-foreground">{plan.destination}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteTripPlan(plan.id)}
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="flex items-center">
+                        <Calendar className="w-4 h-4 text-muted-foreground mr-2" />
+                        <span className="text-sm">{new Date(plan.start_date).toLocaleDateString()} - {new Date(plan.end_date).toLocaleDateString()}</span>
+                      </div>
+                      {plan.budget && (
+                        <div className="flex items-center">
+                          <span className="text-sm">Budget: {formatPrice(plan.budget)}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center">
+                        <span className="text-sm">Created: {formatDate(plan.created_at)}</span>
+                      </div>
+                    </div>
+
+                    {plan.cities && plan.cities.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-sm text-muted-foreground">Cities: {plan.cities.join(', ')}</p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = `/trip-itinerary?planId=${plan.id}`}
+                      >
+                        View Itinerary
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
           )}
         </div>
       </div>

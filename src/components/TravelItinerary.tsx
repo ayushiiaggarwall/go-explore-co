@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { 
   MapPin, Hotel, Plane, Clock, CheckCircle, Circle, Edit2, RotateCcw,
   AlertCircle, Star, Calendar, Car, Coffee, Camera, ShoppingBag,
-  RefreshCw, Loader2
+  RefreshCw, Loader2, Save
 } from 'lucide-react';
 import { geminiApi, ItineraryData, TripFormData } from '../services/geminiApi';
 import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../integrations/supabase/client';
 import Button from './ui/Button';
 
 interface ProgressStep {
@@ -30,12 +32,15 @@ const PROGRESS_STEPS = [
 
 export default function TravelItinerary({ tripData }: TravelItineraryProps) {
   const { smoothNavigate } = useSmoothNavigation();
+  const { user } = useAuth();
   const [itineraryData, setItineraryData] = useState<{ [city: string]: ItineraryData }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [currentProgress, setCurrentProgress] = useState<ProgressStep[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [tripName, setTripName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (tripData.cities.length > 0) {
@@ -127,6 +132,41 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
         console.error('Failed to regenerate itinerary:', error);
         setIsLoading(false);
       });
+  };
+
+  const saveTripPlan = async () => {
+    if (!user || !tripName.trim()) {
+      alert('Please enter a trip name');
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('trip_plans')
+        .insert({
+          user_id: user.id,
+          trip_name: tripName,
+          destination: tripData.cities.join(', '),
+          start_date: tripData.startDate?.toISOString().split('T')[0] || '',
+          end_date: tripData.endDate?.toISOString().split('T')[0] || '',
+          budget: null,
+          travel_style: null,
+          interests: tripData.interests || null,
+          cities: tripData.cities || null,
+          itinerary: JSON.parse(JSON.stringify(itineraryData))
+        });
+
+      if (error) throw error;
+      
+      alert('Trip plan saved successfully!');
+      smoothNavigate('/dashboard');
+    } catch (error) {
+      console.error('Error saving trip plan:', error);
+      alert('Failed to save trip plan');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const renderItineraryItem = (
@@ -332,6 +372,25 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
                   </span>
                 )}
               </p>
+              
+              {/* Save Trip Form */}
+              <div className="mt-4 flex items-center space-x-3">
+                <input
+                  type="text"
+                  placeholder="Enter trip name to save..."
+                  value={tripName}
+                  onChange={(e) => setTripName(e.target.value)}
+                  className="px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500"
+                />
+                <Button
+                  onClick={saveTripPlan}
+                  disabled={isSaving || !tripName.trim()}
+                  className="bg-green-500 hover:bg-green-600 flex items-center space-x-2"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Saving...' : 'Save Trip'}</span>
+                </Button>
+              </div>
             </div>
             <Button
               onClick={generateItineraries}
