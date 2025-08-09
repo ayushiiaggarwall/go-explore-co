@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal } from 'lucide-react';
 import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
+import { useBookings } from '../hooks/useBookings';
 import { mockFlights } from '../services/mockData';
 import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
 import { Flight } from '../types';
@@ -11,6 +12,7 @@ import { Slider } from '../components/ui/slider-number-flow';
 
 export default function FlightSearchResults() {
   const [searchParams] = useSearchParams();
+  const { bookFlight } = useBookings();
   const { smoothNavigate } = useSmoothNavigation();
   const [loading, setLoading] = useState(true);
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -27,6 +29,26 @@ export default function FlightSearchResults() {
     returnDate: searchParams.get('returnDate') || '',
     passengers: parseInt(searchParams.get('passengers') || '1'),
     tripType: searchParams.get('tripType') || 'round-trip'
+  };
+
+  const handleBookApiLFlight = async (flight: SkyscannerFlight) => {
+    // Save booking to database
+    await bookFlight({
+      flight_number: `${flight.airline.slice(0,2).toUpperCase()}${Math.floor(Math.random() * 999) + 100}`,
+      airline: flight.airline,
+      departure_city: flight.departure.city || searchData.from,
+      arrival_city: flight.arrival.city || searchData.destination,
+      departure_date: flight.departure.date || searchData.departureDate,
+      departure_time: flight.departure.time,
+      arrival_time: flight.arrival.time,
+      price: flight.price,
+      passenger_count: searchData.passengers
+    });
+    
+    // Redirect to Skyscanner
+    if (flight.bookingUrl) {
+      window.open(flight.bookingUrl, '_blank');
+    }
   };
 
   useEffect(() => {
@@ -172,19 +194,15 @@ export default function FlightSearchResults() {
                               <div className="text-muted-foreground">({flight.duration})</div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-green-600">{flight.currency} {flight.price}</div>
-                            {flight.bookingUrl && (
-                              <a
-                                href={flight.bookingUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
-                              >
-                                Book Now
-                              </a>
-                            )}
-                          </div>
+                           <div className="text-right">
+                             <div className="text-2xl font-bold text-green-600">{flight.currency} {flight.price}</div>
+                             <button
+                               onClick={() => handleBookApiLFlight(flight)}
+                               className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                             >
+                               Book Now
+                             </button>
+                           </div>
                         </div>
                       </div>
                     ))}
