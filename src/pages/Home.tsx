@@ -1,4 +1,4 @@
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Plane, Hotel, MapPin, Star, Shield, Clock } from 'lucide-react';
 import PackageCard from '../components/cards/PackageCard';
 import { mockPackages } from '../services/mockData';
@@ -6,15 +6,15 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function Home() {
   const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   // Redirect authenticated users to dashboard
   if (!isLoading && user) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const handlePackageBook = (pkg: any) => {
-    // In a real app, this would navigate to booking page
-    console.log('Booking package:', pkg);
+  const handlePackageBook = () => {
+    navigate('/search');
   };
 
   return (
