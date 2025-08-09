@@ -196,7 +196,7 @@ export default function PlanTrip() {
 
             {/* Step 1: Destination */}
             {currentStep === 1 && (
-              <div className="space-y-8">
+              <div className="space-y-8 text-center">
                 <h2 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
                   What's your first destination?
                 </h2>
