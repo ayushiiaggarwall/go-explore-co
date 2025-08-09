@@ -12,15 +12,16 @@ const BAUHAUS_CARD_STYLES = `
   text-align: center;
   box-shadow: 1px 12px 25px rgb(0,0,0/78%);
   border-radius: var(--card-radius, 20px);
-  border: var(--card-border-width, 2px) solid hsl(var(--border));
+  border: var(--card-border-width, 2px) solid transparent;
   --rotation: 4.2rad;
   background-image:
-    linear-gradient(var(--card-bg, #151419), var(--card-bg, #151419)),
-    linear-gradient(calc(var(--rotation,4.2rad)), var(--card-accent, #156ef6) 0, var(--card-bg, #151419) 30%, transparent 80%);
+    linear-gradient(var(--card-bg, hsl(var(--card))), var(--card-bg, hsl(var(--card)))),
+    linear-gradient(calc(var(--rotation,4.2rad)), var(--card-accent, hsl(var(--primary))) 0, var(--card-bg, hsl(var(--card))) 30%, transparent 80%);
   background-origin: border-box;
   background-clip: padding-box, border-box;
-  color: var(--card-text-main, #f0f0f1);
+  color: hsl(var(--card-foreground));
   padding: 2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .bauhaus-card::before {
   position: absolute;
