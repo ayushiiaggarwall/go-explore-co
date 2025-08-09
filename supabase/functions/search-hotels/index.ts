@@ -65,7 +65,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🏨 Hotel search request received');
+    console.log('🏨 HOTEL search function called - NOT flight search');
 
     // Check request method
     if (req.method !== 'POST') {
@@ -87,7 +87,7 @@ serve(async (req) => {
       rooms 
     } = body;
 
-    console.log('📋 Search params:', { destination, checkInDate, checkOutDate, numberOfPeople, rooms });
+    console.log('🏨 Hotel search request body:', { destination, checkInDate, checkOutDate, numberOfPeople, rooms });
 
     // Validate required fields
     if (!destination || !checkInDate || !checkOutDate) {
@@ -116,9 +116,13 @@ serve(async (req) => {
 
     // Calculate number of nights
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    console.log(`🏨 Searching for ${nights} nights`);
 
-    const ACTOR_ID = 'apify/tripadvisor-scraper';
+    // 🏨 IMPORTANT: Use correct TripAdvisor actor for HOTELS
+    const ACTOR_ID = 'maxcopell/tripadvisor';
     const APIFY_API_TOKEN = Deno.env.get('APIFY_API_TOKEN');
+    
+    console.log('🏨 Using TripAdvisor actor:', ACTOR_ID);
 
     if (!APIFY_API_TOKEN) {
       console.error('❌ Missing APIFY_API_TOKEN');
