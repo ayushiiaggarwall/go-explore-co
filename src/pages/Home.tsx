@@ -14,19 +14,17 @@ export default function Home() {
   }
 
   const handlePackageBook = () => {
-    // Add ultra-smooth transition effect
-    document.body.style.opacity = '0.6';
-    document.body.style.transform = 'scale(0.96)';
-    document.body.style.filter = 'blur(1px)';
-    document.body.style.transition = 'opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    // Add smoother transition effect
+    document.body.style.opacity = '0.7';
+    document.body.style.transform = 'scale(0.98)';
+    document.body.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
     
     setTimeout(() => {
       navigate('/search');
       window.scrollTo(0, 0);
       document.body.style.opacity = '1';
       document.body.style.transform = 'scale(1)';
-      document.body.style.filter = 'blur(0px)';
-    }, 600);
+    }, 400);
   };
 
   return (
