@@ -226,8 +226,8 @@ export default function About() {
             </div>
             <div>
               <img
-                src="https://images.pexels.com/photos/1591061/pexels-photo-1591061.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Happy travelers"
+                src="/lovable-uploads/c66146ce-1c1e-45fd-93b3-6d37871b336f.png"
+                alt="Travel planning with maps and travel essentials"
                 className="rounded-lg shadow-lg"
               />
             </div>
