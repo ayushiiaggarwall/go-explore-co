@@ -141,45 +141,90 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
               <img
-                src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400"
-                alt="Sarah Johnson"
+                src="/lovable-uploads/c66146ce-1c1e-45fd-93b3-6d37871b336f.png"
+                alt="Team Member 1"
                 className="w-full h-48 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Sarah Johnson</h3>
-                <p className="text-sky-600 mb-3">CEO & Founder</p>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 1</h3>
+                <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
-                  With 15 years in the travel industry, Sarah leads our vision of making travel accessible to all.
+                  Description of team member and their role.
                 </p>
               </div>
             </div>
 
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
               <img
-                src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400"
-                alt="Michael Chen"
+                src="/lovable-uploads/c66146ce-1c1e-45fd-93b3-6d37871b336f.png"
+                alt="Team Member 2"
                 className="w-full h-48 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Michael Chen</h3>
-                <p className="text-sky-600 mb-3">CTO</p>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 2</h3>
+                <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
-                  Michael ensures our platform remains cutting-edge and user-friendly with the latest technology.
+                  Description of team member and their role.
                 </p>
               </div>
             </div>
 
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
               <img
-                src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=400"
-                alt="Emily Rodriguez"
+                src="/lovable-uploads/c66146ce-1c1e-45fd-93b3-6d37871b336f.png"
+                alt="Team Member 3"
                 className="w-full h-48 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Emily Rodriguez</h3>
-                <p className="text-sky-600 mb-3">Head of Customer Success</p>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 3</h3>
+                <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
-                  Emily leads our customer support team to ensure every traveler has an exceptional experience.
+                  Description of team member and their role.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
+              <img
+                src="/lovable-uploads/c66146ce-1c1e-45fd-93b3-6d37871b336f.png"
+                alt="Team Member 4"
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 4</h3>
+                <p className="text-sky-600 mb-3">Position</p>
+                <p className="text-muted-foreground">
+                  Description of team member and their role.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
+              <img
+                src="/lovable-uploads/c66146ce-1c1e-45fd-93b3-6d37871b336f.png"
+                alt="Team Member 5"
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 5</h3>
+                <p className="text-sky-600 mb-3">Position</p>
+                <p className="text-muted-foreground">
+                  Description of team member and their role.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
+              <img
+                src="/lovable-uploads/c66146ce-1c1e-45fd-93b3-6d37871b336f.png"
+                alt="Team Member 6"
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 6</h3>
+                <p className="text-sky-600 mb-3">Position</p>
+                <p className="text-muted-foreground">
+                  Description of team member and their role.
                 </p>
               </div>
             </div>
