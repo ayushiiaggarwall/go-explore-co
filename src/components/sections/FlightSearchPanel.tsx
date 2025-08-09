@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Calendar, Users, Plane } from 'lucide-react';
+import { Search, MapPin, Users, Plane } from 'lucide-react';
 import Input from '../ui/input';
 import Button from '../ui/Button';
+import { DatePicker } from '../ui/date-picker';
 import { searchCities } from '../../data/cities';
 
 interface FlightSearchPanelProps {
@@ -14,11 +15,11 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
   const [formData, setFormData] = useState({
     from: '',
     destination: '',
-    departureDate: '',
-    returnDate: '',
     passengers: 1,
     tripType: 'round-trip'
   });
+  const [departureDate, setDepartureDate] = useState<Date>();
+  const [returnDate, setReturnDate] = useState<Date>();
   const [showFromDestinations, setShowFromDestinations] = useState(false);
   const [showDestinations, setShowDestinations] = useState(false);
 
@@ -42,7 +43,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.from || !formData.destination || !formData.departureDate) {
+    if (!formData.from || !formData.destination || !departureDate) {
       return;
     }
     
@@ -50,8 +51,8 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
       type: 'flight',
       from: formData.from,
       destination: formData.destination,
-      departureDate: formData.departureDate,
-      returnDate: formData.returnDate,
+      departureDate: departureDate.toISOString().split('T')[0],
+      returnDate: returnDate ? returnDate.toISOString().split('T')[0] : '',
       passengers: formData.passengers.toString(),
       tripType: formData.tripType
     });
@@ -59,7 +60,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
     navigate(`/search?${searchParams.toString()}`);
   };
 
-  const today = new Date().toISOString().split('T')[0];
+  
 
   return (
     <div className={`bg-card rounded-lg shadow-lg p-6 border border-border ${className}`}>
@@ -164,27 +165,22 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
 
         <div className="grid grid-cols-2 gap-4">
           {/* Departure Date */}
-          <Input
+          <DatePicker
             label="Departure"
-            name="departureDate"
-            type="date"
-            value={formData.departureDate}
-            onChange={handleInputChange}
-            min={today}
-            icon={<Calendar className="w-5 h-5 text-gray-400" />}
+            date={departureDate}
+            onSelect={setDepartureDate}
+            placeholder="Select departure date"
             required
           />
 
           {/* Return Date (only for round-trip) */}
           {formData.tripType === 'round-trip' && (
-            <Input
+            <DatePicker
               label="Return"
-              name="returnDate"
-              type="date"
-              value={formData.returnDate}
-              onChange={handleInputChange}
-              min={formData.departureDate || today}
-              icon={<Calendar className="w-5 h-5 text-gray-400" />}
+              date={returnDate}
+              onSelect={setReturnDate}
+              placeholder="Select return date"
+              disabled={!departureDate}
             />
           )}
         </div>

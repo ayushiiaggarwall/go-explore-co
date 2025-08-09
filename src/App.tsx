@@ -3,6 +3,7 @@ import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './hooks/useTheme';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import SearchResults from './pages/SearchResults';
 import BookingDetails from './pages/BookingDetails';
@@ -53,9 +54,9 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/book-flight" element={<FlightBooking />} />
-                <Route path="/book-hotel" element={<HotelBooking />} />
-        <Route path="/plan-trip" element={<PlanTrip />} />
+                <Route path="/book-flight" element={<ProtectedRoute><FlightBooking /></ProtectedRoute>} />
+                <Route path="/book-hotel" element={<ProtectedRoute><HotelBooking /></ProtectedRoute>} />
+        <Route path="/plan-trip" element={<ProtectedRoute><PlanTrip /></ProtectedRoute>} />
         <Route path="/trip-itinerary" element={<TripItinerary />} />
         <Route path="/explore-packages" element={<PackageExplorer />} />
               </Routes>
