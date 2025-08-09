@@ -172,7 +172,7 @@ export default function Contact() {
             <div className="bg-card rounded-lg shadow-md p-8 border border-border">
               <h2 className="text-2xl font-bold text-foreground mb-6">Send us a Message</h2>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Input
                     label="Full Name"
@@ -181,6 +181,7 @@ export default function Contact() {
                     onChange={handleInputChange}
                     error={errors.name}
                     required
+                    className="w-11/12 mx-auto"
                   />
                   <Input
                     label="Email Address"
@@ -190,6 +191,7 @@ export default function Contact() {
                     onChange={handleInputChange}
                     error={errors.email}
                     required
+                    className="w-11/12 mx-auto"
                   />
                 </div>
 
@@ -201,8 +203,9 @@ export default function Contact() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     error={errors.phone}
+                    className="w-11/12 mx-auto"
                   />
-                  <div>
+                  <div className="w-11/12 mx-auto">
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Subject
                     </label>
@@ -227,7 +230,7 @@ export default function Contact() {
                   </div>
                 </div>
 
-                <div>
+                <div className="w-11/12 mx-auto">
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Message
                   </label>
