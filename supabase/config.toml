@@ -57,3 +57,6 @@ verify_jwt = false
 
 [functions.gemini-api]
 verify_jwt = false
+
+[functions.generate-itinerary]
+verify_jwt = false
