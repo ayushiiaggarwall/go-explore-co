@@ -17,27 +17,34 @@ interface TripAdvisorHotel {
 }
 
 serve(async (req) => {
+  console.log(`🔍 TripAdvisor API called: ${req.method} ${req.url}`)
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS preflight request handled')
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    console.log('🔐 Checking API token...')
     // Get the API token from Supabase secrets
     const apifyToken = Deno.env.get('APIFY_API_TOKEN')
     if (!apifyToken) {
       console.error('❌ APIFY_API_TOKEN not found in secrets')
       return new Response(
-        JSON.stringify({ error: 'API token not configured' }),
+        JSON.stringify({ error: 'API token not configured', hotels: [] }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500 
+          status: 200  // Return 200 with error message instead of 500
         }
       )
     }
+    console.log('✅ API token found')
 
     // Parse request body
+    console.log('📝 Parsing request body...')
     const { query, maxItems = 10 } = await req.json()
+    console.log('📍 Search query:', query, 'maxItems:', maxItems)
     
     if (!query) {
       return new Response(
