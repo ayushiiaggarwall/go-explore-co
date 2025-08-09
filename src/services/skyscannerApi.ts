@@ -173,7 +173,7 @@ class SkyscannerApiService {
         },
         duration,
         stops,
-        bookingUrl: `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${departDate.replace(/-/g, '')}/`
+        bookingUrl: `https://www.google.com/flights#flt=${fromCode}.${toCode}.${departDate.replace(/-/g, '')}`
       });
     }
     
