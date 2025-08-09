@@ -49,24 +49,25 @@ serve(async (req) => {
     
     console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers });
 
-    // Start the Apify actor for Skyscanner scraping
-    const actorResponse = await fetch(`https://api.apify.com/v2/acts/maxcopell~tripadvisor-scraper/runs?token=${apifyToken}`, {
+    // Use a working Apify actor for flight search
+    const actorResponse = await fetch(`https://api.apify.com/v2/acts/lhotanok~skyscanner-scraper/runs?token=${apifyToken}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        searchQuery: `flights from ${from} to ${to}`,
-        locationFullName: `${from} to ${to}`,
+        origin: from,
+        destination: to,
+        outboundDate: departDate,
+        returnDate: returnDate || null,
+        adults: passengers || 1,
+        children: 0,
+        infants: 0,
+        cabinClass: 'economy',
         currency: 'USD',
-        language: 'en',
-        sortBy: 'relevance',
-        startUrls: [`https://www.tripadvisor.com/CheapFlightsHome`],
-        maxItems: 15,
-        includeAttractions: false,
-        includeRestaurants: false,
-        includeHotels: false,
-        includeFlights: true
+        locale: 'en-US',
+        market: 'US',
+        maxItems: 15
       })
     });
 
@@ -112,49 +113,29 @@ serve(async (req) => {
 
     // Transform results to our format
     const flights: SkyscannerFlight[] = results
-      .filter((result: any) => result.price && result.title)
-      .slice(0, 15)
-      .map((result: any, index: number) => {
-        // Generate realistic flight data from scraped results
-        const airlines = ['American Airlines', 'Delta', 'United', 'JetBlue', 'Southwest'];
-        const randomAirline = airlines[index % airlines.length];
-        
-        // Extract price from result or generate realistic price
-        const price = result.price?.match(/\d+/) ? parseInt(result.price.match(/\d+/)[0]) : Math.floor(Math.random() * 500) + 200;
-        
-        // Generate realistic times
-        const depHour = Math.floor(Math.random() * 24);
-        const depMinute = Math.floor(Math.random() * 4) * 15;
-        const departureTime = `${depHour.toString().padStart(2, '0')}:${depMinute.toString().padStart(2, '0')}`;
-        
-        // Calculate arrival time (5-8 hours later for cross-country)
-        const flightDuration = Math.floor(Math.random() * 180) + 300; // 5-8 hours
-        const arrivalMinutes = (depHour * 60 + depMinute + flightDuration) % (24 * 60);
-        const arrHour = Math.floor(arrivalMinutes / 60);
-        const arrMin = arrivalMinutes % 60;
-        const arrivalTime = `${arrHour.toString().padStart(2, '0')}:${arrMin.toString().padStart(2, '0')}`;
-
-        return {
-          price: price,
-          currency: 'USD',
-          airline: randomAirline,
+      .filter((result: any) => result.flights && result.flights.length > 0)
+      .flatMap((result: any) => 
+        result.flights.slice(0, 15).map((flight: any) => ({
+          price: Math.round(flight.price?.amount || flight.totalPrice || 0),
+          currency: flight.price?.currency || 'USD',
+          airline: flight.carrierName || flight.airline || 'Unknown Airline',
           departure: {
-            time: departureTime,
-            date: departDate,
-            airport: from,
-            city: from.replace(/[,\s]+\w+$/, '') // Remove country part
+            time: flight.departureTime || '00:00',
+            date: flight.departureDate || departDate,
+            airport: flight.originAirport || from,
+            city: flight.originCity || from.replace(/[,\s]+\w+$/, '')
           },
           arrival: {
-            time: arrivalTime,
-            date: departDate,
-            airport: to,
-            city: to.replace(/[,\s]+\w+$/, '') // Remove country part
+            time: flight.arrivalTime || '00:00', 
+            date: flight.arrivalDate || departDate,
+            airport: flight.destinationAirport || to,
+            city: flight.destinationCity || to.replace(/[,\s]+\w+$/, '')
           },
-          duration: `${Math.floor(flightDuration / 60)}h ${flightDuration % 60}m`,
-          stops: Math.random() > 0.7 ? 1 : 0,
-          bookingUrl: result.url || `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate.replace(/-/g, '')}/`
-        };
-      });
+          duration: flight.duration || 'N/A',
+          stops: flight.stops || 0,
+          bookingUrl: flight.bookingUrl || `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate.replace(/-/g, '')}/`
+        }))
+      );
 
     console.log(`✨ Returning ${flights.length} flight results`);
 

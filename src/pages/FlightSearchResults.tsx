@@ -3,10 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal } from 'lucide-react';
 import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { useBookings } from '../hooks/useBookings';
-import { mockFlights } from '../services/mockData';
 import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
-import { Flight } from '../types';
-import FlightCard from '../components/cards/FlightCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { Slider } from '../components/ui/slider-number-flow';
 
@@ -15,10 +12,8 @@ export default function FlightSearchResults() {
   const { bookFlight } = useBookings();
   const { smoothNavigate } = useSmoothNavigation();
   const [loading, setLoading] = useState(true);
-  const [flights, setFlights] = useState<Flight[]>([]);
   const [apiFlights, setApiFlights] = useState<SkyscannerFlight[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [filteredFlights, setFilteredFlights] = useState<Flight[]>([]);
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -71,27 +66,19 @@ export default function FlightSearchResults() {
           console.log('✅ Skyscanner API returned flights:', apiResults.length);
           setApiFlights(apiResults);
         } else {
-          console.log('⚠️ No flights from Skyscanner API, using mock data');
+          console.log('⚠️ No flights from Skyscanner API');
+          setApiError('No flights found for this route and date.');
         }
       } catch (error) {
         console.error('❌ Skyscanner API error:', error);
-        setApiError('Unable to fetch live flight data. Showing sample results.');
+        setApiError('Unable to fetch live flight data.');
       }
       
-      // Always load mock data as fallback
-      setFlights(mockFlights);
       setLoading(false);
     };
 
     fetchFlights();
   }, [searchData.from, searchData.destination, searchData.departureDate, searchData.returnDate, searchData.passengers]);
-
-  useEffect(() => {
-    const filtered = flights.filter(flight => 
-      flight.price >= priceRange[0] && flight.price <= priceRange[1]
-    );
-    setFilteredFlights(filtered);
-  }, [flights, priceRange]);
 
   if (loading) {
     return (
@@ -152,7 +139,7 @@ export default function FlightSearchResults() {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <p className="text-muted-foreground">
-                {filteredFlights.length} flight{filteredFlights.length !== 1 ? 's' : ''} found
+                {apiFlights.length} flight{apiFlights.length !== 1 ? 's' : ''} found
               </p>
               <button
                 onClick={() => setShowFilters(true)}
@@ -215,20 +202,8 @@ export default function FlightSearchResults() {
                 </div>
               )}
 
-              {/* Fallback/Sample Results */}
-              {filteredFlights.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-lg font-semibold text-foreground">Sample Results</h3>
-                    <span className="text-sm text-muted-foreground">({filteredFlights.length} sample flights)</span>
-                  </div>
-                  {filteredFlights.map((flight) => (
-                    <FlightCard key={flight.id} flight={flight} onBook={() => smoothNavigate('/booking-details')} />
-                  ))}
-                </div>
-              )}
 
-              {filteredFlights.length === 0 && apiFlights.length === 0 && (
+              {apiFlights.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-lg text-muted-foreground mb-4">No flights found matching your criteria</p>
                   <button
