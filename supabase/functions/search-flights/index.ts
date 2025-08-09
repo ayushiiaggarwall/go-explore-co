@@ -177,7 +177,7 @@ serve(async (req) => {
       return `${randomCode}${flightNum}`;
     }
 
-    function buildSkyscannerFlightUrl(originCode: string, destCode: string, date: string, airlineCode: string, flightNum: string, departureTime: string, arrivalTime: string): string {
+    function buildSkyscannerSearchUrl(originCode: string, destCode: string, date: string): string {
       try {
         // Format date to YYYYMMDD for Skyscanner
         const dateObj = new Date(date);
@@ -186,30 +186,19 @@ serve(async (req) => {
         const day = dateObj.getDate().toString().padStart(2, '0');
         const formattedDate = `${year}${month}${day}`;
         
-        // Build comprehensive URL with specific flight details
-        // Include multiple parameters to target the specific flight
+        // Build simple search URL since our data doesn't match real Skyscanner flights
         const params = new URLSearchParams({
           adults: '1',
           cabinclass: 'economy',
-          rtn: '0',
-          // Airline filter
-          airlines: airlineCode,
-          // Departure time filter (convert HH:MM to minutes)
-          deptime: departureTime.replace(':', ''),
-          // Arrival time filter
-          arrtime: arrivalTime.replace(':', ''),
-          // Flight number in query
-          flightnum: flightNum,
-          // Direct flight preference
-          stops: '0'
+          rtn: '0'
         });
         
-        const specificFlightUrl = `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/${formattedDate}/?${params.toString()}`;
+        const searchUrl = `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/${formattedDate}/?${params.toString()}`;
         
-        console.log(`🔗 Generated Skyscanner URL for ${airlineCode}${flightNum}:`, specificFlightUrl);
-        return specificFlightUrl;
+        console.log(`🔗 Generated Skyscanner search URL for ${originCode}-${destCode}:`, searchUrl);
+        return searchUrl;
       } catch (error) {
-        console.warn('Error building Skyscanner URL:', error);
+        console.warn('Error building Skyscanner search URL:', error);
         // Fallback to basic search
         return `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/?adults=1`;
       }
@@ -244,16 +233,8 @@ serve(async (req) => {
         // Generate flight number
         const flightNumber = extractFlightNumber(carriers, index);
         
-        // Build specific Skyscanner URL for this exact flight
-        const skyscannerUrl = buildSkyscannerFlightUrl(
-          originAirport, 
-          destinationAirport, 
-          departDate, 
-          airlineCode, 
-          flightNumber.replace(/[A-Z]/g, ''),
-          departureTime,
-          arrivalTime
-        );
+        // Build Skyscanner search URL (not specific flight since our data doesn't match real flights)
+        const skyscannerUrl = buildSkyscannerSearchUrl(originAirport, destinationAirport, departDate);
 
         return {
           price: Math.round(flight.price.amount || 0),

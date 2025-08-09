@@ -31,31 +31,34 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
       passenger_count: 1
     });
 
-    // Redirect to Skyscanner with specific flight details
-    if (flight.bookingUrl) {
-      console.log(`🔗 Opening Skyscanner for flight ${flight.flightNumber}:`, flight.bookingUrl);
-      window.open(flight.bookingUrl, '_blank');
-    } else {
-      // Build specific flight URL if no bookingUrl provided
-      const airlineCode = typeof flight.airline === 'object' ? flight.airline.code : 'XX';
-      const flightNumOnly = flight.flightNumber.replace(/[A-Z]/g, '');
-      
-      const params = new URLSearchParams({
-        adults: '1',
-        cabinclass: 'economy',
-        rtn: '0',
-        airlines: airlineCode,
-        deptime: flight.departure.time.replace(':', ''),
-        arrtime: flight.arrival.time.replace(':', ''),
-        flightnum: flightNumOnly,
-        stops: flight.stops.toString()
-      });
-      
-      const specificUrl = `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/${flight.departure.date.replace(/-/g, '')}/?${params.toString()}`;
-      
-      console.log(`🔗 Opening specific flight URL for ${flight.flightNumber}:`, specificUrl);
-      window.open(specificUrl, '_blank');
-    }
+    // Redirect to Skyscanner search page
+    // Since our flight data doesn't match real Skyscanner flights, we redirect to search
+    const buildSkyscannerSearchUrl = () => {
+      try {
+        // Format date to YYYYMMDD
+        const dateObj = new Date(flight.departure.date);
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        const formattedDate = `${year}${month}${day}`;
+        
+        // Build Skyscanner search URL
+        const params = new URLSearchParams({
+          adults: '1',
+          cabinclass: 'economy',
+          rtn: '0'
+        });
+        
+        return `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/${formattedDate}/?${params.toString()}`;
+      } catch (error) {
+        // Fallback URL
+        return `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/?adults=1&cabinclass=economy`;
+      }
+    };
+
+    const skyscannerSearchUrl = buildSkyscannerSearchUrl();
+    console.log(`🔗 Opening Skyscanner search for route ${flight.departure.airport}-${flight.arrival.airport}:`, skyscannerSearchUrl);
+    window.open(skyscannerSearchUrl, '_blank');
   };
   return (
     <div className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-border">
@@ -125,10 +128,10 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
             className="w-full"
             size="lg"
           >
-            {onBook ? 'Select Flight' : 'Book on Skyscanner'}
+            {onBook ? 'Select Flight' : 'Search on Skyscanner'}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            Prices for comparison - book on Skyscanner for best rates
+            Compare prices and book similar flights on Skyscanner
           </p>
         </div>
       </div>

@@ -193,7 +193,7 @@ class SkyscannerApiService {
         },
         duration,
         stops,
-        bookingUrl: this.buildSpecificSkyscannerUrl(fromCode, toCode, departDate, airline.code, `${flightNum}`, departureTime, arrivalTime)
+        bookingUrl: this.buildSkyscannerSearchUrl(fromCode, toCode, departDate)
       });
     }
     
@@ -201,15 +201,7 @@ class SkyscannerApiService {
     return flights.sort((a, b) => a.price - b.price);
   }
 
-  private buildSpecificSkyscannerUrl(
-    originCode: string, 
-    destCode: string, 
-    date: string, 
-    airlineCode: string, 
-    flightNumber: string,
-    departureTime: string,
-    arrivalTime: string
-  ): string {
+  private buildSkyscannerSearchUrl(originCode: string, destCode: string, date: string): string {
     try {
       // Format date to YYYYMMDD
       const dateObj = new Date(date);
@@ -218,21 +210,16 @@ class SkyscannerApiService {
       const day = dateObj.getDate().toString().padStart(2, '0');
       const formattedDate = `${year}${month}${day}`;
       
-      // Build URL with specific flight filters
+      // Build search URL since our mock data doesn't match real flights
       const params = new URLSearchParams({
         adults: '1',
         cabinclass: 'economy',
-        rtn: '0',
-        airlines: airlineCode,
-        deptime: departureTime.replace(':', ''),
-        arrtime: arrivalTime.replace(':', ''),
-        flightnum: flightNumber,
-        stops: '0'
+        rtn: '0'
       });
       
       return `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/${formattedDate}/?${params.toString()}`;
     } catch (error) {
-      console.warn('Error building Skyscanner URL:', error);
+      console.warn('Error building Skyscanner search URL:', error);
       return `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/?adults=1`;
     }
   }
