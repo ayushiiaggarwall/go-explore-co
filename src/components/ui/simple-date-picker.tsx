@@ -1,5 +1,4 @@
 import React from "react"
-import { cn } from "../../lib/utils"
 
 interface SimpleDatePickerProps {
   date?: Date
@@ -37,9 +36,9 @@ export function SimpleDatePicker({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-foreground mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           {label}
-          {required && <span className="text-destructive ml-1">*</span>}
+          {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <input
@@ -48,16 +47,8 @@ export function SimpleDatePicker({
         onChange={handleDateChange}
         disabled={disabled}
         placeholder={placeholder}
-        className={cn(
-          "w-full h-12 px-3 py-2 text-sm rounded-md border border-input bg-background",
-          "text-foreground placeholder:text-muted-foreground",
-          "focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          !date && "text-muted-foreground"
-        )}
+        className="w-full h-12 px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
       />
     </div>
   )
 }
-
-SimpleDatePicker.displayName = "SimpleDatePicker"
