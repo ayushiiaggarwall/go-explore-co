@@ -77,9 +77,8 @@ export default function FlightSearchResults() {
       passenger_count: searchData.passengers
     });
     
-    // Redirect to Skyscanner search page with correct parameters
-    // Since our flight data doesn't match real Skyscanner flights, we redirect to search
-    const buildSkyscannerSearchUrl = () => {
+    // Use the specific flight booking URL if available, otherwise fallback to search
+    const bookingUrl = flight.bookingUrl || (() => {
       try {
         // Format date to YYYYMMDD
         const dateObj = new Date(searchData.departureDate);
@@ -88,7 +87,7 @@ export default function FlightSearchResults() {
         const day = dateObj.getDate().toString().padStart(2, '0');
         const formattedDate = `${year}${month}${day}`;
         
-        // Build Skyscanner search URL with search parameters
+        // Build Skyscanner search URL as fallback
         const params = new URLSearchParams({
           adults: searchData.passengers.toString(),
           cabinclass: 'economy',
@@ -100,11 +99,10 @@ export default function FlightSearchResults() {
         // Fallback URL
         return `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/?adults=${searchData.passengers}&cabinclass=economy`;
       }
-    };
+    })();
 
-    const skyscannerSearchUrl = buildSkyscannerSearchUrl();
-    console.log(`🔗 Opening Skyscanner search for route ${flight.departure.airport}-${flight.arrival.airport}:`, skyscannerSearchUrl);
-    window.open(skyscannerSearchUrl, '_blank');
+    console.log(`🔗 Opening Skyscanner booking for flight ${flight.flightNumber}:`, bookingUrl);
+    window.open(bookingUrl, '_blank');
   };
 
   useEffect(() => {
@@ -310,10 +308,10 @@ export default function FlightSearchResults() {
                             onClick={() => handleBookApiLFlight(flight)}
                             className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium transition-colors"
                           >
-                            Search on Skyscanner
+                            Book on Skyscanner
                           </button>
                           <p className="text-xs text-muted-foreground text-center">
-                            Compare prices and book similar flights on Skyscanner
+                            Book this flight directly on Skyscanner
                           </p>
                         </div>
                       </div>

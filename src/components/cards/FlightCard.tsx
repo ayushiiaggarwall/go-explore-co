@@ -128,10 +128,10 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
             className="w-full"
             size="lg"
           >
-            {onBook ? 'Select Flight' : 'Search on Skyscanner'}
+            {onBook ? 'Select Flight' : 'Book on Skyscanner'}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            Compare prices and book similar flights on Skyscanner
+            Book this flight directly on Skyscanner
           </p>
         </div>
       </div>
