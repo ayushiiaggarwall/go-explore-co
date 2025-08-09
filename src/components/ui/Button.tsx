@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/utils';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -8,7 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-export default function Button({
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   variant = 'primary',
   size = 'md',
   isLoading = false,
@@ -16,14 +17,14 @@ export default function Button({
   className = '',
   disabled,
   ...props
-}: ButtonProps) {
+}, ref) => {
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
   
   const variantClasses = {
-    primary: 'bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-500',
-    secondary: 'bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500',
-    outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-sky-500',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-sky-500'
+    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary',
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary',
+    outline: 'border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus:ring-primary',
+    ghost: 'text-foreground hover:bg-accent hover:text-accent-foreground focus:ring-primary'
   };
 
   const sizeClasses = {
@@ -32,11 +33,10 @@ export default function Button({
     lg: 'px-6 py-3 text-base'
   };
 
-  const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
-
   return (
     <button
-      className={classes}
+      ref={ref}
+      className={cn(baseClasses, variantClasses[variant], sizeClasses[size], className)}
       disabled={disabled || isLoading}
       {...props}
     >
@@ -50,4 +50,8 @@ export default function Button({
       )}
     </button>
   );
-}
+});
+
+Button.displayName = "Button";
+
+export default Button;
