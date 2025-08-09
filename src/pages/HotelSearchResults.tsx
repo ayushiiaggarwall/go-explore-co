@@ -122,14 +122,16 @@ export default function HotelSearchResults() {
     if (hotel.tripAdvisorUrl) {
       window.open(hotel.tripAdvisorUrl, '_blank');
     } else {
-      // Create TripAdvisor search URL as fallback
+      // Create Booking.com search URL as fallback
       const params = new URLSearchParams({
-        q: `${hotel.name} ${searchResults?.searchParams.destination || ''}`,
+        ss: searchResults?.searchParams.destination || '',
         checkin: searchResults?.searchParams.checkInDate || '',
         checkout: searchResults?.searchParams.checkOutDate || '',
-        adults: searchResults?.searchParams.numberOfPeople?.toString() || '2'
+        group_adults: searchResults?.searchParams.numberOfPeople?.toString() || '2',
+        no_rooms: searchResults?.searchParams.rooms?.toString() || '1',
+        group_children: '0'
       });
-      window.open(`https://www.tripadvisor.com/Hotels?${params.toString()}`, '_blank');
+      window.open(`https://www.booking.com/searchresults.html?${params.toString()}`, '_blank');
     }
   };
 
@@ -209,7 +211,7 @@ export default function HotelSearchResults() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <LoadingSpinner />
-              <p className="mt-4 text-muted-foreground">Searching hotels on TripAdvisor...</p>
+              <p className="mt-4 text-muted-foreground">Searching hotels on Booking.com...</p>
             </div>
           </div>
         </section>
@@ -329,7 +331,7 @@ export default function HotelSearchResults() {
                               onClick={() => handleBookHotel(hotel)}
                               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                             >
-                              View on TripAdvisor
+                              Book on Booking.com
                               <ExternalLink className="w-4 h-4" />
                             </button>
                           </div>
