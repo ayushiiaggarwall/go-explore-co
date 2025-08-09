@@ -146,7 +146,7 @@ export default function About() {
                 className="w-full h-80 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 1</h3>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Akhil Gupta</h3>
                 <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
@@ -161,7 +161,7 @@ export default function About() {
                 className="w-full h-80 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 2</h3>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Pavitar</h3>
                 <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
@@ -176,7 +176,7 @@ export default function About() {
                 className="w-full h-80 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 3</h3>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Ravi Mansha</h3>
                 <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
@@ -191,7 +191,7 @@ export default function About() {
                 className="w-full h-80 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 4</h3>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Awdesh Kumar</h3>
                 <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
@@ -206,7 +206,7 @@ export default function About() {
                 className="w-full h-80 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 5</h3>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Ayushi Aggarwal</h3>
                 <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
@@ -221,7 +221,7 @@ export default function About() {
                 className="w-full h-80 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 6</h3>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Filipe Pinto</h3>
                 <p className="text-sky-600 mb-3">Position</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
