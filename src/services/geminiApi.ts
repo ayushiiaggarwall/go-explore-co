@@ -159,45 +159,53 @@ Make it practical and helpful for travelers. If no visa is required, explain tha
         ? interests.join(', ') 
         : 'general sightseeing, local cuisine, and cultural experiences';
       
-      const prompt = `Create a comprehensive travel itinerary for ${city} ${dateRange}. User interests: ${interestsList}.
+      const prompt = `Create a comprehensive, location-specific travel itinerary for ${city}. This must be completely customized for ${city} specifically, not generic content.
 
-Generate a detailed itinerary with the following structure:
+IMPORTANT: All recommendations must be real, specific places in ${city}. Include actual names of:
+- Specific restaurants, cafes, and bars in ${city}
+- Real monuments, museums, and landmarks in ${city}
+- Actual neighborhoods and districts in ${city}
+- Local dishes and specialties unique to ${city}
+- Real transport options available in ${city}
 
-1. MUST-DO ATTRACTIONS (5-8 items)
-2. FOOD & DRINKS RECOMMENDATIONS (6-10 items with variety)
-3. DAY-WISE PLANS (3 days with morning/afternoon/evening activities)
-4. HOTEL RECOMMENDATIONS (3-5 options with different budgets)
-5. TRANSPORT OPTIONS (local transport, airport transfers, getting around)
-6. LOCAL TIPS (insider knowledge, cultural etiquette, practical advice)
+User interests: ${interestsList}
+Trip dates: ${dateRange}
 
-Personalize based on interests:
-- Museums interest → include art galleries, history museums
-- Beach vibes → coastal activities, water sports
-- Food interest → local markets, cooking classes, food tours
-- Nightlife → bars, clubs, evening entertainment
-- Nature → parks, hiking trails, outdoor activities
-- Shopping → markets, malls, local crafts
-- Adventure → extreme sports, outdoor activities
+CITY-SPECIFIC REQUIREMENTS:
+For ${city}, research and include:
+1. Famous landmarks unique to ${city} (e.g., if Paris: Eiffel Tower, Notre Dame, Louvre)
+2. Local cuisine specific to ${city}/region (e.g., if Mumbai: vada pav, bhel puri; if Paris: croissants, escargot, wine)
+3. Popular neighborhoods in ${city} (e.g., if Paris: Montmartre, Le Marais; if Mumbai: Colaba, Bandra)
+4. Local transport systems in ${city} (e.g., if Paris: Metro; if Mumbai: local trains)
+5. Cultural practices and tips specific to ${city}
 
-Format as JSON:
+Match interests to city-specific activities:
+- Museums → Include actual museum names in ${city}
+- Food → Local specialties and famous restaurants in ${city}
+- Beach → Specific beaches if ${city} is coastal
+- Nightlife → Real bars and clubs in ${city}
+- Nature → Parks and natural areas in/near ${city}
+- Shopping → Famous markets and shopping areas in ${city}
+
+Format as JSON with this exact structure:
 {
   "mustDos": [
     {
-      "id": "unique_id",
-      "title": "Attraction Name",
-      "description": "Brief description",
-      "category": "sightseeing/culture/nature",
+      "id": "must_do_1",
+      "title": "ACTUAL landmark/attraction name in ${city}",
+      "description": "Why this specific place is important to ${city}",
+      "category": "sightseeing",
       "estimatedTime": "2-3 hours",
       "completed": false
     }
   ],
   "foodRecommendations": [
     {
-      "id": "unique_id",
-      "title": "Restaurant/Dish Name",
-      "description": "What makes it special",
-      "category": "restaurant/street_food/cafe/bar",
-      "cuisine": "cuisine type",
+      "id": "food_1", 
+      "title": "ACTUAL restaurant name or local dish from ${city}",
+      "description": "What makes this food/place special in ${city}",
+      "category": "restaurant",
+      "cuisine": "specific cuisine type from ${city}",
       "completed": false
     }
   ],
@@ -205,13 +213,13 @@ Format as JSON:
     {
       "id": "day_1",
       "day": "Day 1",
-      "theme": "Arrival & City Center",
+      "theme": "Exploring ${city}'s [specific area]",
       "activities": [
         {
-          "id": "unique_id",
+          "id": "day1_morning",
           "time": "Morning",
-          "title": "Activity Name",
-          "description": "What to do",
+          "title": "Visit [specific landmark in ${city}]",
+          "description": "Explore this iconic ${city} location",
           "completed": false
         }
       ]
@@ -219,32 +227,34 @@ Format as JSON:
   ],
   "hotels": [
     {
-      "id": "unique_id",
-      "name": "Hotel Name",
-      "category": "luxury/mid-range/budget",
-      "description": "Why recommended",
-      "estimatedPrice": "$100-150/night",
+      "id": "hotel_1",
+      "name": "Recommended hotel type/area in ${city}",
+      "category": "luxury",
+      "description": "Why this area/type is good for ${city}",
+      "estimatedPrice": "price range for ${city}",
       "completed": false
     }
   ],
   "transport": [
     {
-      "id": "unique_id",
-      "type": "Airport Transfer/Local Transport/Inter-city",
-      "description": "Transport option details",
-      "tips": "Practical advice",
+      "id": "transport_1",
+      "type": "ACTUAL transport system in ${city}",
+      "description": "How to use ${city}'s specific transport",
+      "tips": "Specific tips for getting around ${city}",
       "completed": false
     }
   ],
   "localTips": [
     {
-      "id": "unique_id",
-      "category": "culture/safety/money/language",
-      "tip": "Helpful local knowledge",
+      "id": "tip_1",
+      "category": "culture",
+      "tip": "Specific cultural tip for ${city}",
       "completed": false
     }
   ]
-}`;
+}
+
+Make sure every recommendation is genuinely specific to ${city} and not generic travel advice.`;
 
       const response = await this.makeGeminiRequest(prompt);
       
