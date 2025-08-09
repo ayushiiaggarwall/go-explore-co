@@ -18,6 +18,11 @@ export default function FlightSearchResults() {
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [flightsPerPage] = useState(5);
+  
+  // Filter states
+  const [departureTimeFilter, setDepartureTimeFilter] = useState<string[]>([]);
+  const [arrivalTimeFilter, setArrivalTimeFilter] = useState<string[]>([]);
+  const [stopsFilter, setStopsFilter] = useState<string[]>([]);
 
   const searchData = {
     from: searchParams.get('from') || '',
@@ -58,6 +63,74 @@ export default function FlightSearchResults() {
       console.warn('Error cleaning time:', timeString, error);
       return '00:00';
     }
+  };
+
+  // Helper function to get time period
+  const getTimePeriod = (timeString: string): string => {
+    const cleanedTime = cleanTimeFormat(timeString);
+    const [hours] = cleanedTime.split(':').map(Number);
+    
+    if (hours < 6) return 'before-6am';
+    if (hours < 12) return '6am-12pm';
+    if (hours < 18) return '12pm-6pm';
+    return '6pm-12am';
+  };
+
+  // Filter flights based on selected filters
+  const getFilteredFlights = () => {
+    return apiFlights.filter(flight => {
+      // Price filter
+      const priceInRange = flight.price >= priceRange[0] && flight.price <= priceRange[1];
+      
+      // Departure time filter
+      const departureTimeMatch = departureTimeFilter.length === 0 || 
+        departureTimeFilter.includes(getTimePeriod(flight.departure.time));
+      
+      // Arrival time filter
+      const arrivalTimeMatch = arrivalTimeFilter.length === 0 || 
+        arrivalTimeFilter.includes(getTimePeriod(flight.arrival.time));
+      
+      // Stops filter
+      const stopsMatch = stopsFilter.length === 0 || 
+        stopsFilter.some(filter => {
+          if (filter === 'non-stop') return flight.stops === 0;
+          if (filter === '1-stop') return flight.stops === 1;
+          if (filter === '2-plus-stops') return flight.stops >= 2;
+          return false;
+        });
+      
+      return priceInRange && departureTimeMatch && arrivalTimeMatch && stopsMatch;
+    });
+  };
+
+  // Handle filter changes
+  const handleTimeFilterChange = (timeFilter: string, filterType: 'departure' | 'arrival', checked: boolean) => {
+    const setFilter = filterType === 'departure' ? setDepartureTimeFilter : setArrivalTimeFilter;
+    const currentFilter = filterType === 'departure' ? departureTimeFilter : arrivalTimeFilter;
+    
+    if (checked) {
+      setFilter([...currentFilter, timeFilter]);
+    } else {
+      setFilter(currentFilter.filter(f => f !== timeFilter));
+    }
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const handleStopsFilterChange = (stopsFilter: string, checked: boolean) => {
+    if (checked) {
+      setStopsFilter(prev => [...prev, stopsFilter]);
+    } else {
+      setStopsFilter(prev => prev.filter(f => f !== stopsFilter));
+    }
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const clearAllFilters = () => {
+    setPriceRange([0, 2000]);
+    setDepartureTimeFilter([]);
+    setArrivalTimeFilter([]);
+    setStopsFilter([]);
+    setCurrentPage(1);
   };
 
   const handleBookApiLFlight = async (flight: SkyscannerFlight) => {
@@ -106,12 +179,13 @@ export default function FlightSearchResults() {
     window.open(bookingUrl, '_blank');
   };
 
-  // Pagination logic
-  const totalFlights = apiFlights.length;
+  // Pagination logic - use filtered flights
+  const filteredFlights = getFilteredFlights();
+  const totalFlights = filteredFlights.length;
   const totalPages = Math.ceil(totalFlights / flightsPerPage);
   const startIndex = (currentPage - 1) * flightsPerPage;
   const endIndex = startIndex + flightsPerPage;
-  const currentFlights = apiFlights.slice(startIndex, endIndex);
+  const currentFlights = filteredFlights.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -211,27 +285,107 @@ export default function FlightSearchResults() {
             <div className="bg-card rounded-lg p-6 border border-border sticky top-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-foreground">Filters</h3>
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="lg:hidden text-muted-foreground hover:text-foreground"
-                >
-                  ×
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear All
+                  </button>
+                  <button
+                    onClick={() => setShowFilters(false)}
+                    className="lg:hidden text-muted-foreground hover:text-foreground"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-6">
+                {/* Price Range Filter */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-3">
                     Price Range: ${priceRange[0]} - ${priceRange[1]}
                   </label>
                   <Slider
                     value={priceRange}
-                    onValueChange={setPriceRange}
+                    onValueChange={(value) => {
+                      setPriceRange(value);
+                      setCurrentPage(1);
+                    }}
                     max={2000}
                     min={0}
                     step={50}
                     className="w-full"
                   />
+                </div>
+
+                {/* Departure Time Filter */}
+                <div>
+                  <h4 className="text-sm font-medium text-foreground mb-3">Departure Time</h4>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'before-6am', label: 'Before 6 AM' },
+                      { value: '6am-12pm', label: '6 AM - 12 PM' },
+                      { value: '12pm-6pm', label: '12 PM - 6 PM' },
+                      { value: '6pm-12am', label: '6 PM - 12 AM' }
+                    ].map(({ value, label }) => (
+                      <label key={value} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={departureTimeFilter.includes(value)}
+                          onChange={(e) => handleTimeFilterChange(value, 'departure', e.target.checked)}
+                          className="rounded border-border text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-foreground">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Arrival Time Filter */}
+                <div>
+                  <h4 className="text-sm font-medium text-foreground mb-3">Arrival Time</h4>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'before-6am', label: 'Before 6 AM' },
+                      { value: '6am-12pm', label: '6 AM - 12 PM' },
+                      { value: '12pm-6pm', label: '12 PM - 6 PM' },
+                      { value: '6pm-12am', label: '6 PM - 12 AM' }
+                    ].map(({ value, label }) => (
+                      <label key={value} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={arrivalTimeFilter.includes(value)}
+                          onChange={(e) => handleTimeFilterChange(value, 'arrival', e.target.checked)}
+                          className="rounded border-border text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-foreground">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stops Filter */}
+                <div>
+                  <h4 className="text-sm font-medium text-foreground mb-3">Stops</h4>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'non-stop', label: 'Non-stop' },
+                      { value: '1-stop', label: '1 Stop' },
+                      { value: '2-plus-stops', label: '2+ Stops' }
+                    ].map(({ value, label }) => (
+                      <label key={value} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={stopsFilter.includes(value)}
+                          onChange={(e) => handleStopsFilterChange(value, e.target.checked)}
+                          className="rounded border-border text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-foreground">{label}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -242,6 +396,9 @@ export default function FlightSearchResults() {
             <div className="flex items-center justify-between mb-6">
               <p className="text-muted-foreground">
                 {totalFlights} flight{totalFlights !== 1 ? 's' : ''} found
+                {apiFlights.length !== totalFlights && (
+                  <span className="text-xs ml-1">({apiFlights.length - totalFlights} filtered out)</span>
+                )}
               </p>
               <button
                 onClick={() => setShowFilters(true)}
@@ -387,7 +544,25 @@ export default function FlightSearchResults() {
                 </div>
               )}
 
-              {totalFlights === 0 && !loading && (
+              {totalFlights === 0 && apiFlights.length > 0 && (
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
+                    <Plane className="w-12 h-12 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">No flights match your filters</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                    Try adjusting your filter criteria to see more results.
+                  </p>
+                  <button
+                    onClick={clearAllFilters}
+                    className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              )}
+
+              {totalFlights === 0 && apiFlights.length === 0 && !loading && (
                 <div className="text-center py-12">
                   <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
                     <Plane className="w-12 h-12 text-muted-foreground" />
