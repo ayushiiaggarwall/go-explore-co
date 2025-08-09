@@ -203,7 +203,7 @@ export default function PlanTrip() {
                   </h2>
                 </div>
                 <div className="space-y-4 flex flex-col items-center">
-                  <div className="relative w-full max-w-md">
+                  <div className="relative w-full max-w-md ml-4">
                     <Input
                       value={formData.destination}
                       onChange={(e) => setFormData(prev => ({ ...prev, destination: e.target.value }))}
