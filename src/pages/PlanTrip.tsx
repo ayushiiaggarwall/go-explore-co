@@ -202,8 +202,8 @@ export default function PlanTrip() {
                     What's your first destination?
                   </h2>
                 </div>
-                <div className="space-y-4">
-                  <div className="relative">
+                <div className="space-y-4 flex flex-col items-center">
+                  <div className="relative w-full max-w-lg">
                     <Input
                       value={formData.destination}
                       onChange={(e) => setFormData(prev => ({ ...prev, destination: e.target.value }))}
