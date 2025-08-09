@@ -14,15 +14,17 @@ export default function Home() {
   }
 
   const handlePackageBook = () => {
-    // Add smooth transition effect
-    document.body.style.opacity = '0.8';
-    document.body.style.transition = 'opacity 0.2s ease-out';
+    // Add smoother transition effect
+    document.body.style.opacity = '0.7';
+    document.body.style.transform = 'scale(0.98)';
+    document.body.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
     
     setTimeout(() => {
       navigate('/search');
       window.scrollTo(0, 0);
       document.body.style.opacity = '1';
-    }, 200);
+      document.body.style.transform = 'scale(1)';
+    }, 400);
   };
 
   return (
