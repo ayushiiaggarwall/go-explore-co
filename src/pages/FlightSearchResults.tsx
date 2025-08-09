@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Plane } from 'lucide-react';
 import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { useBookings } from '../hooks/useBookings';
 import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
@@ -84,8 +84,26 @@ export default function FlightSearchResults() {
     return (
       <div className="min-h-screen bg-background pt-24">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center py-20">
+          <div className="text-center py-20">
             <LoadingSpinner size="lg" />
+            <h2 className="text-2xl font-bold text-foreground mt-6 mb-2">Searching for flights...</h2>
+            <p className="text-muted-foreground">
+              Finding the best deals from {searchData.from} to {searchData.destination}
+            </p>
+            <div className="mt-8 max-w-md mx-auto bg-card rounded-lg p-6 border border-border">
+              <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                <span>Route</span>
+                <span>{searchData.from} → {searchData.destination}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                <span>Date</span>
+                <span>{searchData.departureDate}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Passengers</span>
+                <span>{searchData.passengers}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -181,15 +199,16 @@ export default function FlightSearchResults() {
                               <div className="text-muted-foreground">({flight.duration})</div>
                             </div>
                           </div>
-                           <div className="text-right">
-                             <div className="text-2xl font-bold text-green-600">{flight.currency} {flight.price}</div>
-                             <button
-                               onClick={() => handleBookApiLFlight(flight)}
-                               className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
-                             >
-                               Book Now
-                             </button>
-                           </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-primary">${flight.price}</div>
+                            <div className="text-sm text-muted-foreground mb-2">{flight.currency} per person</div>
+                            <button
+                              onClick={() => handleBookApiLFlight(flight)}
+                              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm font-medium transition-colors"
+                            >
+                              Book Now
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -203,15 +222,34 @@ export default function FlightSearchResults() {
               )}
 
 
-              {apiFlights.length === 0 && (
+              {apiFlights.length === 0 && !loading && (
                 <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground mb-4">No flights found matching your criteria</p>
-                  <button
-                    onClick={() => smoothNavigate('/book-flight')}
-                    className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-                  >
-                    Try New Search
-                  </button>
+                  <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
+                    <Plane className="w-12 h-12 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">No flights found</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                    We couldn't find any flights for your search criteria. Try adjusting your dates or destinations.
+                  </p>
+                  {apiError && (
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6 max-w-md mx-auto">
+                      <p className="text-destructive text-sm">{apiError}</p>
+                    </div>
+                  )}
+                  <div className="flex gap-3 justify-center">
+                    <button
+                      onClick={() => smoothNavigate('/book-flight')}
+                      className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                    >
+                      Try New Search
+                    </button>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="px-6 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90"
+                    >
+                      Refresh Results
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

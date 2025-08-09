@@ -49,25 +49,21 @@ serve(async (req) => {
     
     console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers });
 
-    // Use a working Apify actor for flight search
-    const actorResponse = await fetch(`https://api.apify.com/v2/acts/lhotanok~skyscanner-scraper/runs?token=${apifyToken}`, {
+    // Use the harvest/skyscanner-scraper actor
+    const actorResponse = await fetch(`https://api.apify.com/v2/acts/harvest~skyscanner-scraper/runs?token=${apifyToken}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        origin: from,
-        destination: to,
-        outboundDate: departDate,
+        from: from,
+        to: to,
+        departDate: departDate,
         returnDate: returnDate || null,
         adults: passengers || 1,
-        children: 0,
-        infants: 0,
-        cabinClass: 'economy',
         currency: 'USD',
         locale: 'en-US',
-        market: 'US',
-        maxItems: 15
+        maxResults: 20
       })
     });
 
@@ -111,31 +107,46 @@ serve(async (req) => {
 
     console.log('✅ Flight search completed, processing results...');
 
-    // Transform results to our format
+    // Transform results to our format - handle the harvest/skyscanner-scraper response format
     const flights: SkyscannerFlight[] = results
-      .filter((result: any) => result.flights && result.flights.length > 0)
-      .flatMap((result: any) => 
-        result.flights.slice(0, 15).map((flight: any) => ({
-          price: Math.round(flight.price?.amount || flight.totalPrice || 0),
+      .filter((result: any) => result && result.price)
+      .slice(0, 20)
+      .map((flight: any) => {
+        // Handle the legs array structure from harvest/skyscanner-scraper
+        const leg = flight.legs && flight.legs[0] ? flight.legs[0] : {};
+        const carrier = leg.carriers && leg.carriers.marketing && leg.carriers.marketing[0] 
+          ? leg.carriers.marketing[0] 
+          : {};
+
+        return {
+          price: Math.round(flight.price?.raw || flight.price?.amount || flight.price || 0),
           currency: flight.price?.currency || 'USD',
-          airline: flight.carrierName || flight.airline || 'Unknown Airline',
+          airline: carrier.name || flight.airline || 'Unknown Airline',
           departure: {
-            time: flight.departureTime || '00:00',
-            date: flight.departureDate || departDate,
-            airport: flight.originAirport || from,
-            city: flight.originCity || from.replace(/[,\s]+\w+$/, '')
+            time: leg.departure ? new Date(leg.departure).toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            }) : '00:00',
+            date: leg.departure ? new Date(leg.departure).toISOString().split('T')[0] : departDate,
+            airport: leg.origin?.id || from,
+            city: leg.origin?.name?.split(' ')[0] || from.replace(/[,\s]+\w+$/, '')
           },
           arrival: {
-            time: flight.arrivalTime || '00:00', 
-            date: flight.arrivalDate || departDate,
-            airport: flight.destinationAirport || to,
-            city: flight.destinationCity || to.replace(/[,\s]+\w+$/, '')
+            time: leg.arrival ? new Date(leg.arrival).toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            }) : '00:00',
+            date: leg.arrival ? new Date(leg.arrival).toISOString().split('T')[0] : departDate,
+            airport: leg.destination?.id || to,
+            city: leg.destination?.name?.split(' ')[0] || to.replace(/[,\s]+\w+$/, '')
           },
-          duration: flight.duration || 'N/A',
-          stops: flight.stops || 0,
+          duration: leg.durationInMinutes ? `${Math.floor(leg.durationInMinutes / 60)}h ${leg.durationInMinutes % 60}m` : 'N/A',
+          stops: leg.stopCount || 0,
           bookingUrl: flight.bookingUrl || `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate.replace(/-/g, '')}/`
-        }))
-      );
+        };
+      });
 
     console.log(`✨ Returning ${flights.length} flight results`);
 
