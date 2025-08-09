@@ -41,7 +41,6 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
     }
     
     const searchParams = new URLSearchParams({
-      type: 'hotel',
       destination: formData.destination,
       checkIn: checkInDate.toISOString().split('T')[0],
       checkOut: checkOutDate.toISOString().split('T')[0],
@@ -49,7 +48,7 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
       rooms: formData.rooms.toString()
     });
     
-    navigate(`/search-hotels?${searchParams.toString()}`);
+    navigate(`/hotel-search-results?${searchParams.toString()}`);
   };
 
   
