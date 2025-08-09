@@ -49,7 +49,7 @@ export default function Slider({ value, className, onValueChange, ...props }: Ra
 						className="absolute bottom-8 left-1/2 -translate-x-1/2 text-lg font-semibold"
 						style={{ 
 							filter: 'drop-shadow(0 25px 25px rgba(0, 0, 0, 1))',
-							WebkitTextStroke: '1px rgba(0, 0, 0, 0.3)'
+							WebkitTextStroke: '2px rgba(0, 0, 0, 0.4)'
 						} as React.CSSProperties}
 					/>
 				)}
