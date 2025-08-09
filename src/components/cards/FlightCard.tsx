@@ -3,6 +3,7 @@ import { Flight } from '../../types';
 import { formatPrice } from '../../utils/validation';
 import { useBookings } from '../../hooks/useBookings';
 import Button from '../ui/Button';
+import { toast } from 'sonner';
 
 interface FlightCardProps {
   flight: Flight;
@@ -18,18 +19,31 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
       return;
     }
 
-    // Save booking to database
-    await bookFlight({
-      flight_number: flight.flightNumber,
-      airline: typeof flight.airline === 'string' ? flight.airline : flight.airline.name,
-      departure_city: flight.departure.city,
-      arrival_city: flight.arrival.city,
-      departure_date: flight.departure.date,
-      departure_time: flight.departure.time,
-      arrival_time: flight.arrival.time,
-      price: flight.price,
-      passenger_count: 1
-    });
+    try {
+      // Save booking to database
+      const success = await bookFlight({
+        flight_number: flight.flightNumber,
+        airline: typeof flight.airline === 'string' ? flight.airline : flight.airline.name,
+        departure_city: flight.departure.city,
+        arrival_city: flight.arrival.city,
+        departure_date: flight.departure.date,
+        departure_time: flight.departure.time,
+        arrival_time: flight.arrival.time,
+        price: flight.price,
+        passenger_count: 1
+      });
+
+      if (success) {
+        toast.success('Flight saved to your bookings!');
+      } else {
+        toast.error('Failed to save booking. Please try again.');
+        return; // Don't redirect if booking failed
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast.error('Failed to save booking. Please try again.');
+      return; // Don't redirect if booking failed
+    }
 
     // Redirect to Skyscanner search page
     // Since our flight data doesn't match real Skyscanner flights, we redirect to search
