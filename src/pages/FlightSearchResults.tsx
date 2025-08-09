@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal, Plane } from 'lucide-react';
+import { SlidersHorizontal, Plane, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { useBookings } from '../hooks/useBookings';
 import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
@@ -14,9 +14,10 @@ export default function FlightSearchResults() {
   const [loading, setLoading] = useState(true);
   const [apiFlights, setApiFlights] = useState<SkyscannerFlight[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [dataSource, setDataSource] = useState<string>('');
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [flightsPerPage] = useState(5);
 
   const searchData = {
     from: searchParams.get('from') || '',
@@ -105,6 +106,30 @@ export default function FlightSearchResults() {
     window.open(bookingUrl, '_blank');
   };
 
+  // Pagination logic
+  const totalFlights = apiFlights.length;
+  const totalPages = Math.ceil(totalFlights / flightsPerPage);
+  const startIndex = (currentPage - 1) * flightsPerPage;
+  const endIndex = startIndex + flightsPerPage;
+  const currentFlights = apiFlights.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
   useEffect(() => {
     const fetchFlights = async () => {
       setLoading(true);
@@ -124,7 +149,6 @@ export default function FlightSearchResults() {
         if (apiResults && apiResults.flights && apiResults.flights.length > 0) {
           console.log('✅ Flight API returned flights:', apiResults.flights.length);
           setApiFlights(apiResults.flights);
-          setDataSource(apiResults.source || 'google-flights');
         } else {
           console.log('⚠️ No flights from Flight API');
           setApiError('No flights found for this route and date.');
@@ -217,7 +241,7 @@ export default function FlightSearchResults() {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <p className="text-muted-foreground">
-                {apiFlights.length} flight{apiFlights.length !== 1 ? 's' : ''} found
+                {totalFlights} flight{totalFlights !== 1 ? 's' : ''} found
               </p>
               <button
                 onClick={() => setShowFilters(true)}
@@ -229,22 +253,20 @@ export default function FlightSearchResults() {
             </div>
 
             <div className="space-y-4">
-              {/* API Results Section */}
-              {apiFlights.length > 0 && (
+              {/* Flight Results */}
+              {currentFlights.length > 0 && (
                 <div className="mb-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                    <h3 className="text-lg font-semibold text-foreground">Live Flight Results</h3>
-                    <span className="text-sm text-muted-foreground">({apiFlights.length} found)</span>
-                    {dataSource && (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                        {dataSource === 'google-flights' ? 'Google Flights' : 'Free Scraper'}
-                      </span>
-                    )}
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-foreground">
+                      Flight Results ({totalFlights} flights found)
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Showing {startIndex + 1}-{Math.min(endIndex, totalFlights)} of {totalFlights} flights
+                    </p>
                   </div>
-                  <div className="grid gap-4">
-                    {apiFlights.slice(0, 5).map((flight, index) => (
-                      <div key={index} className="bg-card rounded-lg border border-border p-6 hover:shadow-lg transition-all duration-200">
+                  <div className="space-y-4">
+                    {currentFlights.map((flight, index) => (
+                      <div key={startIndex + index} className="bg-card rounded-lg border border-border p-6 hover:shadow-lg transition-all duration-200">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center space-x-3">
                             {typeof flight.airline === 'object' && flight.airline.logo ? (
@@ -315,8 +337,48 @@ export default function FlightSearchResults() {
                           </p>
                         </div>
                       </div>
-                    ))}
+                     ))}
                   </div>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center space-x-4 mt-8">
+                      <button
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 1}
+                        className="flex items-center space-x-1 px-3 py-2 border border-border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Previous</span>
+                      </button>
+
+                      <div className="flex items-center space-x-2">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${
+                              currentPage === page
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border border-border hover:bg-muted'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className="flex items-center space-x-1 px-3 py-2 border border-border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
                   {apiError && (
                     <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                       <p className="text-yellow-800 text-sm">{apiError}</p>
@@ -325,8 +387,7 @@ export default function FlightSearchResults() {
                 </div>
               )}
 
-
-              {apiFlights.length === 0 && !loading && (
+              {totalFlights === 0 && !loading && (
                 <div className="text-center py-12">
                   <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
                     <Plane className="w-12 h-12 text-muted-foreground" />
