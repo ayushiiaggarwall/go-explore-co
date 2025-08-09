@@ -95,14 +95,14 @@ export default function Header() {
                     Book Hotels
                   </Link>
                   <Link
-                    to="/explore-packages"
+                    to="/plan-trip"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                     onClick={() => setIsTravelToolsOpen(false)}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3l8 8-8 8M4 11h16" />
                     </svg>
-                    Explore Packages
+                    Plan Trip
                   </Link>
                   <div className="border-t border-border my-2"></div>
                   <Link
@@ -255,11 +255,11 @@ export default function Header() {
                 Book Hotels
               </Link>
               <Link
-                to="/explore-packages"
+                to="/plan-trip"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Explore Packages
+                Plan Trip
               </Link>
               <Link
                 to="/recommendations"

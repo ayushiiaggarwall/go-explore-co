@@ -23,6 +23,7 @@ import Profile from './pages/Profile';
 import FlightBooking from './pages/FlightBooking';
 import HotelBooking from './pages/HotelBooking';
 import PackageExplorer from './pages/PackageExplorer';
+import PlanTrip from './pages/PlanTrip';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -53,7 +54,8 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/book-flight" element={<FlightBooking />} />
                 <Route path="/book-hotel" element={<HotelBooking />} />
-                <Route path="/explore-packages" element={<PackageExplorer />} />
+        <Route path="/plan-trip" element={<PlanTrip />} />
+        <Route path="/explore-packages" element={<PackageExplorer />} />
               </Routes>
             </main>
             <Footer />
