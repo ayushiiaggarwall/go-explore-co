@@ -1,7 +1,5 @@
 import { Link, Navigate } from 'react-router-dom';
 import { Plane, Hotel, MapPin, Star, Shield, Clock } from 'lucide-react';
-import HotelSearchPanel from '../components/sections/HotelSearchPanel';
-import FlightSearchPanel from '../components/sections/FlightSearchPanel';
 import PackageCard from '../components/cards/PackageCard';
 import { mockPackages } from '../services/mockData';
 import { useAuth } from '../hooks/useAuth';
@@ -42,8 +40,31 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            <HotelSearchPanel />
-            <FlightSearchPanel />
+            {/* Hotels Button */}
+            <Link 
+              to="/hotel-booking" 
+              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-yellow-500/20"></div>
+              <div className="relative p-8 h-64 flex flex-col items-center justify-center text-center">
+                <Hotel className="w-16 h-16 text-white mb-4 group-hover:scale-110 transition-transform duration-300" />
+                <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">HOTELS</h2>
+                <p className="text-white/90 text-lg">Find perfect accommodations</p>
+              </div>
+            </Link>
+
+            {/* Flights Button */}
+            <Link 
+              to="/flight-booking" 
+              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-sky-500/20"></div>
+              <div className="relative p-8 h-64 flex flex-col items-center justify-center text-center">
+                <Plane className="w-16 h-16 text-white mb-4 group-hover:scale-110 transition-transform duration-300" />
+                <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Flights</h2>
+                <p className="text-white/90 text-lg">Book your next adventure</p>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
