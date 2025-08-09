@@ -310,76 +310,74 @@ export default function SearchResults() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <div className="lg:w-64">
-            <div className="bg-card rounded-lg shadow-sm p-8 border border-border min-h-[600px] flex flex-col">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-semibold text-foreground">Filters</h3>
-                <SlidersHorizontal className="w-6 h-6 text-muted-foreground" />
+            <div className="bg-card rounded-lg shadow-sm p-6 border border-border">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground">Filters</h3>
+                <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
               </div>
               
-              <div className="flex-1 space-y-8">
-                {searchType === 'hotels' && (
-                  <>
-                    <div>
-                      <label className="block text-base font-medium text-foreground mb-4">
-                        Price Range (per night)
-                      </label>
-                      <div className="space-y-4">
-                        <Slider
-                          value={[filters.priceRange[1]]}
-                          onValueChange={(value) => setFilters(prev => ({
-                            ...prev,
-                            priceRange: [0, value[0]]
-                          }))}
-                          min={0}
-                          max={1000}
-                          step={1}
-                          className="w-3/4"
-                        />
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span>$0</span>
-                          <span>${filters.priceRange[1]}</span>
-                        </div>
+              {searchType === 'hotels' && (
+                <>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Price Range (per night)
+                    </label>
+                    <div className="space-y-2">
+                      <Slider
+                        value={[filters.priceRange[1]]}
+                        onValueChange={(value) => setFilters(prev => ({
+                          ...prev,
+                          priceRange: [0, value[0]]
+                        }))}
+                        min={0}
+                        max={1000}
+                        step={1}
+                        className="w-1/2"
+                      />
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>$0</span>
+                        <span>${filters.priceRange[1]}</span>
                       </div>
                     </div>
-                    
-                    <div>
-                      <label className="block text-base font-medium text-foreground mb-4">
-                        Star Rating
-                      </label>
-                      <select
-                        value={filters.starRating}
-                        onChange={(e) => setFilters(prev => ({
-                          ...prev,
-                          starRating: parseFloat(e.target.value)
-                        }))}
-                        className="w-full p-3 rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
-                      >
-                        <option value={0}>Any Rating</option>
-                        <option value={3}>3+ Stars</option>
-                        <option value={4}>4+ Stars</option>
-                        <option value={4.5}>4.5+ Stars</option>
-                      </select>
-                    </div>
-                  </>
-                )}
-                
-                <div>
-                  <label className="block text-base font-medium text-foreground mb-4">
-                    Sort By
-                  </label>
-                  <select
-                    value={filters.sortBy}
-                    onChange={(e) => setFilters(prev => ({
-                      ...prev,
-                      sortBy: e.target.value
-                    }))}
-                    className="w-full p-3 rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
-                  >
-                    <option value="price">Price (Low to High)</option>
-                    <option value="rating">Rating (High to Low)</option>
-                    <option value="name">Name (A to Z)</option>
-                  </select>
-                </div>
+                  </div>
+                  
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Star Rating
+                    </label>
+                    <select
+                      value={filters.starRating}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        starRating: parseFloat(e.target.value)
+                      }))}
+                      className="w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
+                    >
+                      <option value={0}>Any Rating</option>
+                      <option value={3}>3+ Stars</option>
+                      <option value={4}>4+ Stars</option>
+                      <option value={4.5}>4.5+ Stars</option>
+                    </select>
+                  </div>
+                </>
+              )}
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Sort By
+                </label>
+                <select
+                  value={filters.sortBy}
+                  onChange={(e) => setFilters(prev => ({
+                    ...prev,
+                    sortBy: e.target.value
+                  }))}
+                  className="w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
+                >
+                  <option value="price">Price (Low to High)</option>
+                  <option value="rating">Rating (High to Low)</option>
+                  <option value="name">Name (A to Z)</option>
+                </select>
               </div>
             </div>
           </div>
