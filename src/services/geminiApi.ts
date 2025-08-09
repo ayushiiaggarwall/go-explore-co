@@ -272,6 +272,49 @@ Make sure every recommendation is genuinely specific to ${city} and not generic 
     }
   }
 
+  async generateFullItinerary(tripData: TripFormData): Promise<any> {
+    try {
+      console.log(`🗺️ Gemini: Generating full itinerary for trip:`, tripData);
+      
+      const numberOfDays = tripData.startDate && tripData.endDate
+        ? Math.max(1, Math.ceil((tripData.endDate.getTime() - tripData.startDate.getTime()) / (1000*60*60*24)) + 1)
+        : 7;
+
+      const payload = {
+        cityName: tripData.cities[0], // Use first city for now
+        startDate: tripData.startDate?.toISOString().split('T')[0],
+        endDate: tripData.endDate?.toISOString().split('T')[0],
+        tripName: tripData.tripName,
+        numberOfDays,
+        activities: tripData.interests.filter(i => ['Beach vibes', 'Sports', 'Water activities', 'Winter sports', 'Climbing', 'Cycling', 'Camping', 'Hiking', 'Adrenaline', 'Theme parks'].includes(i)),
+        foodDrinks: tripData.interests.filter(i => ['Coffee', 'International', 'Chinese', 'French', 'Indian', 'Italian', 'Japanese', 'Korean', 'Mexican', 'Thai', 'Vegan', 'Seafood', 'Sushi', 'Ice cream', 'Dining Establishments', 'Bakery', 'Bar', 'Cafe', 'Restaurants', 'Drinks'].includes(i)),
+        entertainment: tripData.interests.filter(i => ['Shopping', 'Dancing', 'Cinemas', 'Adult entertainment', 'Comedy clubs'].includes(i)),
+        sightseeing: tripData.interests.filter(i => ['Nature', 'Art', 'Museums', 'Historical sites', 'Bridges', 'Libraries', 'Memorials', 'Lookout points', 'Architecture', 'Ships', 'Aquariums', 'Urban architecture', 'Interesting streets'].includes(i)),
+        relaxation: tripData.interests.filter(i => ['Massage', 'Wellness'].includes(i))
+      };
+
+      const response = await fetch(`${this.supabaseUrl}/functions/v1/generate-itinerary`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Generate itinerary error: ${errorText}`);
+      }
+
+      const itinerary = await response.json();
+      console.log(`✅ Gemini: Generated full itinerary for ${tripData.tripName}`);
+      return itinerary;
+    } catch (error) {
+      console.error('❌ Gemini full itinerary generation error:', error);
+      throw error;
+    }
+  }
+
   async convertCurrency(amount: number, fromCurrency: string, toCurrency: string): Promise<{ convertedAmount: number, exchangeRate: number, additionalInfo: string }> {
     try {
       console.log(`💱 Gemini: Converting ${amount} ${fromCurrency} to ${toCurrency}`);

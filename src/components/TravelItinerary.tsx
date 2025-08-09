@@ -72,22 +72,32 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
         ));
       }
 
-      // Generate itinerary for each city
-      const newItineraryData: { [city: string]: ItineraryData } = {};
+      // Generate full itinerary using the new edge function
+      const fullItinerary = await geminiApi.generateFullItinerary(tripData);
       
-      for (const city of tripData.cities) {
-        const itinerary = await geminiApi.generateItinerary(
-          city,
-          tripData.interests,
-          tripData.startDate,
-          tripData.endDate
-        );
-        newItineraryData[city] = itinerary;
-      }
+      // Transform the response to match our current data structure
+      const newItineraryData: { [city: string]: ItineraryData } = {};
+      newItineraryData[tripData.cities[0]] = fullItinerary;
 
       setItineraryData(newItineraryData);
     } catch (error) {
       console.error('Failed to generate itinerary:', error);
+      // Fallback to old method if new one fails
+      try {
+        const newItineraryData: { [city: string]: ItineraryData } = {};
+        for (const city of tripData.cities) {
+          const itinerary = await geminiApi.generateItinerary(
+            city,
+            tripData.interests,
+            tripData.startDate,
+            tripData.endDate
+          );
+          newItineraryData[city] = itinerary;
+        }
+        setItineraryData(newItineraryData);
+      } catch (fallbackError) {
+        console.error('Fallback itinerary generation also failed:', fallbackError);
+      }
     } finally {
       setIsLoading(false);
       setCurrentProgress([]);
