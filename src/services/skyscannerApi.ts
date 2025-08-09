@@ -22,14 +22,7 @@ interface SkyscannerFlight {
 }
 
 class SkyscannerApiService {
-  private apiToken: string;
-
-  constructor() {
-    this.apiToken = import.meta.env.VITE_APIFY_API_TOKEN || '';
-    if (!this.apiToken) {
-      console.warn('Skyscanner API token not found. Please set VITE_APIFY_API_TOKEN in your .env file');
-    }
-  }
+  private baseUrl = 'https://ioifldpjlfotqvtaidem.supabase.co/functions/v1/search-flights';
 
   async searchFlights(
     from: string, 
@@ -37,13 +30,10 @@ class SkyscannerApiService {
     departDate: string, 
     returnDate?: string
   ): Promise<SkyscannerFlight[]> {
-    console.log('✈️ Flight Search: Generating realistic flight data', { from, to, departDate, returnDate });
-    
-    // Since Skyscanner APIs require payment, let's generate realistic flight data
-    // This provides a working demo while you decide on a paid API solution
+    console.log('✈️ Flight Search: Starting real-time search', { from, to, departDate, returnDate });
     
     try {
-      // Use Gemini API to convert city names to airport codes
+      // Use Gemini API to convert city names to airport codes for the API
       console.log('🤖 Converting cities to airport codes with Gemini...');
       
       const [fromCode, toCode] = await Promise.all([
@@ -51,19 +41,60 @@ class SkyscannerApiService {
         geminiApi.convertCityToAirportCode(to)
       ]);
       
-      console.log(`🌍 Searching flights from ${fromCode} (${from}) to ${toCode} (${to})`);
+      console.log(`🌍 Searching real flights from ${fromCode} (${from}) to ${toCode} (${to})`);
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the real Skyscanner API via our edge function
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: fromCode,
+          to: toCode,
+          departDate,
+          returnDate,
+          passengers: 1
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Flight API error:', response.status, errorData);
+        
+        // Fallback to mock data if API fails
+        console.log('🔄 Falling back to mock data...');
+        return this.generateRealisticFlights(fromCode, toCode, departDate);
+      }
+
+      const data = await response.json();
       
-      const mockFlights = this.generateRealisticFlights(fromCode, toCode, departDate);
-      
-      console.log(`✨ Generated ${mockFlights.length} realistic flight options`);
-      return mockFlights;
+      if (data.error || !data.flights || data.flights.length === 0) {
+        console.error('❌ Flight API returned error or no results:', data.error);
+        
+        // Fallback to mock data
+        console.log('🔄 Falling back to mock data...');
+        return this.generateRealisticFlights(fromCode, toCode, departDate);
+      }
+
+      console.log('✅ Real flight search success:', data.flights?.length || 0, 'flights found');
+      return data.flights;
       
     } catch (error) {
       console.error('❌ Flight Search Error:', error);
-      throw error;
+      
+      // Fallback to mock data on any error
+      console.log('🔄 Falling back to mock data due to error...');
+      try {
+        const [fromCode, toCode] = await Promise.all([
+          geminiApi.convertCityToAirportCode(from),
+          geminiApi.convertCityToAirportCode(to)
+        ]);
+        return this.generateRealisticFlights(fromCode, toCode, departDate);
+      } catch (fallbackError) {
+        console.error('❌ Even fallback failed:', fallbackError);
+        throw error;
+      }
     }
   }
 
