@@ -24,6 +24,7 @@ import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import FlightBooking from './pages/FlightBooking';
 import HotelBooking from './pages/HotelBooking';
+import HotelSearchResults from './pages/HotelSearchResults';
 
 import PackageExplorer from './pages/PackageExplorer';
 import PlanTrip from './pages/PlanTrip';
@@ -42,7 +43,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/search-flights" element={<FlightSearchResults />} />
-                <Route path="/search-hotels" element={<HotelBooking />} />
+                <Route path="/search-hotels" element={<HotelSearchResults />} />
                 <Route path="/booking" element={<BookingDetails />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
