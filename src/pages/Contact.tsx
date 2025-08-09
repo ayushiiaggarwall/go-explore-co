@@ -181,7 +181,7 @@ export default function Contact() {
                     onChange={handleInputChange}
                     error={errors.name}
                     required
-                    className="w-11/12 mx-auto"
+                    className="w-3/4 mx-auto"
                   />
                   <Input
                     label="Email Address"
@@ -191,7 +191,7 @@ export default function Contact() {
                     onChange={handleInputChange}
                     error={errors.email}
                     required
-                    className="w-11/12 mx-auto"
+                    className="w-3/4 mx-auto"
                   />
                 </div>
 
@@ -203,9 +203,9 @@ export default function Contact() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     error={errors.phone}
-                    className="w-11/12 mx-auto"
+                    className="w-3/4 mx-auto"
                   />
-                  <div className="w-11/12 mx-auto">
+                  <div className="w-3/4 mx-auto">
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Subject
                     </label>
@@ -230,7 +230,7 @@ export default function Contact() {
                   </div>
                 </div>
 
-                <div className="w-11/12 mx-auto">
+                <div className="w-3/4 mx-auto">
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Message
                   </label>
