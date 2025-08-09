@@ -3,6 +3,8 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { MapPin, Star, ExternalLink, ArrowLeft, Building2 } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useBookings } from '../hooks/useBookings';
+import { toast } from 'sonner';
 
 interface TripAdvisorHotel {
   id: string;
@@ -39,6 +41,7 @@ export default function HotelSearchResults() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const searchExecutedRef = useRef(false);
+  const { bookHotel } = useBookings();
 
   // Get search parameters
   const destination = searchParams.get('destination');
@@ -315,7 +318,43 @@ export default function HotelSearchResults() {
                             )}
                             
                             <button 
-                              onClick={() => window.open(hotel.url, '_blank')}
+                              onClick={async () => {
+                                try {
+                                  // Calculate booking details
+                                  const checkInDate = checkIn || new Date().toISOString().split('T')[0];
+                                  const checkOutDate = checkOut || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                                  const guestCount = guests ? parseInt(guests) : 2;
+                                  const nights = Math.max(1, Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24)));
+                                  const pricePerNight = hotel.priceFrom || 100;
+                                  const totalPrice = pricePerNight * nights;
+                                  
+                                  const success = await bookHotel({
+                                    hotel_name: hotel.name,
+                                    hotel_address: hotel.address || hotel.location || 'N/A',
+                                    city: hotel.location?.split(',')[0] || destination || 'N/A',
+                                    check_in_date: checkInDate,
+                                    check_out_date: checkOutDate,
+                                    room_type: 'Standard Room',
+                                    price_per_night: pricePerNight,
+                                    total_price: totalPrice,
+                                    guest_count: guestCount,
+                                    rating: hotel.rating || null
+                                  });
+
+                                  if (success) {
+                                    toast.success('Hotel saved to your bookings!');
+                                    // Open TripAdvisor
+                                    if (hotel.url) {
+                                      window.open(hotel.url, '_blank');
+                                    }
+                                  } else {
+                                    toast.error('Failed to save booking. Please try again.');
+                                  }
+                                } catch (error) {
+                                  console.error('Booking error:', error);
+                                  toast.error('Failed to save booking. Please try again.');
+                                }
+                              }}
                               className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                             >
                               View on TripAdvisor

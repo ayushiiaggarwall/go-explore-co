@@ -196,12 +196,62 @@ export function useBookings() {
     loadBookings();
   }, [user]);
 
+  const deleteFlight = async (flightId: string) => {
+    if (!user) {
+      toast.error('Please log in to delete bookings');
+      return false;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('flight_bookings')
+        .delete()
+        .eq('id', flightId);
+
+      if (error) throw error;
+
+      toast.success('Flight booking deleted successfully!');
+      loadBookings(); // Refresh bookings
+      return true;
+    } catch (error) {
+      console.error('Error deleting flight:', error);
+      toast.error('Failed to delete flight booking');
+      return false;
+    }
+  };
+
+  const deleteHotel = async (hotelId: string) => {
+    if (!user) {
+      toast.error('Please log in to delete bookings');
+      return false;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('hotel_bookings')
+        .delete()
+        .eq('id', hotelId);
+
+      if (error) throw error;
+
+      toast.success('Hotel booking deleted successfully!');
+      loadBookings(); // Refresh bookings
+      return true;
+    } catch (error) {
+      console.error('Error deleting hotel:', error);
+      toast.error('Failed to delete hotel booking');
+      return false;
+    }
+  };
+
   return {
     flightBookings,
     hotelBookings,
     loading,
     bookFlight,
     bookHotel,
+    deleteFlight,
+    deleteHotel,
     loadBookings,
     cleanTimeFormat // Export the utility function
   };

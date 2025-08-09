@@ -24,7 +24,7 @@ interface TripPlan {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
-  const { flightBookings, hotelBookings, loading: bookingsLoading } = useBookings();
+  const { flightBookings, hotelBookings, loading: bookingsLoading, deleteFlight, deleteHotel } = useBookings();
   const [tripPlans, setTripPlans] = useState<TripPlan[]>([]);
   const [activeTab, setActiveTab] = useState<'bookings' | 'trips'>('bookings');
 
@@ -113,8 +113,19 @@ export default function Dashboard() {
         </div>
 
         <div className="border-t pt-4">
-          <div className="text-sm text-muted-foreground">
-            Booked: {formatDate(booking.created_at)}
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-muted-foreground">
+              Booked: {formatDate(booking.created_at)}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => deleteFlight(booking.id)}
+              className="text-red-600 border-red-300 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Delete
+            </Button>
           </div>
         </div>
       </div>
@@ -169,13 +180,22 @@ export default function Dashboard() {
             <div className="text-sm text-muted-foreground">
               <div>Booked: {formatDate(booking.created_at)}</div>
               <div>{formatPrice(booking.price_per_night)}/night</div>
+              {booking.rating && (
+                <div className="flex items-center mt-1">
+                  <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                  <span className="text-sm">{booking.rating} stars</span>
+                </div>
+              )}
             </div>
-            {booking.rating && (
-              <div className="flex items-center">
-                <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                <span className="text-sm">{booking.rating} stars</span>
-              </div>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => deleteHotel(booking.id)}
+              className="text-red-600 border-red-300 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Delete
+            </Button>
           </div>
         </div>
       </div>

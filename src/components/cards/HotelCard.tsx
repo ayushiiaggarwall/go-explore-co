@@ -3,13 +3,19 @@ import { Hotel } from '../../types';
 import { formatPrice } from '../../utils/validation';
 import { useBookings } from '../../hooks/useBookings';
 import Button from '../ui/Button';
+import { toast } from 'sonner';
 
 interface HotelCardProps {
   hotel: Hotel;
   onBook?: (hotel: Hotel) => void;
+  searchParams?: {
+    checkIn?: string;
+    checkOut?: string;
+    guests?: string;
+  };
 }
 
-export default function HotelCard({ hotel, onBook }: HotelCardProps) {
+export default function HotelCard({ hotel, onBook, searchParams }: HotelCardProps) {
   const { bookHotel } = useBookings();
 
   const handleBookHotel = async () => {
@@ -18,22 +24,43 @@ export default function HotelCard({ hotel, onBook }: HotelCardProps) {
       return;
     }
 
-    // Calculate total price for a standard 2-night stay
-    const nights = 2;
-    const totalPrice = hotel.pricePerNight * nights;
+    try {
+      // Use search params if available, otherwise use defaults
+      const checkInDate = searchParams?.checkIn || new Date().toISOString().split('T')[0];
+      const checkOutDate = searchParams?.checkOut || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const guestCount = searchParams?.guests ? parseInt(searchParams.guests) : 2;
+      
+      // Calculate nights between dates
+      const nights = Math.max(1, Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24)));
+      const totalPrice = hotel.pricePerNight * nights;
 
-    await bookHotel({
-      hotel_name: hotel.name,
-      hotel_address: hotel.location,
-      city: hotel.location.split(',')[0] || hotel.location,
-      check_in_date: new Date().toISOString().split('T')[0],
-      check_out_date: new Date(Date.now() + nights * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      room_type: 'Standard Room',
-      price_per_night: hotel.pricePerNight,
-      total_price: totalPrice,
-      guest_count: 2,
-      rating: hotel.rating
-    });
+      const success = await bookHotel({
+        hotel_name: hotel.name,
+        hotel_address: hotel.location,
+        city: hotel.location.split(',')[0] || hotel.location,
+        check_in_date: checkInDate,
+        check_out_date: checkOutDate,
+        room_type: 'Standard Room',
+        price_per_night: hotel.pricePerNight,
+        total_price: totalPrice,
+        guest_count: guestCount,
+        rating: hotel.rating
+      });
+
+      if (success) {
+        toast.success('Hotel saved to your bookings!');
+        
+        // Create a simple TripAdvisor search URL
+        const searchQuery = encodeURIComponent(`${hotel.name} ${hotel.location}`);
+        const tripadvisorUrl = `https://www.tripadvisor.com/Search?q=${searchQuery}`;
+        window.open(tripadvisorUrl, '_blank');
+      } else {
+        toast.error('Failed to save booking. Please try again.');
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast.error('Failed to save booking. Please try again.');
+    }
   };
   return (
     <div className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-border">
@@ -87,7 +114,7 @@ export default function HotelCard({ hotel, onBook }: HotelCardProps) {
           className="w-full"
           size="lg"
         >
-          Book Now
+          View on TripAdvisor
         </Button>
       </div>
     </div>
