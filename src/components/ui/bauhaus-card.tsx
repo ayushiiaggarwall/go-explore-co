@@ -21,14 +21,6 @@ const BAUHAUS_CARD_STYLES = `
   background-clip: padding-box, border-box;
   color: var(--card-text-main, #f0f0f1);
   padding: 2rem;
-  transition: all 0.3s ease-in-out;
-}
-.bauhaus-card:hover {
-  box-shadow: 
-    1px 12px 25px rgb(0,0,0/78%),
-    0 0 30px hsl(var(--primary) / 0.3),
-    inset 0 0 20px hsl(var(--primary) / 0.1);
-  transform: translateY(-2px);
 }
 .bauhaus-card::before {
   position: absolute;
