@@ -118,11 +118,11 @@ serve(async (req) => {
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
     console.log(`🏨 Searching for ${nights} nights`);
 
-    // 🏨 IMPORTANT: Use correct TripAdvisor actor for HOTELS
-    const ACTOR_ID = 'maxcopell/tripadvisor';
+    // 🏨 CORRECT TripAdvisor actor ID for HOTELS
+    const ACTOR_ID = 'curious_coder/tripadvisor-scraper';
     const APIFY_API_TOKEN = Deno.env.get('APIFY_API_TOKEN');
     
-    console.log('🏨 Using TripAdvisor actor:', ACTOR_ID);
+    console.log('🏨 Using correct TripAdvisor actor:', ACTOR_ID);
 
     if (!APIFY_API_TOKEN) {
       console.error('❌ Missing APIFY_API_TOKEN');
@@ -135,17 +135,17 @@ serve(async (req) => {
       });
     }
 
+    // Simplified input for the TripAdvisor scraper - just search by location name
     const apifyInput = {
       searchTerm: destination,
-      contentType: "hotels",
-      checkInDate: checkInDate,
-      checkOutDate: checkOutDate,
-      maxItems: 20,
-      language: "en",
-      currency: "USD"
+      maxResults: 20,
+      extractDetails: false,
+      includeAmenities: true,
+      includePricing: true,
+      includeReviews: false
     };
 
-    console.log('🚀 Calling TripAdvisor actor:', apifyInput);
+    console.log('🏨 TripAdvisor scraper input:', apifyInput);
 
     // Start Apify actor run
     const runResponse = await fetch(
