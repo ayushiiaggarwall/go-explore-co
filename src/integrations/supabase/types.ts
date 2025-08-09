@@ -44,6 +44,111 @@ export type Database = {
         }
         Relationships: []
       }
+      flight_bookings: {
+        Row: {
+          airline: string
+          arrival_city: string
+          arrival_time: string
+          booking_status: string
+          created_at: string
+          departure_city: string
+          departure_date: string
+          departure_time: string
+          flight_number: string
+          id: string
+          passenger_count: number
+          price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          airline: string
+          arrival_city: string
+          arrival_time: string
+          booking_status?: string
+          created_at?: string
+          departure_city: string
+          departure_date: string
+          departure_time: string
+          flight_number: string
+          id?: string
+          passenger_count?: number
+          price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          airline?: string
+          arrival_city?: string
+          arrival_time?: string
+          booking_status?: string
+          created_at?: string
+          departure_city?: string
+          departure_date?: string
+          departure_time?: string
+          flight_number?: string
+          id?: string
+          passenger_count?: number
+          price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      hotel_bookings: {
+        Row: {
+          booking_status: string
+          check_in_date: string
+          check_out_date: string
+          city: string
+          created_at: string
+          guest_count: number
+          hotel_address: string
+          hotel_name: string
+          id: string
+          price_per_night: number
+          rating: number | null
+          room_type: string
+          total_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_status?: string
+          check_in_date: string
+          check_out_date: string
+          city: string
+          created_at?: string
+          guest_count?: number
+          hotel_address: string
+          hotel_name: string
+          id?: string
+          price_per_night: number
+          rating?: number | null
+          room_type: string
+          total_price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_status?: string
+          check_in_date?: string
+          check_out_date?: string
+          city?: string
+          created_at?: string
+          guest_count?: number
+          hotel_address?: string
+          hotel_name?: string
+          id?: string
+          price_per_night?: number
+          rating?: number | null
+          room_type?: string
+          total_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

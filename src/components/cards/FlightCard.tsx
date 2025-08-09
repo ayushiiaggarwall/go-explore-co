@@ -1,14 +1,35 @@
 import { Plane, Clock } from 'lucide-react';
 import { Flight } from '../../types';
 import { formatPrice } from '../../utils/validation';
+import { useBookings } from '../../hooks/useBookings';
 import Button from '../ui/Button';
 
 interface FlightCardProps {
   flight: Flight;
-  onBook: (flight: Flight) => void;
+  onBook?: (flight: Flight) => void;
 }
 
 export default function FlightCard({ flight, onBook }: FlightCardProps) {
+  const { bookFlight } = useBookings();
+
+  const handleBookFlight = async () => {
+    if (onBook) {
+      onBook(flight);
+      return;
+    }
+
+    await bookFlight({
+      flight_number: flight.flightNumber,
+      airline: flight.airline,
+      departure_city: flight.departure.city,
+      arrival_city: flight.arrival.city,
+      departure_date: flight.departure.date,
+      departure_time: flight.departure.time,
+      arrival_time: flight.arrival.time,
+      price: flight.price,
+      passenger_count: 1
+    });
+  };
   return (
     <div className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-border">
       <div className="p-6">
@@ -54,11 +75,11 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
         </div>
 
         <Button
-          onClick={() => onBook(flight)}
+          onClick={handleBookFlight}
           className="w-full"
           size="lg"
         >
-          Select Flight
+          {onBook ? 'Select Flight' : 'Book Now'}
         </Button>
       </div>
     </div>

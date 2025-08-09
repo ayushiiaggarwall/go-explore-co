@@ -50,6 +50,7 @@ export const mockHotels: Hotel[] = [
 export const mockFlights: Flight[] = [
   {
     id: '1',
+    flightNumber: 'AF007',
     airline: 'Air France',
     departure: {
       airport: 'JFK',
@@ -69,6 +70,7 @@ export const mockFlights: Flight[] = [
   },
   {
     id: '2',
+    flightNumber: 'JL061',
     airline: 'Japan Airlines',
     departure: {
       airport: 'LAX',
@@ -88,6 +90,7 @@ export const mockFlights: Flight[] = [
   },
   {
     id: '3',
+    flightNumber: 'SQ117',
     airline: 'Singapore Airlines',
     departure: {
       airport: 'SIN',

@@ -170,6 +170,7 @@ export default function SearchResults() {
   const convertApiFlightsToFlights = (apiFlights: SkyscannerFlight[]): Flight[] => {
     return apiFlights.map((flight, index) => ({
       id: `sky-${index}`,
+      flightNumber: `${flight.airline.slice(0,2).toUpperCase()}${Math.floor(Math.random() * 999) + 100}`,
       airline: flight.airline,
       departure: {
         airport: flight.departure.airport,

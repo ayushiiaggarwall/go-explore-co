@@ -1,14 +1,40 @@
 import { Star, MapPin, Wifi } from 'lucide-react';
 import { Hotel } from '../../types';
 import { formatPrice } from '../../utils/validation';
+import { useBookings } from '../../hooks/useBookings';
 import Button from '../ui/Button';
 
 interface HotelCardProps {
   hotel: Hotel;
-  onBook: (hotel: Hotel) => void;
+  onBook?: (hotel: Hotel) => void;
 }
 
 export default function HotelCard({ hotel, onBook }: HotelCardProps) {
+  const { bookHotel } = useBookings();
+
+  const handleBookHotel = async () => {
+    if (onBook) {
+      onBook(hotel);
+      return;
+    }
+
+    // Calculate total price for a standard 2-night stay
+    const nights = 2;
+    const totalPrice = hotel.pricePerNight * nights;
+
+    await bookHotel({
+      hotel_name: hotel.name,
+      hotel_address: hotel.location,
+      city: hotel.location.split(',')[0] || hotel.location,
+      check_in_date: new Date().toISOString().split('T')[0],
+      check_out_date: new Date(Date.now() + nights * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      room_type: 'Standard Room',
+      price_per_night: hotel.pricePerNight,
+      total_price: totalPrice,
+      guest_count: 2,
+      rating: hotel.rating
+    });
+  };
   return (
     <div className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-border">
       <div className="relative">
@@ -57,7 +83,7 @@ export default function HotelCard({ hotel, onBook }: HotelCardProps) {
         </div>
         
         <Button
-          onClick={() => onBook(hotel)}
+          onClick={handleBookHotel}
           className="w-full"
           size="lg"
         >

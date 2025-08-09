@@ -30,6 +30,7 @@ export interface Hotel {
 
 export interface Flight {
   id: string;
+  flightNumber: string;
   airline: string;
   departure: {
     airport: string;
