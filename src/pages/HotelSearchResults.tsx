@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { MapPin, Star, ExternalLink, ArrowLeft, Building2 } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
@@ -38,6 +38,7 @@ export default function HotelSearchResults() {
   const [tripAdvisorResults, setTripAdvisorResults] = useState<TripAdvisorResults | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const searchExecutedRef = useRef(false);
 
   // Get search parameters
   const destination = searchParams.get('destination');
@@ -80,11 +81,15 @@ export default function HotelSearchResults() {
   };
 
   useEffect(() => {
-    if (!destination || !checkIn || !checkOut) {
-      setError('Missing required search parameters');
-      setLoading(false);
+    if (!destination || !checkIn || !checkOut || searchExecutedRef.current) {
+      if (!destination || !checkIn || !checkOut) {
+        setError('Missing required search parameters');
+        setLoading(false);
+      }
       return;
     }
+
+    searchExecutedRef.current = true;
 
     const searchData = {
       destination,
