@@ -222,7 +222,7 @@ export default function About() {
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Filipe Pinto</h3>
-                <p className="text-sky-600 mb-3">Position</p>
+                <p className="text-sky-600 mb-3">Frontend UI</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
                 </p>
