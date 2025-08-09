@@ -1,4 +1,4 @@
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { Plane, Hotel, MapPin, Star, Shield, Clock } from 'lucide-react';
 import PackageCard from '../components/cards/PackageCard';
 import { mockPackages } from '../services/mockData';
@@ -8,7 +8,6 @@ import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 export default function Home() {
   const { user, isLoading } = useAuth();
   const { smoothNavigate } = useSmoothNavigation();
-  const navigate = useNavigate();
 
   // Redirect authenticated users to dashboard
   if (!isLoading && user) {
@@ -16,7 +15,7 @@ export default function Home() {
   }
 
   const handlePackageBook = () => {
-    navigate('/search');
+    smoothNavigate('/search');
   };
 
 
