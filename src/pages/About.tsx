@@ -216,7 +216,7 @@ export default function About() {
 
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
               <img
-                src="/lovable-uploads/b96a7eff-f606-443a-88e3-77b1dfe613a5.png"
+                src="/lovable-uploads/07b5215d-c3dd-4bb4-a367-91d1c1439e33.png"
                 alt="Team Member 6"
                 className="w-full h-80 object-cover"
               />
