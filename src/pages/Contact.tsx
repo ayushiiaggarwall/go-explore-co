@@ -213,7 +213,7 @@ export default function Contact() {
                       name="subject"
                       value={formData.subject}
                       onChange={handleInputChange}
-                      className="block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
+                      className="block w-full rounded-md border-gray-300 dark:border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
                       required
                     >
                       <option value="">Select a subject</option>
@@ -240,7 +240,7 @@ export default function Contact() {
                     value={formData.message}
                     onChange={handleInputChange}
                     placeholder="Tell us how we can help you..."
-                    className="block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
+                    className="block w-full rounded-md border-gray-300 dark:border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
                     required
                   />
                   {errors.message && (
