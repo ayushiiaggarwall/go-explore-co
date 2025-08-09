@@ -2,14 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { validateEmail, validateRequired, validatePassword } from '../utils/validation';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/input';
 import { BauhausCard } from '../components/ui/bauhaus-card';
 
 export default function Register() {
-  const { smoothNavigate } = useSmoothNavigation();
   const { register, isLoading } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -66,7 +64,7 @@ export default function Register() {
     
     if (result.success) {
       // Redirect to email confirmation page
-      smoothNavigate('/email-confirmation');
+      window.location.href = '/email-confirmation';
     } else {
       setErrors({ email: result.error || 'Registration failed. Please try again.' });
     }

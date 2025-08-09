@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, Users, MapPin, Star, CreditCard, Shield } from 'lucide-react';
-import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { Hotel, Flight, Package } from '../types';
 import { formatPrice, validateEmail, validatePhone, validateRequired } from '../utils/validation';
 import { useAuth } from '../hooks/useAuth';
@@ -10,7 +9,7 @@ import Input from '../components/ui/input';
 
 export default function BookingDetails() {
   const location = useLocation();
-  const { smoothNavigate } = useSmoothNavigation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   
   const { type, item, searchParams } = location.state || {};
@@ -32,7 +31,7 @@ export default function BookingDetails() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   if (!type || !item) {
-    smoothNavigate('/');
+    navigate('/');
     return null;
   }
 
@@ -108,7 +107,7 @@ export default function BookingDetails() {
     existingBookings.push(booking);
     localStorage.setItem('userBookings', JSON.stringify(existingBookings));
     
-    smoothNavigate('/confirmation', { state: { booking } });
+    navigate('/confirmation', { state: { booking } });
   };
 
   const getTotalPrice = () => {

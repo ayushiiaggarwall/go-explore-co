@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SlidersHorizontal } from 'lucide-react';
-import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { mockHotels, mockFlights, mockPackages } from '../services/mockData';
 import { tripAdvisorApi, TripAdvisorHotel } from '../services/tripAdvisorApi';
 import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
@@ -16,7 +15,7 @@ type SearchType = 'hotels' | 'flights' | 'packages';
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
-  const { smoothNavigate } = useSmoothNavigation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [searchType, setSearchType] = useState<SearchType>('hotels');
   const [apiHotels, setApiHotels] = useState<TripAdvisorHotel[]>([]);
@@ -107,7 +106,7 @@ export default function SearchResults() {
   }, [from, destination, checkIn, checkOut, guests]);
 
   const handleBookHotel = (hotel: Hotel) => {
-    smoothNavigate('/booking', { 
+    navigate('/booking', { 
       state: { 
         type: 'hotel', 
         item: hotel, 
@@ -122,7 +121,7 @@ export default function SearchResults() {
   };
 
   const handleBookFlight = (flight: Flight) => {
-    smoothNavigate('/booking', { 
+    navigate('/booking', { 
       state: { 
         type: 'flight', 
         item: flight, 
@@ -137,7 +136,7 @@ export default function SearchResults() {
   };
 
   const handleBookPackage = (pkg: Package) => {
-    smoothNavigate('/booking', { 
+    navigate('/booking', { 
       state: { 
         type: 'package', 
         item: pkg, 
@@ -325,7 +324,6 @@ export default function SearchResults() {
                     </label>
                     <div className="space-y-2">
                       <Input
-                        className="w-full"
                         type="range"
                         min="0"
                         max="1000"

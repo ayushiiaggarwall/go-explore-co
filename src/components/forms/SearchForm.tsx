@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Calendar, Users } from 'lucide-react';
-import { useSmoothNavigation } from '../../hooks/useSmoothNavigation';
 import Input from '../ui/input';
 import Button from '../ui/Button';
 import { searchCities } from '../../data/cities';
@@ -10,7 +10,7 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({ className = '' }: SearchFormProps) {
-  const { smoothNavigate } = useSmoothNavigation();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     from: '',
     destination: '',
@@ -55,7 +55,7 @@ export default function SearchForm({ className = '' }: SearchFormProps) {
       rooms: formData.rooms.toString()
     });
     
-    smoothNavigate(`/search?${searchParams.toString()}`);
+    navigate(`/search?${searchParams.toString()}`);
   };
 
   // Get today's date in YYYY-MM-DD format

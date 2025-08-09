@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Calendar, Users, Plane } from 'lucide-react';
-import { useSmoothNavigation } from '../../hooks/useSmoothNavigation';
 import Input from '../ui/input';
 import Button from '../ui/Button';
 import { searchCities } from '../../data/cities';
@@ -10,7 +10,7 @@ interface FlightSearchPanelProps {
 }
 
 export default function FlightSearchPanel({ className = '' }: FlightSearchPanelProps) {
-  const { smoothNavigate } = useSmoothNavigation();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     from: '',
     destination: '',
@@ -56,7 +56,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
       tripType: formData.tripType
     });
     
-    smoothNavigate(`/search?${searchParams.toString()}`);
+    navigate(`/search?${searchParams.toString()}`);
   };
 
   const today = new Date().toISOString().split('T')[0];

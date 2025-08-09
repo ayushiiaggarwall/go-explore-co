@@ -1,22 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Calendar, MapPin, Star, Phone, Mail, User, Trash2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { Booking } from '../types';
 import { formatPrice, formatDate } from '../utils/validation';
 import Button from '../components/ui/Button';
 
 export default function Dashboard() {
-  const { smoothNavigate } = useSmoothNavigation();
   const { user, isLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [activeTab, setActiveTab] = useState<'bookings'>('bookings');
 
   useEffect(() => {
     if (!isLoading && !user) {
-      smoothNavigate('/');
+      window.location.href = '/';
     }
-  }, [user, isLoading, smoothNavigate]);
+  }, [user, isLoading]);
 
   useEffect(() => {
     // Load bookings from localStorage
@@ -186,7 +184,7 @@ export default function Dashboard() {
               <p className="text-muted-foreground mb-6">
                 Start exploring and book your first trip with TravelEase.
               </p>
-              <Button onClick={() => smoothNavigate('/search')}>
+              <Button onClick={() => window.location.href = '/search'}>
                 Start Booking
               </Button>
             </div>

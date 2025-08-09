@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { validateEmail, validateRequired } from '../utils/validation';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/input';
 import { BauhausCard } from '../components/ui/bauhaus-card';
 
 export default function Login() {
-  const { smoothNavigate } = useSmoothNavigation();
+  const navigate = useNavigate();
   const location = useLocation();
   const { login, isLoading } = useAuth();
   
@@ -57,7 +56,7 @@ export default function Login() {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      smoothNavigate(from, { replace: true });
+      navigate(from, { replace: true });
     } else {
       setErrors({ email: result.error || 'Invalid email or password' });
     }

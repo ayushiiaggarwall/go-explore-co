@@ -1,10 +1,10 @@
-import { useNavigate, NavigateOptions } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
 
 export const useSmoothNavigation = () => {
   const navigate = useNavigate();
 
-  const smoothNavigate = useCallback((path: string, options?: NavigateOptions) => {
+  const smoothNavigate = useCallback((path: string, options?: { replace?: boolean }) => {
     // Zoom out to a tiny dot
     document.body.style.opacity = '0.3';
     document.body.style.transform = 'scale(0.05)';

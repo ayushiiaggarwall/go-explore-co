@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Calendar, Users } from 'lucide-react';
-import { useSmoothNavigation } from '../../hooks/useSmoothNavigation';
 import Input from '../ui/input';
 import Button from '../ui/Button';
 import { searchCities } from '../../data/cities';
@@ -10,7 +10,7 @@ interface HotelSearchPanelProps {
 }
 
 export default function HotelSearchPanel({ className = '' }: HotelSearchPanelProps) {
-  const { smoothNavigate } = useSmoothNavigation();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     destination: '',
     checkIn: '',
@@ -48,7 +48,7 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
       rooms: formData.rooms.toString()
     });
     
-    smoothNavigate(`/search?${searchParams.toString()}`);
+    navigate(`/search?${searchParams.toString()}`);
   };
 
   const today = new Date().toISOString().split('T')[0];
