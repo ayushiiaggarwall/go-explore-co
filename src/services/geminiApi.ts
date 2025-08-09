@@ -9,22 +9,13 @@ interface GeminiResponse {
 }
 
 class GeminiApiService {
-  private apiKey: string;
-  private baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+  private supabaseUrl = 'https://ioifldpjlfotqvtaidem.supabase.co';
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-    if (!this.apiKey) {
-      console.warn('Gemini API key not found. Please set VITE_GEMINI_API_KEY in your .env file');
-    }
+    // No longer need API key here - handled by Supabase Edge Function
   }
 
   async convertCityToAirportCode(cityName: string): Promise<string> {
-    if (!this.apiKey) {
-      console.warn('Gemini API key not configured, using fallback');
-      return this.fallbackCityToAirport(cityName);
-    }
-
     try {
       console.log(`🤖 Gemini: Converting "${cityName}" to airport code`);
       
@@ -40,46 +31,47 @@ Rules:
 City: ${cityName}
 Airport Code:`;
 
-      const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.statusText}`);
-      }
-
-      const data: GeminiResponse = await response.json();
-      const airportCode = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim().toUpperCase();
+      const result = await this.makeGeminiRequest(prompt);
+      const airportCode = result.trim().toUpperCase().substring(0, 3);
       
-      if (airportCode && /^[A-Z]{3}$/.test(airportCode) && airportCode !== 'UNK') {
-        console.log(`✅ Gemini: "${cityName}" -> ${airportCode}`);
-        return airportCode;
-      } else {
-        console.warn(`⚠️ Gemini returned invalid code: ${airportCode}, using fallback`);
-        return this.fallbackCityToAirport(cityName);
-      }
+      console.log(`✅ Converted "${cityName}" to airport code: ${airportCode}`);
+      return airportCode || this.fallbackCityToAirport(cityName);
     } catch (error) {
       console.error('❌ Gemini API Error:', error);
       return this.fallbackCityToAirport(cityName);
     }
   }
 
-  async getBookMovieRecommendations(destination: string): Promise<{ books: any[], movies: any[] }> {
-    if (!this.apiKey) {
-      console.warn('Gemini API key not configured, using fallback recommendations');
-      return this.getFallbackRecommendations(destination);
+  async convertMultipleCitiesToAirportCodes(cities: string[]): Promise<{ [city: string]: string }> {
+    console.log(`🤖 Gemini: Converting ${cities.length} cities to airport codes`);
+    
+    const results: { [city: string]: string } = {};
+    
+    // Process cities in parallel with a limit to avoid rate limiting
+    const promises = cities.map(city => 
+      this.convertCityToAirportCode(city)
+        .then(code => ({ city, code }))
+    );
+    
+    try {
+      const resolved = await Promise.all(promises);
+      resolved.forEach(({ city, code }) => {
+        results[city] = code;
+      });
+      
+      console.log('✅ Gemini: Batch conversion completed', results);
+      return results;
+    } catch (error) {
+      console.error('❌ Gemini: Batch conversion failed', error);
+      // Fallback for all cities
+      cities.forEach(city => {
+        results[city] = this.fallbackCityToAirport(city);
+      });
+      return results;
     }
+  }
 
+  async getBookMovieRecommendations(destination: string): Promise<{ books: any[], movies: any[] }> {
     try {
       console.log(`📚 Gemini: Getting recommendations for "${destination}"`);
       
@@ -131,11 +123,6 @@ Format as JSON:
   }
 
   async getVisaTips(fromCountry: string, toCountry: string, purposeOfVisit: string): Promise<string> {
-    if (!this.apiKey) {
-      console.warn('Gemini API key not configured, using fallback visa info');
-      return this.getFallbackVisaTips(fromCountry, toCountry, purposeOfVisit);
-    }
-
     try {
       console.log(`🛂 Gemini: Getting visa tips for ${fromCountry} to ${toCountry}`);
       
@@ -161,11 +148,6 @@ Make it practical and helpful for travelers. If no visa is required, explain tha
   }
 
   async generateItinerary(city: string, interests: string[], startDate?: Date, endDate?: Date): Promise<ItineraryData> {
-    if (!this.apiKey) {
-      console.warn('Gemini API key not configured, using fallback itinerary');
-      return this.getFallbackItinerary(city, interests);
-    }
-
     try {
       console.log(`🗺️ Gemini: Generating itinerary for "${city}" with interests:`, interests);
       
@@ -281,11 +263,6 @@ Format as JSON:
   }
 
   async convertCurrency(amount: number, fromCurrency: string, toCurrency: string): Promise<{ convertedAmount: number, exchangeRate: number, additionalInfo: string }> {
-    if (!this.apiKey) {
-      console.warn('Gemini API key not configured, using fallback conversion');
-      return this.getFallbackCurrencyConversion(amount, fromCurrency, toCurrency);
-    }
-
     try {
       console.log(`💱 Gemini: Converting ${amount} ${fromCurrency} to ${toCurrency}`);
       
@@ -323,17 +300,14 @@ Note: Use realistic approximate rates as of early 2025. Explain this is an estim
   }
 
   private async makeGeminiRequest(prompt: string): Promise<string> {
-    const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
+    const response = await fetch(`${this.supabaseUrl}/functions/v1/gemini-api`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }]
+        prompt: prompt,
+        action: 'generate'
       }),
     });
 
@@ -341,14 +315,13 @@ Note: Use realistic approximate rates as of early 2025. Explain this is an estim
       throw new Error(`Gemini API error: ${response.statusText}`);
     }
 
-    const data: GeminiResponse = await response.json();
-    const result = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    const data = await response.json();
     
-    if (!result) {
-      throw new Error('No response from Gemini API');
+    if (!data.success || !data.text) {
+      throw new Error(data.error || 'No response from Gemini API');
     }
     
-    return result;
+    return data.text;
   }
 
   private getFallbackRecommendations(destination: string) {
@@ -668,35 +641,6 @@ For accurate information, visit the official government website of ${toCountry} 
         }
       ]
     };
-  }
-
-  async convertMultipleCitiesToAirportCodes(cities: string[]): Promise<{ [city: string]: string }> {
-    console.log(`🤖 Gemini: Converting ${cities.length} cities to airport codes`);
-    
-    const results: { [city: string]: string } = {};
-    
-    // Process cities in parallel with a limit to avoid rate limiting
-    const promises = cities.map(city => 
-      this.convertCityToAirportCode(city)
-        .then(code => ({ city, code }))
-    );
-    
-    try {
-      const resolved = await Promise.all(promises);
-      resolved.forEach(({ city, code }) => {
-        results[city] = code;
-      });
-      
-      console.log('✅ Gemini: Batch conversion completed', results);
-      return results;
-    } catch (error) {
-      console.error('❌ Gemini: Batch conversion failed', error);
-      // Fallback for all cities
-      cities.forEach(city => {
-        results[city] = this.fallbackCityToAirport(city);
-      });
-      return results;
-    }
   }
 
   private fallbackCityToAirport(cityName: string): string {

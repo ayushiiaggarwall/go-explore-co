@@ -51,3 +51,6 @@ inspector_port = 8083
 
 [functions.search-tripadvisor]
 verify_jwt = false
+
+[functions.gemini-api]
+verify_jwt = false
