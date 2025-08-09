@@ -32,11 +32,11 @@ export default function About() {
                 travel deals, comprehensive options, and 24/7 support for your peace of mind.
               </p>
             </div>
-            <div className="relative">
+            <div className="relative h-full flex items-center">
               <img
                 src="https://images.pexels.com/photos/1020016/pexels-photo-1020016.jpeg?auto=compress&cs=tinysrgb&w=800"
                 alt="Travel planning"
-                className="rounded-lg shadow-lg"
+                className="rounded-lg shadow-lg w-full h-full object-cover max-h-80"
               />
             </div>
           </div>
