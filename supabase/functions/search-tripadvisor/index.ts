@@ -62,22 +62,15 @@ serve(async (req) => {
 
     console.log('🚀 TripAdvisor API: Starting search for hotels in', destination)
 
-    // Prepare the actor input for maxcopell/tripadvisor
+    // Prepare the actor input for maxcopell/tripadvisor with fixed settings
     const actorInput = {
-      searchQuery: `hotels in ${destination}`,
-      locationFullName: destination,
-      language: 'en',
-      currency: 'USD',
-      checkIn: checkInDate || '',
-      checkOut: checkOutDate || '',
-      adults: numberOfPeople || 2,
-      children: 0,
-      rooms: rooms || 1,
-      locationId: '',
-      categories: ['hotels'],
-      offset: 0,
-      limit: maxItems,
-      sort: 'popularity'
+      query: destination,
+      includeHotels: true,
+      includeRestaurants: false,
+      includeAttractions: false,
+      includeVacationRentals: false,
+      includeNearbyResults: false,
+      maxItemsPerQuery: 10
     }
 
     console.log('🏨 Actor input for maxcopell/tripadvisor:', JSON.stringify(actorInput, null, 2))
