@@ -332,7 +332,7 @@ export default function SearchResults() {
                           ...prev,
                           priceRange: [0, parseInt(e.target.value)]
                         }))}
-                        className="w-4/5 mx-auto"
+                        className="w-4/5"
                       />
                       <div className="flex justify-between text-sm text-muted-foreground">
                         <span>$0</span>
