@@ -5,6 +5,7 @@ import {
   RefreshCw, Loader2
 } from 'lucide-react';
 import { geminiApi, ItineraryData, TripFormData } from '../services/geminiApi';
+import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import Button from './ui/Button';
 
 interface ProgressStep {
@@ -28,6 +29,7 @@ const PROGRESS_STEPS = [
 ];
 
 export default function TravelItinerary({ tripData }: TravelItineraryProps) {
+  const { smoothNavigate } = useSmoothNavigation();
   const [itineraryData, setItineraryData] = useState<{ [city: string]: ItineraryData }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [currentProgress, setCurrentProgress] = useState<ProgressStep[]>([]);
@@ -457,7 +459,19 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
                     <p className="text-xs text-muted-foreground mb-2">{hotel.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-green-600 font-medium">{hotel.estimatedPrice}</span>
-                      <Button className="px-3 py-1 text-xs bg-sky-500 hover:bg-sky-600">
+                      <Button 
+                        className="px-3 py-1 text-xs bg-sky-500 hover:bg-sky-600"
+                        onClick={() => {
+                          const searchParams = new URLSearchParams({
+                            destination: selectedCity,
+                            checkIn: tripData.startDate?.toISOString().split('T')[0] || '',
+                            checkOut: tripData.endDate?.toISOString().split('T')[0] || '',
+                            guests: '2',
+                            rooms: '1'
+                          });
+                          smoothNavigate(`/search-hotels?${searchParams.toString()}`);
+                        }}
+                      >
                         Book Now
                       </Button>
                     </div>
@@ -496,7 +510,20 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
                   <span>Regenerate {selectedCity}</span>
                 </Button>
                 
-                <Button className="w-full bg-green-500 hover:bg-green-600 flex items-center justify-center space-x-2">
+                <Button 
+                  className="w-full bg-green-500 hover:bg-green-600 flex items-center justify-center space-x-2"
+                  onClick={() => {
+                    const searchParams = new URLSearchParams({
+                      from: tripData.cities[0] || '',
+                      destination: selectedCity,
+                      departureDate: tripData.startDate?.toISOString().split('T')[0] || '',
+                      returnDate: tripData.endDate?.toISOString().split('T')[0] || '',
+                      passengers: '1',
+                      tripType: 'round-trip'
+                    });
+                    smoothNavigate(`/search-flights?${searchParams.toString()}`);
+                  }}
+                >
                   <Plane className="w-4 h-4" />
                   <span>Find Flights</span>
                 </Button>
