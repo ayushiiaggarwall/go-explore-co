@@ -172,7 +172,7 @@ export default function Contact() {
             <div className="bg-card rounded-lg shadow-md p-8 border border-border">
               <h2 className="text-2xl font-bold text-foreground mb-6">Send us a Message</h2>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-none">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Input
                     label="Full Name"
@@ -210,7 +210,7 @@ export default function Contact() {
                       name="subject"
                       value={formData.subject}
                       onChange={handleInputChange}
-                      className="block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
+                      className="block w-full max-w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-sky-500 focus:ring-sky-500"
                       required
                     >
                       <option value="">Select a subject</option>
