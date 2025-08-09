@@ -9,7 +9,7 @@ import HotelCard from '../components/cards/HotelCard';
 import FlightCard from '../components/cards/FlightCard';
 import PackageCard from '../components/cards/PackageCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import Input from '../components/ui/input';
+import { Slider } from '../components/ui/slider-number-flow';
 
 type SearchType = 'hotels' | 'flights' | 'packages';
 
@@ -323,15 +323,15 @@ export default function SearchResults() {
                       Price Range (per night)
                     </label>
                     <div className="space-y-2">
-                      <Input
-                        type="range"
-                        min="0"
-                        max="1000"
-                        value={filters.priceRange[1]}
-                        onChange={(e) => setFilters(prev => ({
+                      <Slider
+                        value={[filters.priceRange[1]]}
+                        onValueChange={(value) => setFilters(prev => ({
                           ...prev,
-                          priceRange: [0, parseInt(e.target.value)]
+                          priceRange: [0, value[0]]
                         }))}
+                        min={0}
+                        max={1000}
+                        step={1}
                         className="w-1/2"
                       />
                       <div className="flex justify-between text-sm text-muted-foreground">
