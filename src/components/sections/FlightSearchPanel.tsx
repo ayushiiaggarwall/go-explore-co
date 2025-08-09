@@ -57,7 +57,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
       tripType: formData.tripType
     });
     
-    navigate(`/search?${searchParams.toString()}`);
+    navigate(`/search-flights?${searchParams.toString()}`);
   };
 
   

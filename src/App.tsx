@@ -6,6 +6,8 @@ import Footer from './components/common/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import SearchResults from './pages/SearchResults';
+import FlightSearchResults from './pages/FlightSearchResults';
+import HotelSearchResults from './pages/HotelSearchResults';
 import BookingDetails from './pages/BookingDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -39,6 +41,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/search" element={<SearchResults />} />
+                <Route path="/search-flights" element={<FlightSearchResults />} />
+                <Route path="/search-hotels" element={<HotelSearchResults />} />
                 <Route path="/booking" element={<BookingDetails />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
