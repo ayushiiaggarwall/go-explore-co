@@ -93,7 +93,7 @@ export default function Register() {
           backgroundColor="hsl(var(--card))"
           borderRadius="1rem"
         >
-          <form className="space-y-6 w-full" onSubmit={handleSubmit}>
+          <form className="space-y-6 w-full text-black dark:text-foreground" onSubmit={handleSubmit}>
             <Input
               label="Full name"
               name="name"
