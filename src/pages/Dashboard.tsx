@@ -216,6 +216,20 @@ export default function Dashboard() {
     }
   };
 
+  // Combine and sort bookings by upcoming dates
+  const allBookings = [
+    ...flightBookings.map(booking => ({
+      ...booking,
+      type: 'flight' as const,
+      sortDate: new Date(booking.departure_date)
+    })),
+    ...hotelBookings.map(booking => ({
+      ...booking,
+      type: 'hotel' as const,
+      sortDate: new Date(booking.check_in_date)
+    }))
+  ].sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
+
   const totalBookings = flightBookings.length + hotelBookings.length;
 
   if (isLoading || bookingsLoading) {
@@ -282,8 +296,11 @@ export default function Dashboard() {
               </div>
             ) : (
               <div>
-                {flightBookings.map(renderFlightBookingCard)}
-                {hotelBookings.map(renderHotelBookingCard)}
+                {allBookings.map(booking => 
+                  booking.type === 'flight' 
+                    ? renderFlightBookingCard(booking)
+                    : renderHotelBookingCard(booking)
+                )}
               </div>
             )
           ) : (
