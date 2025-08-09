@@ -3,7 +3,12 @@ import { geminiApi } from './geminiApi';
 export interface SkyscannerFlight {
   price: number;
   currency: string;
-  airline: string;
+  airline: {
+    name: string;
+    code: string;
+    logo?: string;
+  };
+  flightNumber: string;
   departure: {
     time: string;
     date: string;
@@ -122,7 +127,16 @@ class SkyscannerApiService {
     toCode: string, 
     departDate: string
   ): SkyscannerFlight[] {
-    const airlines = ['American Airlines', 'Delta', 'United', 'JetBlue', 'Air France', 'Lufthansa', 'British Airways', 'Emirates'];
+    const airlines = [
+      { name: 'American Airlines', code: 'AA' },
+      { name: 'Delta Air Lines', code: 'DL' },
+      { name: 'United Airlines', code: 'UA' },
+      { name: 'JetBlue Airways', code: 'B6' },
+      { name: 'Air France', code: 'AF' },
+      { name: 'Lufthansa', code: 'LH' },
+      { name: 'British Airways', code: 'BA' },
+      { name: 'Emirates', code: 'EK' }
+    ];
     const flights: SkyscannerFlight[] = [];
     
     // Generate 8-12 realistic flight options
@@ -132,6 +146,7 @@ class SkyscannerApiService {
       const airline = airlines[Math.floor(Math.random() * airlines.length)];
       const isDirectFlight = Math.random() > 0.6;
       const stops = isDirectFlight ? 0 : Math.floor(Math.random() * 2) + 1;
+      const flightNum = Math.floor(Math.random() * 9000) + 1000;
       
       // Calculate base price based on route distance (rough estimate)
       const routeMultiplier = this.getRouteMultiplier(fromCode, toCode);
@@ -158,7 +173,12 @@ class SkyscannerApiService {
       flights.push({
         price: finalPrice,
         currency: 'USD',
-        airline,
+        airline: {
+          name: airline.name,
+          code: airline.code,
+          logo: `https://logos.skyscnr.com/images/airlines/favicon/${airline.code}.png`
+        },
+        flightNumber: `${airline.code}${flightNum}`,
         departure: {
           time: departureTime,
           date: departDate,
@@ -173,7 +193,7 @@ class SkyscannerApiService {
         },
         duration,
         stops,
-        bookingUrl: `https://www.google.com/flights#flt=${fromCode}.${toCode}.${departDate.replace(/-/g, '')}`
+        bookingUrl: `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${departDate.replace(/-/g, '')}/?adults=1&cabinclass=economy&rtn=0`
       });
     }
     

@@ -51,7 +51,11 @@ export const mockFlights: Flight[] = [
   {
     id: '1',
     flightNumber: 'AF007',
-    airline: 'Air France',
+    airline: {
+      name: 'Air France',
+      code: 'AF',
+      logo: 'https://logos.skyscnr.com/images/airlines/favicon/AF.png'
+    },
     departure: {
       airport: 'JFK',
       city: 'New York',
@@ -71,7 +75,11 @@ export const mockFlights: Flight[] = [
   {
     id: '2',
     flightNumber: 'JL061',
-    airline: 'Japan Airlines',
+    airline: {
+      name: 'Japan Airlines',
+      code: 'JL',
+      logo: 'https://logos.skyscnr.com/images/airlines/favicon/JL.png'
+    },
     departure: {
       airport: 'LAX',
       city: 'Los Angeles',
@@ -91,7 +99,11 @@ export const mockFlights: Flight[] = [
   {
     id: '3',
     flightNumber: 'SQ117',
-    airline: 'Singapore Airlines',
+    airline: {
+      name: 'Singapore Airlines',
+      code: 'SQ',
+      logo: 'https://logos.skyscnr.com/images/airlines/favicon/SQ.png'
+    },
     departure: {
       airport: 'SIN',
       city: 'Singapore',

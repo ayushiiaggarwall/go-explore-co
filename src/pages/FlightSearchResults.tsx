@@ -30,8 +30,8 @@ export default function FlightSearchResults() {
   const handleBookApiLFlight = async (flight: SkyscannerFlight) => {
     // Save booking to database
     await bookFlight({
-      flight_number: `${flight.airline.slice(0,2).toUpperCase()}${Math.floor(Math.random() * 999) + 100}`,
-      airline: flight.airline,
+      flight_number: flight.flightNumber,
+      airline: typeof flight.airline === 'string' ? flight.airline : flight.airline.name,
       departure_city: flight.departure.city || searchData.from,
       arrival_city: flight.arrival.city || searchData.destination,
       departure_date: flight.departure.date || searchData.departureDate,
@@ -186,36 +186,75 @@ export default function FlightSearchResults() {
                   </div>
                   <div className="grid gap-4">
                     {apiFlights.slice(0, 5).map((flight, index) => (
-                      <div key={index} className="bg-card rounded-lg border border-border p-4 hover:shadow-md transition-shadow">{/* Added hover effect */}
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-4 mb-2">
-                              <span className="font-semibold text-lg">{flight.airline}</span>
-                              <span className="text-sm text-muted-foreground">{flight.stops === 0 ? 'Direct' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}</span>
+                      <div key={index} className="bg-card rounded-lg border border-border p-6 hover:shadow-lg transition-all duration-200">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex items-center space-x-3">
+                            {typeof flight.airline === 'object' && flight.airline.logo ? (
+                              <img 
+                                src={flight.airline.logo} 
+                                alt={flight.airline.name}
+                                className="w-10 h-10 rounded"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                            ) : null}
+                            <div className={`w-10 h-10 bg-primary/10 rounded flex items-center justify-center ${typeof flight.airline === 'object' && flight.airline.logo ? 'hidden' : ''}`}>
+                              <Plane className="w-5 h-5 text-primary" />
                             </div>
-                            <div className="flex items-center gap-4 text-sm">
-                              <div>
-                                <div className="font-medium">{flight.departure.time}</div>
-                                <div className="text-muted-foreground">{flight.departure.airport}</div>
+                            <div>
+                              <div className="font-semibold text-lg text-foreground">
+                                {typeof flight.airline === 'string' ? flight.airline : flight.airline.name}
                               </div>
-                              <div className="text-muted-foreground">→</div>
-                              <div>
-                                <div className="font-medium">{flight.arrival.time}</div>
-                                <div className="text-muted-foreground">{flight.arrival.airport}</div>
+                              <div className="text-sm text-muted-foreground">
+                                Flight {flight.flightNumber}
                               </div>
-                              <div className="text-muted-foreground">({flight.duration})</div>
                             </div>
                           </div>
                           <div className="text-right">
                             <div className="text-2xl font-bold text-primary">${flight.price}</div>
-                            <div className="text-sm text-muted-foreground mb-2">{flight.currency} per person</div>
-                            <button
-                              onClick={() => handleBookApiLFlight(flight)}
-                              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm font-medium transition-colors"
-                            >
-                              Book Now
-                            </button>
+                            <div className="text-sm text-muted-foreground">{flight.currency} per person</div>
                           </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="text-center">
+                            <div className="text-lg font-semibold text-foreground">{flight.departure.time}</div>
+                            <div className="text-sm text-muted-foreground">{flight.departure.airport}</div>
+                            <div className="text-xs text-muted-foreground">{flight.departure.city}</div>
+                          </div>
+                          
+                          <div className="flex-1 px-4">
+                            <div className="flex items-center justify-center space-x-2">
+                              <div className="flex-1 h-px bg-border"></div>
+                              <div className="flex items-center space-x-1 bg-muted px-2 py-1 rounded-full">
+                                <span className="text-xs text-muted-foreground">{flight.duration}</span>
+                              </div>
+                              <div className="flex-1 h-px bg-border"></div>
+                            </div>
+                            <div className="text-center text-xs text-muted-foreground mt-1">
+                              {flight.stops === 0 ? 'Direct' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}
+                            </div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-lg font-semibold text-foreground">{flight.arrival.time}</div>
+                            <div className="text-sm text-muted-foreground">{flight.arrival.airport}</div>
+                            <div className="text-xs text-muted-foreground">{flight.arrival.city}</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <button
+                            onClick={() => handleBookApiLFlight(flight)}
+                            className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium transition-colors"
+                          >
+                            Book on Skyscanner
+                          </button>
+                          <p className="text-xs text-muted-foreground text-center">
+                            Prices for comparison - book on Skyscanner for best rates
+                          </p>
                         </div>
                       </div>
                     ))}

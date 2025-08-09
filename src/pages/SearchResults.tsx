@@ -172,7 +172,7 @@ export default function SearchResults() {
   const convertApiFlightsToFlights = (apiFlights: SkyscannerFlight[]): Flight[] => {
     return apiFlights.map((flight, index) => ({
       id: `sky-${index}`,
-      flightNumber: `${flight.airline.slice(0,2).toUpperCase()}${Math.floor(Math.random() * 999) + 100}`,
+      flightNumber: flight.flightNumber,
       airline: flight.airline,
       departure: {
         airport: flight.departure.airport,
@@ -188,7 +188,8 @@ export default function SearchResults() {
       },
       duration: flight.duration,
       price: flight.price,
-      stops: flight.stops
+      stops: flight.stops,
+      bookingUrl: flight.bookingUrl
     }));
   };
 

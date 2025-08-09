@@ -18,9 +18,10 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
       return;
     }
 
+    // Save booking to database
     await bookFlight({
       flight_number: flight.flightNumber,
-      airline: flight.airline,
+      airline: typeof flight.airline === 'string' ? flight.airline : flight.airline.name,
       departure_city: flight.departure.city,
       arrival_city: flight.arrival.city,
       departure_date: flight.departure.date,
@@ -29,14 +30,37 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
       price: flight.price,
       passenger_count: 1
     });
+
+    // Redirect to Skyscanner
+    if (flight.bookingUrl) {
+      window.open(flight.bookingUrl, '_blank');
+    }
   };
   return (
     <div className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-border">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center space-x-2">
-            <Plane className="w-5 h-5 text-sky-500" />
-            <span className="font-semibold text-foreground">{flight.airline}</span>
+          <div className="flex items-center space-x-3">
+            {typeof flight.airline === 'object' && flight.airline.logo ? (
+              <img 
+                src={flight.airline.logo} 
+                alt={flight.airline.name}
+                className="w-8 h-8 rounded"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <Plane className={`w-5 h-5 text-sky-500 ${typeof flight.airline === 'object' && flight.airline.logo ? 'hidden' : ''}`} />
+            <div>
+              <div className="font-semibold text-foreground">
+                {typeof flight.airline === 'string' ? flight.airline : flight.airline.name}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Flight {flight.flightNumber}
+              </div>
+            </div>
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-foreground">{formatPrice(flight.price)}</div>
@@ -74,13 +98,18 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
           </div>
         </div>
 
-        <Button
-          onClick={handleBookFlight}
-          className="w-full"
-          size="lg"
-        >
-          {onBook ? 'Select Flight' : 'Book Now'}
-        </Button>
+        <div className="space-y-2">
+          <Button
+            onClick={handleBookFlight}
+            className="w-full"
+            size="lg"
+          >
+            {onBook ? 'Select Flight' : 'Book on Skyscanner'}
+          </Button>
+          <p className="text-xs text-muted-foreground text-center">
+            Prices for comparison - book on Skyscanner for best rates
+          </p>
+        </div>
       </div>
     </div>
   );
