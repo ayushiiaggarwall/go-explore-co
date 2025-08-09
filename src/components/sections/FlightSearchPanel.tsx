@@ -18,7 +18,6 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
     passengers: 1
   });
   const [departureDate, setDepartureDate] = useState<Date>();
-  const [returnDate, setReturnDate] = useState<Date>();
   const [showFromDestinations, setShowFromDestinations] = useState(false);
   const [showDestinations, setShowDestinations] = useState(false);
 
@@ -51,7 +50,6 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
       from: formData.from,
       destination: formData.destination,
       departureDate: departureDate.toISOString().split('T')[0],
-      returnDate: returnDate ? returnDate.toISOString().split('T')[0] : '',
       passengers: formData.passengers.toString()
     });
     
@@ -144,15 +142,6 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
             onSelect={setDepartureDate}
             placeholder="Select departure date"
             required
-          />
-
-          {/* Return Date */}
-          <SimpleDatePicker
-            label="Return"
-            date={returnDate}
-            onSelect={setReturnDate}
-            placeholder="Select return date"
-            disabled={!departureDate}
           />
         </div>
 
