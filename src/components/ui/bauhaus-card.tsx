@@ -12,7 +12,7 @@ const BAUHAUS_CARD_STYLES = `
   text-align: center;
   box-shadow: 1px 12px 25px rgb(0,0,0/78%);
   border-radius: var(--card-radius, 20px);
-  border: var(--card-border-width, 2px) solid transparent;
+  border: var(--card-border-width, 2px) solid black;
   --rotation: 4.2rad;
   background-image:
     linear-gradient(var(--card-bg, #151419), var(--card-bg, #151419)),
