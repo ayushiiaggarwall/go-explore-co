@@ -256,7 +256,7 @@ export default function Dashboard() {
                 <p className="text-muted-foreground mb-6">
                   Start exploring and book your first trip with TravelEase.
                 </p>
-                <Button onClick={() => window.location.href = '/search'}>
+                <Button onClick={() => window.location.href = '/book-flight'}>
                   Start Booking
                 </Button>
               </div>
