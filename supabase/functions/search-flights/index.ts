@@ -65,15 +65,14 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        origin: from,
-        destination: to,
-        departureDate: departDate,
-        returnDate: returnDate || undefined,
-        adults: passengers || 1,
-        children: 0,
-        infants: 0,
-        currency: 'USD',
-        locale: 'en-US'
+        "origin.0": from,
+        "target.0": to,
+        "depart.0": departDate,
+        ...(returnDate ? { 
+          "origin.1": to, 
+          "target.1": from, 
+          "depart.1": returnDate 
+        } : {})
       })
     });
 
