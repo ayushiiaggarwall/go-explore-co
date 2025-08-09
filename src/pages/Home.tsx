@@ -15,6 +15,7 @@ export default function Home() {
 
   const handlePackageBook = () => {
     navigate('/search');
+    window.scrollTo(0, 0);
   };
 
   return (
