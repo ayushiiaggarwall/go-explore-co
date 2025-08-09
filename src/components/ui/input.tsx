@@ -12,7 +12,7 @@ export interface InputProps
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, label, error, icon, ...props }, ref) => {
     return (
-      <div className="space-y-2 flex flex-col items-center w-full border border-black rounded-md p-4">
+      <div className="space-y-2 flex flex-col items-center w-full">
         {label && (
           <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {label}
