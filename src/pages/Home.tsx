@@ -14,8 +14,15 @@ export default function Home() {
   }
 
   const handlePackageBook = () => {
-    navigate('/search');
-    window.scrollTo(0, 0);
+    // Add smooth transition effect
+    document.body.style.opacity = '0.8';
+    document.body.style.transition = 'opacity 0.2s ease-out';
+    
+    setTimeout(() => {
+      navigate('/search');
+      window.scrollTo(0, 0);
+      document.body.style.opacity = '1';
+    }, 200);
   };
 
   return (
