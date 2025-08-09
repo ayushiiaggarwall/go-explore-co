@@ -49,11 +49,12 @@ class SkyscannerApiService {
       
       console.log(`🌍 Searching real flights from ${fromCode} (${from}) to ${toCode} (${to})`);
       
-      // Call the real Skyscanner API via our edge function
+      // Call the Google Flights API via our edge function
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || ''}`,
         },
         body: JSON.stringify({
           from: fromCode,
