@@ -15,6 +15,31 @@ export default function PackageCard({ package: pkg, onBook }: PackageCardProps) 
   const savingsPercent = Math.round((savings / pkg.originalPrice) * 100);
   const { actualTheme } = useTheme();
 
+  const handleBookPackage = () => {
+    // Apply smooth transition effect
+    document.body.style.opacity = '0.3';
+    document.body.style.transform = 'scale(0.05)';
+    document.body.style.filter = 'blur(3px)';
+    document.body.style.transition = 'opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    
+    setTimeout(() => {
+      onBook(pkg);
+      
+      // Start the new page as a tiny dot
+      document.body.style.opacity = '0.4';
+      document.body.style.transform = 'scale(0.05)';
+      document.body.style.filter = 'blur(3px)';
+      
+      // Zoom in from dot to full page
+      setTimeout(() => {
+        document.body.style.opacity = '1';
+        document.body.style.transform = 'scale(1)';
+        document.body.style.filter = 'blur(0)';
+        document.body.style.transition = 'opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      }, 150);
+    }, 800);
+  };
+
   // Check if this package should have the glare effect
   const hasGlareEffect = false;
   
@@ -86,7 +111,7 @@ export default function PackageCard({ package: pkg, onBook }: PackageCardProps) 
         </div>
         
         <Button
-          onClick={() => onBook(pkg)}
+          onClick={handleBookPackage}
           className="w-full transition-transform duration-200 hover:scale-105"
           size="lg"
         >
