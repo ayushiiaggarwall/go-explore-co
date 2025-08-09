@@ -332,6 +332,7 @@ export default function SearchResults() {
                           ...prev,
                           priceRange: [0, parseInt(e.target.value)]
                         }))}
+                        className="w-full"
                       />
                       <div className="flex justify-between text-sm text-muted-foreground">
                         <span>$0</span>
