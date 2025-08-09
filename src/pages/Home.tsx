@@ -55,7 +55,7 @@ export default function Home() {
 
             {/* Flights Button */}
             <Link 
-              to="/flight-booking" 
+              to="/book-flight" 
               className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-sky-500/20"></div>
