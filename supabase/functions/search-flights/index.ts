@@ -121,12 +121,19 @@ serve(async (req) => {
     function cleanTimeFormat(timeString: string): string {
       if (!timeString) return '00:00';
       
-      // Handle different time formats
       try {
+        // Handle different time formats
         // If it's already in HH:MM format
         if (/^\d{1,2}:\d{2}$/.test(timeString)) {
           const [hours, minutes] = timeString.split(':');
           return `${hours.padStart(2, '0')}:${minutes}`;
+        }
+        
+        // Handle corrupted time like "19:23.04206639745962" or "22:3.606127428290847"
+        const corruptedTimeMatch = timeString.match(/^(\d{1,2}):(\d{1,2})[\.\d]*$/);
+        if (corruptedTimeMatch) {
+          const [, hours, minutes] = corruptedTimeMatch;
+          return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
         }
         
         // If it's ISO string or complex format
@@ -141,15 +148,17 @@ serve(async (req) => {
           }
         }
         
-        // Handle corrupted time like "22:3.606127428290847"
-        const match = timeString.match(/^(\d{1,2}):(\d{1,2})/);
-        if (match) {
-          const [, hours, minutes] = match;
+        // Handle simple time with extra decimals - extract only hours and minutes
+        const timeMatch = timeString.match(/^(\d{1,2})[:.](\d{1,2})/);
+        if (timeMatch) {
+          const [, hours, minutes] = timeMatch;
           return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
         }
         
+        console.warn('Could not parse time format:', timeString);
         return '00:00';
-      } catch {
+      } catch (error) {
+        console.warn('Error parsing time:', timeString, error);
         return '00:00';
       }
     }
@@ -196,9 +205,14 @@ serve(async (req) => {
         const airlineName = carriers?.marketing?.[0]?.name || 'Unknown Airline';
         const airlineCode = carriers?.marketing?.[0]?.id || 'XX';
         
-        // Extract and clean times
-        const departureTime = cleanTimeFormat(leg?.departure);
-        const arrivalTime = cleanTimeFormat(leg?.arrival);
+        // Extract and clean times with enhanced validation
+        const rawDepartureTime = leg?.departure;
+        const rawArrivalTime = leg?.arrival;
+        
+        const departureTime = cleanTimeFormat(rawDepartureTime);
+        const arrivalTime = cleanTimeFormat(rawArrivalTime);
+        
+        console.log(`🕐 Time cleaning: ${rawDepartureTime} → ${departureTime}, ${rawArrivalTime} → ${arrivalTime}`);
         
         // Extract airports
         const originAirport = leg?.origin?.id || from;
