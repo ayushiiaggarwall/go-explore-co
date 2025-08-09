@@ -47,7 +47,7 @@ export default function Slider({ value, className, onValueChange, ...props }: Ra
 							duration: 500
 						}}
 						className="absolute bottom-8 left-1/2 -translate-x-1/2 text-lg font-semibold"
-						style={{ filter: 'drop-shadow(0 25px 25px rgba(0, 0, 0, 0.8))' }}
+						style={{ filter: 'drop-shadow(0 25px 25px rgba(0, 0, 0, 1))' }}
 					/>
 				)}
 			</RadixSlider.Thumb>
