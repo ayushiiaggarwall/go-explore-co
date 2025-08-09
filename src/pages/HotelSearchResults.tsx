@@ -46,6 +46,7 @@ interface SearchResults {
 export default function HotelSearchResults() {
   const [searchParams] = useSearchParams();
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
+  const [tripAdvisorResults, setTripAdvisorResults] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
@@ -88,6 +89,35 @@ export default function HotelSearchResults() {
     }
   };
 
+  const searchTripAdvisorHotels = async (searchData: any) => {
+    try {
+      console.log('🔍 Searching TripAdvisor hotels with params:', searchData);
+
+      const { data, error } = await supabase.functions.invoke('search-tripadvisor', {
+        body: {
+          destination: searchData.destination,
+          checkInDate: searchData.checkInDate,
+          checkOutDate: searchData.checkOutDate,
+          numberOfPeople: searchData.numberOfPeople || 2,
+          rooms: searchData.rooms || 1,
+          maxItems: 10
+        }
+      });
+
+      console.log('📡 TripAdvisor Response:', { data, error });
+
+      if (error) {
+        console.error('❌ TripAdvisor Function error:', error);
+        return { success: false, hotels: [] };
+      }
+
+      return data || { success: false, hotels: [] };
+    } catch (error) {
+      console.error('❌ TripAdvisor Search error:', error);
+      return { success: false, hotels: [] };
+    }
+  };
+
   useEffect(() => {
     if (!destination || !checkIn || !checkOut) {
       setError('Missing required search parameters');
@@ -103,10 +133,16 @@ export default function HotelSearchResults() {
       rooms: rooms ? parseInt(rooms) : 1
     };
 
-    searchHotels(searchData)
-      .then((results) => {
-        setSearchResults(results);
-        if (results.hotels.length === 0) {
+    // Search both Booking.com and TripAdvisor in parallel
+    Promise.all([
+      searchHotels(searchData),
+      searchTripAdvisorHotels(searchData)
+    ])
+      .then(([bookingResults, tripAdvisorData]) => {
+        setSearchResults(bookingResults);
+        setTripAdvisorResults(tripAdvisorData);
+        
+        if (bookingResults.hotels.length === 0 && (!tripAdvisorData.hotels || tripAdvisorData.hotels.length === 0)) {
           setError('No hotels found. Try a different destination or dates.');
         }
       })
@@ -211,7 +247,7 @@ export default function HotelSearchResults() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <LoadingSpinner />
-              <p className="mt-4 text-muted-foreground">Searching hotels on Booking.com...</p>
+              <p className="mt-4 text-muted-foreground">Searching hotels on Booking.com and TripAdvisor...</p>
             </div>
           </div>
         </section>
@@ -332,6 +368,125 @@ export default function HotelSearchResults() {
                               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                             >
                               Book on Booking.com
+                              <ExternalLink className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* TripAdvisor Results */}
+      {tripAdvisorResults && tripAdvisorResults.hotels && tripAdvisorResults.hotels.length > 0 && (
+        <section className="py-12 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              {/* TripAdvisor Header */}
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-foreground mb-2">
+                  TripAdvisor Reviews & Ratings
+                </h2>
+                <p className="text-muted-foreground">
+                  See what travelers are saying about hotels in {destination}
+                </p>
+              </div>
+
+              {/* TripAdvisor Hotel Cards */}
+              <div className="grid gap-6">
+                {tripAdvisorResults.hotels.map((hotel: any, index: number) => (
+                  <div key={hotel.id || index} className="bg-card border border-border rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="md:flex">
+                      {/* Hotel Image */}
+                      {hotel.image && (
+                        <div className="md:w-80 h-48 md:h-auto overflow-hidden">
+                          <img 
+                            src={hotel.image} 
+                            alt={hotel.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+
+                      {/* Hotel Content */}
+                      <div className="flex-1 p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          {/* Hotel Header */}
+                          <div className="flex-1">
+                            <h3 className="text-xl font-semibold text-foreground mb-2">{hotel.name}</h3>
+                            
+                            {/* TripAdvisor Rating */}
+                            {hotel.rating > 0 && (
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex text-orange-400">
+                                  {[...Array(Math.floor(hotel.rating))].map((_, i) => (
+                                    <Star key={i} className="w-4 h-4 fill-current" />
+                                  ))}
+                                </div>
+                                <span className="bg-orange-600 text-white px-2 py-1 rounded text-sm font-medium">
+                                  {hotel.rating.toFixed(1)}
+                                </span>
+                                {hotel.numberOfReviews > 0 && (
+                                  <span className="text-sm text-muted-foreground">
+                                    ({hotel.numberOfReviews.toLocaleString()} TripAdvisor reviews)
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Location */}
+                            {hotel.location && (
+                              <div className="flex items-center text-sm text-muted-foreground mb-3">
+                                <MapPin className="w-4 h-4 mr-1" />
+                                <span>{hotel.location}</span>
+                              </div>
+                            )}
+
+                            {/* Description */}
+                            {hotel.description && (
+                              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                                {hotel.description}
+                              </p>
+                            )}
+
+                            {/* Amenities */}
+                            {hotel.amenities && hotel.amenities.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-4">
+                                {hotel.amenities.slice(0, 4).map((amenity: string, i: number) => (
+                                  <span key={i} className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-1 rounded">
+                                    {amenity}
+                                  </span>
+                                ))}
+                                {hotel.amenities.length > 4 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    +{hotel.amenities.length - 4} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Price and View on TripAdvisor */}
+                          <div className="text-right ml-6">
+                            {hotel.priceFrom && (
+                              <div className="mb-4">
+                                <div className="text-lg font-bold text-orange-600">
+                                  From ${hotel.priceFrom}
+                                </div>
+                                <div className="text-sm text-muted-foreground">per night</div>
+                              </div>
+                            )}
+                            
+                            <button 
+                              onClick={() => window.open(hotel.url, '_blank')}
+                              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                            >
+                              View on TripAdvisor
                               <ExternalLink className="w-4 h-4" />
                             </button>
                           </div>

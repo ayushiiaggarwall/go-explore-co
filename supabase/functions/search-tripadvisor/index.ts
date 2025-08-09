@@ -6,6 +6,7 @@ const corsHeaders = {
 }
 
 interface TripAdvisorHotel {
+  id: string;
   name: string;
   rating?: number;
   numberOfReviews?: number;
@@ -14,6 +15,9 @@ interface TripAdvisorHotel {
   image?: string;
   amenities?: string[];
   url?: string;
+  description?: string;
+  address?: string;
+  distance?: string;
 }
 
 serve(async (req) => {
@@ -41,14 +45,14 @@ serve(async (req) => {
     }
     console.log('✅ API token found')
 
-    // Parse request body
+    // Parse request body - accept hotel search parameters
     console.log('📝 Parsing request body...')
-    const { query, maxItems = 10 } = await req.json()
-    console.log('📍 Search query:', query, 'maxItems:', maxItems)
+    const { destination, checkInDate, checkOutDate, numberOfPeople, rooms, maxItems = 10 } = await req.json()
+    console.log('📍 Search parameters:', { destination, checkInDate, checkOutDate, numberOfPeople, rooms, maxItems })
     
-    if (!query) {
+    if (!destination) {
       return new Response(
-        JSON.stringify({ error: 'Query parameter is required' }),
+        JSON.stringify({ error: 'Destination parameter is required' }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400 
@@ -56,29 +60,32 @@ serve(async (req) => {
       )
     }
 
-    console.log('🚀 TripAdvisor API: Starting search for', query)
+    console.log('🚀 TripAdvisor API: Starting search for hotels in', destination)
 
-    // Prepare the actor input
+    // Prepare the actor input for maxcopell/tripadvisor
     const actorInput = {
-      query,
-      maxItemsPerQuery: maxItems,
-      includeTags: true,
-      includeNearbyResults: false,
-      includeAttractions: false,
-      includeRestaurants: false,
-      includeHotels: true,
-      includeVacationRentals: false,
-      includePriceOffers: false,
-      includeAiReviewsSummary: false,
+      searchQuery: `hotels in ${destination}`,
+      locationFullName: destination,
       language: 'en',
-      currency: 'USD'
+      currency: 'USD',
+      checkIn: checkInDate || '',
+      checkOut: checkOutDate || '',
+      adults: numberOfPeople || 2,
+      children: 0,
+      rooms: rooms || 1,
+      locationId: '',
+      categories: ['hotels'],
+      offset: 0,
+      limit: maxItems,
+      sort: 'popularity'
     }
 
-    // Start the actor run
-    const runResponse = await fetch('https://api.apify.com/v2/acts/dbEyMBriog95Fv8CW/runs', {
+    console.log('🏨 Actor input for maxcopell/tripadvisor:', JSON.stringify(actorInput, null, 2))
+
+    // Start the actor run using maxcopell/tripadvisor
+    const runResponse = await fetch(`https://api.apify.com/v2/acts/maxcopell~tripadvisor/runs?token=${apifyToken}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apifyToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(actorInput),
@@ -92,18 +99,16 @@ serve(async (req) => {
     const runData = await runResponse.json()
     console.log('🏃 Actor run started:', runData.data.id)
 
-    // Wait for the run to complete
+    // Poll for results with longer timeout for TripAdvisor
     let attempts = 0
-    const maxAttempts = 30 // 30 seconds max wait time
+    const maxAttempts = 60 // 60 seconds max wait time
     let runStatus = 'RUNNING'
 
     while (runStatus === 'RUNNING' && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
       
-      const statusResponse = await fetch(`https://api.apify.com/v2/acts/dbEyMBriog95Fv8CW/runs/${runData.data.id}`, {
-        headers: {
-          'Authorization': `Bearer ${apifyToken}`,
-        },
+      const statusResponse = await fetch(`https://api.apify.com/v2/acts/maxcopell~tripadvisor/runs/${runData.data.id}?token=${apifyToken}`, {
+        method: 'GET'
       })
 
       if (statusResponse.ok) {
@@ -117,43 +122,79 @@ serve(async (req) => {
 
     if (runStatus !== 'SUCCEEDED') {
       console.error('❌ Actor run did not complete successfully:', runStatus)
-      throw new Error(`Actor run failed with status: ${runStatus}`)
+      return new Response(
+        JSON.stringify({ 
+          error: `TripAdvisor search ${runStatus.toLowerCase()}`,
+          hotels: [] 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200  // Return 200 with empty results instead of error
+        }
+      )
     }
 
-    // Get the results
-    const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${runData.data.defaultDatasetId}/items`, {
-      headers: {
-        'Authorization': `Bearer ${apifyToken}`,
-      },
+    // Get the results from dataset
+    const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${runData.data.defaultDatasetId}/items?token=${apifyToken}`, {
+      method: 'GET'
     })
 
     if (!resultsResponse.ok) {
       console.error('❌ Failed to fetch results:', resultsResponse.status)
-      throw new Error(`Failed to fetch results: ${resultsResponse.status}`)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to fetch TripAdvisor results',
+          hotels: [] 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      )
     }
 
     const results = await resultsResponse.json()
-    console.log('✅ Retrieved results:', results.length, 'items')
+    console.log('✅ Retrieved TripAdvisor results:', results.length, 'items')
+    
+    if (results.length > 0) {
+      console.log('🏨 Sample result structure:', Object.keys(results[0]))
+    }
 
-    // Transform the results to match our interface
-    const hotels: TripAdvisorHotel[] = results
-      .filter((item: any) => item.type === 'hotel')
-      .map((item: any) => ({
-        name: item.name || 'Unknown Hotel',
-        rating: item.rating || undefined,
-        numberOfReviews: item.numberOfReviews || 0,
-        priceFrom: item.priceFrom || undefined,
-        location: item.location || undefined,
-        image: item.image || undefined,
-        amenities: item.amenities || [],
-        url: item.url || undefined,
+    // Process maxcopell/tripadvisor results
+    const processedHotels: TripAdvisorHotel[] = results
+      .filter((item: any) => item && (item.name || item.title))
+      .map((item: any, index: number) => ({
+        id: `tripadvisor_${index}_${Date.now()}`,
+        name: item.name || item.title || 'Hotel',
+        rating: item.rating || item.bubbleRating || 0,
+        numberOfReviews: item.reviewCount || item.numReviews || item.numberOfReviews || 0,
+        priceFrom: item.priceFrom || item.price || undefined,
+        location: item.locationString || item.location || item.address || '',
+        image: item.photo?.images?.large?.url || item.image || item.imageUrl || '',
+        amenities: item.amenities || item.features || [],
+        url: item.webUrl || item.url || `https://www.tripadvisor.com`,
+        description: item.description || '',
+        address: item.address || item.locationString || '',
+        distance: item.distance || ''
       }))
       .slice(0, maxItems)
 
-    console.log('🏨 Processed hotels:', hotels.length)
+    console.log('🏨 Processed TripAdvisor hotels:', processedHotels.length)
 
     return new Response(
-      JSON.stringify({ hotels }),
+      JSON.stringify({ 
+        success: true,
+        hotels: processedHotels,
+        totalResults: processedHotels.length,
+        source: 'TripAdvisor',
+        searchParams: {
+          destination,
+          checkInDate,
+          checkOutDate,
+          numberOfPeople,
+          rooms
+        }
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
