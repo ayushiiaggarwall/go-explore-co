@@ -115,53 +115,31 @@ export default function Register() {
               required
             />
 
-            <div className="relative">
-              <Input
-                label="Password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleInputChange}
-                error={errors.password}
-                icon={<Lock className="w-5 h-5 text-gray-400" />}
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
+            <Input
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={handleInputChange}
+              error={errors.password}
+              icon={<Lock className="w-5 h-5 text-gray-400" />}
+              rightIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              onRightIconClick={() => setShowPassword(!showPassword)}
+              required
+            />
 
-            <div className="relative">
-              <Input
-                label="Confirm password"
-                name="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                error={errors.confirmPassword}
-                icon={<Lock className="w-5 h-5 text-gray-400" />}
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
+            <Input
+              label="Confirm password"
+              name="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              error={errors.confirmPassword}
+              icon={<Lock className="w-5 h-5 text-gray-400" />}
+              rightIcon={showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              onRightIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              required
+            />
 
             <div className="flex items-center">
               <input

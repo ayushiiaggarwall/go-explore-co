@@ -97,29 +97,18 @@ export default function Login() {
               required
             />
 
-            <div className="relative">
-              <Input
-                label="Password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleInputChange}
-                error={errors.password}
-                icon={<Lock className="w-5 h-5 text-gray-400" />}
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
+            <Input
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={handleInputChange}
+              error={errors.password}
+              icon={<Lock className="w-5 h-5 text-gray-400" />}
+              rightIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              onRightIconClick={() => setShowPassword(!showPassword)}
+              required
+            />
 
             <div className="flex items-center justify-end">
               <div className="text-sm">
