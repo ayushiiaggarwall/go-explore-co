@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   MapPin, Hotel, Plane, Clock, CheckCircle, Circle, Edit2, RotateCcw,
   AlertCircle, Star, Calendar, Car, Coffee, Camera, ShoppingBag,
@@ -33,7 +34,9 @@ const PROGRESS_STEPS = [
 export default function TravelItinerary({ tripData }: TravelItineraryProps) {
   const { smoothNavigate } = useSmoothNavigation();
   const { user } = useAuth();
-  const [itineraryData, setItineraryData] = useState<{ [city: string]: ItineraryData }>({});
+  const location = useLocation();
+  const savedItinerary = location.state?.savedItinerary;
+  const [itineraryData, setItineraryData] = useState<{ [city: string]: ItineraryData }>(savedItinerary || {});
   const [isLoading, setIsLoading] = useState(false);
   const [currentProgress, setCurrentProgress] = useState<ProgressStep[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>('');
@@ -45,9 +48,12 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
   useEffect(() => {
     if (tripData.cities.length > 0) {
       setSelectedCity(tripData.cities[0]);
-      generateItineraries();
+      // Only generate if we don't have saved itinerary data
+      if (!savedItinerary || Object.keys(savedItinerary).length === 0) {
+        generateItineraries();
+      }
     }
-  }, [tripData]);
+  }, [tripData, savedItinerary]);
 
   const generateItineraries = async () => {
     setIsLoading(true);

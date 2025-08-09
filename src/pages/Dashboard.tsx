@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Star, Phone, Mail, User, Trash2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Booking } from '../types';
@@ -21,6 +22,7 @@ interface TripPlan {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user, isLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [tripPlans, setTripPlans] = useState<TripPlan[]>([]);
@@ -314,7 +316,17 @@ export default function Dashboard() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => window.location.href = `/trip-itinerary?planId=${plan.id}`}
+                        onClick={() => {
+                          // Convert plan data back to TripFormData format
+                          const tripData = {
+                            tripName: plan.trip_name,
+                            startDate: new Date(plan.start_date),
+                            endDate: new Date(plan.end_date),
+                            cities: plan.cities || [plan.destination],
+                            interests: plan.interests || []
+                          };
+                          navigate('/trip-itinerary', { state: { tripData, savedItinerary: plan.itinerary } });
+                        }}
                       >
                         View Itinerary
                       </Button>
