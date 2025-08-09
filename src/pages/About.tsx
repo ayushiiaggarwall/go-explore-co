@@ -162,7 +162,7 @@ export default function About() {
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Pavitar</h3>
-                <p className="text-sky-600 mb-3">Position</p>
+                <p className="text-sky-600 mb-3">Backend Tech</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
                 </p>
@@ -207,7 +207,7 @@ export default function About() {
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Ayushi Aggarwal</h3>
-                <p className="text-sky-600 mb-3">Position</p>
+                <p className="text-sky-600 mb-3">Backend Tech</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
                 </p>
