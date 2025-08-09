@@ -89,7 +89,9 @@ export default function SearchResults() {
           } else if (value.type === 'flights') {
             if ('data' in value && value.data) {
               console.log('✅ Flight API Results received:', value.data);
-              setApiFlights(value.data as SkyscannerFlight[]);
+              // Handle both old array format and new FlightApiResponse format
+              const flightsData = (value.data as any).flights || value.data;
+              setApiFlights(Array.isArray(flightsData) ? flightsData as SkyscannerFlight[] : []);
             } else if ('error' in value && value.error) {
               console.error('❌ Error fetching flights:', value.error);
               setFlightError(`Failed to fetch flights from Skyscanner: ${value.error instanceof Error ? value.error.message : 'Unknown error'}`);

@@ -14,6 +14,7 @@ export default function FlightSearchResults() {
   const [loading, setLoading] = useState(true);
   const [apiFlights, setApiFlights] = useState<SkyscannerFlight[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [dataSource, setDataSource] = useState<string>('');
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -54,7 +55,7 @@ export default function FlightSearchResults() {
       try {
         console.log('🛫 Flight Search Parameters:', searchData);
         
-        // Fetch from Skyscanner API
+        // Fetch from Flight API (Google Flights/Free Scraper)
         const apiResults = await skyscannerApi.searchFlights(
           searchData.from, 
           searchData.destination, 
@@ -62,15 +63,16 @@ export default function FlightSearchResults() {
           searchData.returnDate
         );
         
-        if (apiResults && apiResults.length > 0) {
-          console.log('✅ Skyscanner API returned flights:', apiResults.length);
-          setApiFlights(apiResults);
+        if (apiResults && apiResults.flights && apiResults.flights.length > 0) {
+          console.log('✅ Flight API returned flights:', apiResults.flights.length);
+          setApiFlights(apiResults.flights);
+          setDataSource(apiResults.source || 'google-flights');
         } else {
-          console.log('⚠️ No flights from Skyscanner API');
+          console.log('⚠️ No flights from Flight API');
           setApiError('No flights found for this route and date.');
         }
       } catch (error) {
-        console.error('❌ Skyscanner API error:', error);
+        console.error('❌ Flight API error:', error);
         setApiError('Unable to fetch live flight data.');
       }
       
@@ -173,13 +175,18 @@ export default function FlightSearchResults() {
               {apiFlights.length > 0 && (
                 <div className="mb-8">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                     <h3 className="text-lg font-semibold text-foreground">Live Flight Results</h3>
                     <span className="text-sm text-muted-foreground">({apiFlights.length} found)</span>
+                    {dataSource && (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                        {dataSource === 'google-flights' ? 'Google Flights' : 'Free Scraper'}
+                      </span>
+                    )}
                   </div>
                   <div className="grid gap-4">
                     {apiFlights.slice(0, 5).map((flight, index) => (
-                      <div key={index} className="bg-card rounded-lg border border-green-200 p-4">
+                      <div key={index} className="bg-card rounded-lg border border-border p-4 hover:shadow-md transition-shadow">{/* Added hover effect */}
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center gap-4 mb-2">

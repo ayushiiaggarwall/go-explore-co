@@ -49,23 +49,46 @@ serve(async (req) => {
     
     console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers });
 
-    // Use the harvest/skyscanner-scraper actor
-    const actorResponse = await fetch(`https://api.apify.com/v2/acts/harvest~skyscanner-scraper/runs?token=${apifyToken}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: from,
-        to: to,
-        departDate: departDate,
-        returnDate: returnDate || null,
-        adults: passengers || 1,
-        currency: 'USD',
-        locale: 'en-US',
-        maxResults: 20
-      })
-    });
+    // Primary: Use Google Flights scraper for better accuracy
+    let actorResponse;
+    let actorType = 'google-flights';
+    
+    try {
+      console.log('🚀 Trying Google Flights scraper first...');
+      actorResponse = await fetch(`https://api.apify.com/v2/acts/canadesk~google-flights/runs?token=${apifyToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          departure: from,
+          arrival: to,
+          departureDate: departDate,
+          returnDate: returnDate || null,
+          adults: passengers || 1,
+          children: 0,
+          infants: 0,
+          mode: returnDate ? "roundTrip" : "oneWay"
+        })
+      });
+    } catch (error) {
+      console.log('⚠️ Google Flights failed, trying free flight scraper...');
+      actorType = 'free-scraper';
+      actorResponse = await fetch(`https://api.apify.com/v2/acts/jindrich.bar~free-flight-ticket-scraper/runs?token=${apifyToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fromCode: from,
+          toCode: to,
+          fromDate: departDate,
+          toDate: returnDate || null,
+          adults: passengers || 1,
+          directFlightsOnly: false
+        })
+      });
+    }
 
     if (!actorResponse.ok) {
       console.error('❌ Failed to start Apify actor:', actorResponse.status);
@@ -105,53 +128,73 @@ serve(async (req) => {
     const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${actorData.data.defaultDatasetId}/items?token=${apifyToken}`);
     const results = await resultsResponse.json();
 
-    console.log('✅ Flight search completed, processing results...');
+    console.log(`✅ Flight search completed using ${actorType}, processing results...`);
 
-    // Transform results to our format - handle the harvest/skyscanner-scraper response format
-    const flights: SkyscannerFlight[] = results
-      .filter((result: any) => result && result.price)
-      .slice(0, 20)
-      .map((flight: any) => {
-        // Handle the legs array structure from harvest/skyscanner-scraper
-        const leg = flight.legs && flight.legs[0] ? flight.legs[0] : {};
-        const carrier = leg.carriers && leg.carriers.marketing && leg.carriers.marketing[0] 
-          ? leg.carriers.marketing[0] 
-          : {};
+    // Transform results based on actor type
 
-        return {
-          price: Math.round(flight.price?.raw || flight.price?.amount || flight.price || 0),
-          currency: flight.price?.currency || 'USD',
-          airline: carrier.name || flight.airline || 'Unknown Airline',
+    let flights: SkyscannerFlight[] = [];
+
+    if (actorType === 'google-flights') {
+      // Handle Google Flights response format
+      flights = results
+        .filter((result: any) => result && result.flights && result.flights.length > 0)
+        .flatMap((result: any) => 
+          result.flights.slice(0, 20).map((flight: any) => ({
+            price: parseFloat(flight.price?.replace(/[^0-9.]/g, '') || '0'),
+            currency: 'USD',
+            airline: flight.airline || 'Unknown Airline',
+            departure: {
+              time: flight.departure?.time || '00:00',
+              date: departDate,
+              airport: flight.departure?.airport || from,
+              city: flight.departure?.airport?.replace(/[,\s]+\w+$/, '') || from
+            },
+            arrival: {
+              time: flight.arrival?.time || '00:00',
+              date: departDate,
+              airport: flight.arrival?.airport || to,
+              city: flight.arrival?.airport?.replace(/[,\s]+\w+$/, '') || to
+            },
+            duration: flight.duration || 'N/A',
+            stops: flight.stops || 0,
+            bookingUrl: flight.bookingUrl || `https://www.google.com/flights`
+          }))
+        );
+    } else {
+      // Handle Free Flight Scraper response format
+      flights = results
+        .filter((result: any) => result && result.price)
+        .slice(0, 20)
+        .map((flight: any) => ({
+          price: Math.round(flight.price || 0),
+          currency: flight.currency || 'USD',
+          airline: flight.airline || 'Unknown Airline',
           departure: {
-            time: leg.departure ? new Date(leg.departure).toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            }) : '00:00',
-            date: leg.departure ? new Date(leg.departure).toISOString().split('T')[0] : departDate,
-            airport: leg.origin?.id || from,
-            city: leg.origin?.name?.split(' ')[0] || from.replace(/[,\s]+\w+$/, '')
+            time: flight.departureTime || '00:00',
+            date: departDate,
+            airport: from,
+            city: from.replace(/[,\s]+\w+$/, '')
           },
           arrival: {
-            time: leg.arrival ? new Date(leg.arrival).toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            }) : '00:00',
-            date: leg.arrival ? new Date(leg.arrival).toISOString().split('T')[0] : departDate,
-            airport: leg.destination?.id || to,
-            city: leg.destination?.name?.split(' ')[0] || to.replace(/[,\s]+\w+$/, '')
+            time: flight.arrivalTime || '00:00',
+            date: departDate,
+            airport: to,
+            city: to.replace(/[,\s]+\w+$/, '')
           },
-          duration: leg.durationInMinutes ? `${Math.floor(leg.durationInMinutes / 60)}h ${leg.durationInMinutes % 60}m` : 'N/A',
-          stops: leg.stopCount || 0,
-          bookingUrl: flight.bookingUrl || `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate.replace(/-/g, '')}/`
-        };
-      });
+          duration: flight.duration || 'N/A',
+          stops: flight.stops === 'Direct' ? 0 : (flight.stops?.match(/\d+/) ? parseInt(flight.stops.match(/\d+/)[0]) : 0),
+          bookingUrl: flight.bookingUrl || `https://www.google.com/flights`
+        }));
+    }
 
     console.log(`✨ Returning ${flights.length} flight results`);
 
     return new Response(
-      JSON.stringify({ flights }),
+      JSON.stringify({ 
+        flights, 
+        source: actorType,
+        totalResults: flights.length 
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }

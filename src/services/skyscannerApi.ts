@@ -1,6 +1,6 @@
 import { geminiApi } from './geminiApi';
 
-interface SkyscannerFlight {
+export interface SkyscannerFlight {
   price: number;
   currency: string;
   airline: string;
@@ -21,6 +21,12 @@ interface SkyscannerFlight {
   bookingUrl?: string;
 }
 
+export interface FlightApiResponse {
+  flights: SkyscannerFlight[];
+  source: string;
+  totalResults: number;
+}
+
 class SkyscannerApiService {
   private baseUrl = 'https://ioifldpjlfotqvtaidem.supabase.co/functions/v1/search-flights';
 
@@ -29,7 +35,7 @@ class SkyscannerApiService {
     to: string, 
     departDate: string, 
     returnDate?: string
-  ): Promise<SkyscannerFlight[]> {
+  ): Promise<FlightApiResponse> {
     console.log('✈️ Flight Search: Starting real-time search', { from, to, departDate, returnDate });
     
     try {
@@ -64,7 +70,11 @@ class SkyscannerApiService {
         
         // Fallback to mock data if API fails
         console.log('🔄 Falling back to mock data...');
-        return this.generateRealisticFlights(fromCode, toCode, departDate);
+        return {
+          flights: this.generateRealisticFlights(fromCode, toCode, departDate),
+          source: 'mock-data',
+          totalResults: 10
+        };
       }
 
       const data = await response.json();
@@ -74,11 +84,15 @@ class SkyscannerApiService {
         
         // Fallback to mock data
         console.log('🔄 Falling back to mock data...');
-        return this.generateRealisticFlights(fromCode, toCode, departDate);
+        return {
+          flights: this.generateRealisticFlights(fromCode, toCode, departDate),
+          source: 'mock-data',
+          totalResults: 10
+        };
       }
 
       console.log('✅ Real flight search success:', data.flights?.length || 0, 'flights found');
-      return data.flights;
+      return data; // Return the full response object which includes flights, source, totalResults
       
     } catch (error) {
       console.error('❌ Flight Search Error:', error);
@@ -90,7 +104,11 @@ class SkyscannerApiService {
           geminiApi.convertCityToAirportCode(from),
           geminiApi.convertCityToAirportCode(to)
         ]);
-        return this.generateRealisticFlights(fromCode, toCode, departDate);
+        return {
+          flights: this.generateRealisticFlights(fromCode, toCode, departDate),
+          source: 'mock-data',
+          totalResults: 10
+        };
       } catch (fallbackError) {
         console.error('❌ Even fallback failed:', fallbackError);
         throw error;
@@ -221,4 +239,3 @@ class SkyscannerApiService {
 }
 
 export const skyscannerApi = new SkyscannerApiService();
-export type { SkyscannerFlight };
