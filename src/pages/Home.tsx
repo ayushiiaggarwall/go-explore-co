@@ -1,12 +1,13 @@
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { Plane, Hotel, MapPin, Star, Shield, Clock } from 'lucide-react';
 import PackageCard from '../components/cards/PackageCard';
 import { mockPackages } from '../services/mockData';
 import { useAuth } from '../hooks/useAuth';
+import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 
 export default function Home() {
   const { user, isLoading } = useAuth();
-  const navigate = useNavigate();
+  const { smoothNavigate } = useSmoothNavigation();
 
   // Redirect authenticated users to dashboard
   if (!isLoading && user) {
@@ -14,18 +15,9 @@ export default function Home() {
   }
 
   const handlePackageBook = () => {
-    // Add smoother transition effect
-    document.body.style.opacity = '0.7';
-    document.body.style.transform = 'scale(0.98)';
-    document.body.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-    
-    setTimeout(() => {
-      navigate('/search');
-      window.scrollTo(0, 0);
-      document.body.style.opacity = '1';
-      document.body.style.transform = 'scale(1)';
-    }, 400);
+    smoothNavigate('/search');
   };
+
 
 
   return (
@@ -52,10 +44,9 @@ export default function Home() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-8">
             {/* Hotels Button */}
-            <Link 
-              to="/book-hotel" 
-              onClick={() => window.scrollTo(0, 0)}
-              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+            <button 
+              onClick={() => smoothNavigate('/book-hotel')}
+              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105 w-full"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-yellow-500/20"></div>
               <div className="relative p-8 h-64 flex flex-col items-center justify-center text-center">
@@ -63,13 +54,12 @@ export default function Home() {
                 <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">HOTELS</h2>
                 <p className="text-white/90 text-lg">Find perfect accommodations</p>
               </div>
-            </Link>
+            </button>
 
             {/* Flights Button */}
-            <Link 
-              to="/book-flight"
-              onClick={() => window.scrollTo(0, 0)}
-              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+            <button 
+              onClick={() => smoothNavigate('/book-flight')}
+              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105 w-full"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-sky-500/20"></div>
               <div className="relative p-8 h-64 flex flex-col items-center justify-center text-center">
@@ -77,14 +67,13 @@ export default function Home() {
                 <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Flights</h2>
                 <p className="text-white/90 text-lg">Book your next adventure</p>
               </div>
-            </Link>
+            </button>
           </div>
 
           {/* Plan Trip Button - Centered below */}
           <div className="flex justify-center max-w-6xl mx-auto">
-            <Link 
-              to="/plan-trip"
-              onClick={() => window.scrollTo(0, 0)}
+            <button 
+              onClick={() => smoothNavigate('/plan-trip')}
               className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105 w-full max-w-md"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"></div>
@@ -93,7 +82,7 @@ export default function Home() {
                 <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Plan Trip</h2>
                 <p className="text-white/90 text-lg">Design your perfect journey</p>
               </div>
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -149,13 +138,12 @@ export default function Home() {
           </div>
           
           <div className="text-center mt-12">
-            <Link
-              to="/search"
-              onClick={() => window.scrollTo(0, 0)}
+            <button
+              onClick={() => smoothNavigate('/search')}
               className="inline-flex items-center px-6 py-3 bg-sky-500 text-white font-medium rounded-md hover:bg-sky-600 transition-colors"
             >
               View All Packages
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -176,9 +164,9 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Flights</h3>
                 <p className="text-muted-foreground mb-4 text-center">Compare and book flights from hundreds of airlines worldwide.</p>
-                <Link to="/search" onClick={() => window.scrollTo(0, 0)} className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <button onClick={() => smoothNavigate('/search')} className="text-sky-500 hover:text-sky-600 font-medium block text-center w-full">
                   Search Flights →
-                </Link>
+                </button>
               </div>
             </div>
             
@@ -189,9 +177,9 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Hotels</h3>
                 <p className="text-muted-foreground mb-4 text-center">Find and book the perfect accommodation for your stay.</p>
-                <Link to="/search" onClick={() => window.scrollTo(0, 0)} className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <button onClick={() => smoothNavigate('/search')} className="text-sky-500 hover:text-sky-600 font-medium block text-center w-full">
                   Search Hotels →
-                </Link>
+                </button>
               </div>
             </div>
             
@@ -202,9 +190,9 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Packages</h3>
                 <p className="text-muted-foreground mb-4 text-center">Save with our curated vacation packages and deals.</p>
-                <Link to="/search" onClick={() => window.scrollTo(0, 0)} className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <button onClick={() => smoothNavigate('/search')} className="text-sky-500 hover:text-sky-600 font-medium block text-center w-full">
                   View Packages →
-                </Link>
+                </button>
               </div>
             </div>
           </div>
