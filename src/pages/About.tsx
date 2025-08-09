@@ -143,7 +143,7 @@ export default function About() {
               <img
                 src="/lovable-uploads/2b4e80c9-e1c0-489e-b6d8-85465a1d3bf2.png"
                 alt="Team Member 1"
-                className="w-full h-64 object-cover"
+                className="w-full h-80 object-cover"
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 1</h3>
@@ -158,7 +158,7 @@ export default function About() {
               <img
                 src="/lovable-uploads/5dd6f82e-a3cf-4dac-a9dd-114df45f0d4c.png"
                 alt="Team Member 2"
-                className="w-full h-64 object-cover"
+                className="w-full h-80 object-cover"
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 2</h3>
@@ -173,7 +173,7 @@ export default function About() {
               <img
                 src="/lovable-uploads/178e7eb4-9389-4eaf-bfa2-f2e356028fb8.png"
                 alt="Team Member 3"
-                className="w-full h-64 object-cover"
+                className="w-full h-80 object-cover"
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 3</h3>
@@ -188,7 +188,7 @@ export default function About() {
               <img
                 src="/lovable-uploads/fe5f69de-0d88-433a-af2d-95092cbbf024.png"
                 alt="Team Member 4"
-                className="w-full h-64 object-cover"
+                className="w-full h-80 object-cover"
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 4</h3>
@@ -203,7 +203,7 @@ export default function About() {
               <img
                 src="/lovable-uploads/bdfb9d91-cd9c-48f0-9abf-54e12ace25ee.png"
                 alt="Team Member 5"
-                className="w-full h-64 object-cover"
+                className="w-full h-80 object-cover"
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 5</h3>
@@ -218,7 +218,7 @@ export default function About() {
               <img
                 src="/lovable-uploads/b96a7eff-f606-443a-88e3-77b1dfe613a5.png"
                 alt="Team Member 6"
-                className="w-full h-64 object-cover"
+                className="w-full h-80 object-cover"
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Team Member 6</h3>
