@@ -177,18 +177,40 @@ serve(async (req) => {
       return `${randomCode}${flightNum}`;
     }
 
-    function buildSkyscannerFlightUrl(originCode: string, destCode: string, date: string, airlineCode: string, flightNum: string): string {
+    function buildSkyscannerFlightUrl(originCode: string, destCode: string, date: string, airlineCode: string, flightNum: string, departureTime: string, arrivalTime: string): string {
       try {
-        // Skyscanner flight detail URL format (attempt to create a more specific URL)
-        // Format: https://www.skyscanner.com/transport/flights/{origin}/{dest}/{date}/{airline}{flightnumber}
-        const dateFormatted = date.replace(/-/g, ''); // YYYYMMDD format
+        // Format date to YYYYMMDD for Skyscanner
+        const dateObj = new Date(date);
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        const formattedDate = `${year}${month}${day}`;
         
-        // Primary URL - try to link to specific flight
-        const specificFlightUrl = `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/${dateFormatted}/?adults=1&cabinclass=economy&rtn=0&preflight=${airlineCode}${flightNum}`;
+        // Build comprehensive URL with specific flight details
+        // Include multiple parameters to target the specific flight
+        const params = new URLSearchParams({
+          adults: '1',
+          cabinclass: 'economy',
+          rtn: '0',
+          // Airline filter
+          airlines: airlineCode,
+          // Departure time filter (convert HH:MM to minutes)
+          deptime: departureTime.replace(':', ''),
+          // Arrival time filter
+          arrtime: arrivalTime.replace(':', ''),
+          // Flight number in query
+          flightnum: flightNum,
+          // Direct flight preference
+          stops: '0'
+        });
         
+        const specificFlightUrl = `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/${formattedDate}/?${params.toString()}`;
+        
+        console.log(`🔗 Generated Skyscanner URL for ${airlineCode}${flightNum}:`, specificFlightUrl);
         return specificFlightUrl;
-      } catch {
-        // Fallback to general search
+      } catch (error) {
+        console.warn('Error building Skyscanner URL:', error);
+        // Fallback to basic search
         return `https://www.skyscanner.com/transport/flights/${originCode}/${destCode}/?adults=1`;
       }
     }
@@ -222,8 +244,16 @@ serve(async (req) => {
         // Generate flight number
         const flightNumber = extractFlightNumber(carriers, index);
         
-        // Build specific Skyscanner URL for this flight
-        const skyscannerUrl = buildSkyscannerFlightUrl(originAirport, destinationAirport, departDate, airlineCode, flightNumber.replace(/[A-Z]/g, ''));
+        // Build specific Skyscanner URL for this exact flight
+        const skyscannerUrl = buildSkyscannerFlightUrl(
+          originAirport, 
+          destinationAirport, 
+          departDate, 
+          airlineCode, 
+          flightNumber.replace(/[A-Z]/g, ''),
+          departureTime,
+          arrivalTime
+        );
 
         return {
           price: Math.round(flight.price.amount || 0),

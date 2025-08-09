@@ -81,10 +81,25 @@ export default function FlightSearchResults() {
     if (flight.bookingUrl) {
       window.open(flight.bookingUrl, '_blank');
     } else {
-      // Fallback URL if bookingUrl is not available
+      // Build custom specific flight URL if bookingUrl is not available
       const airlineCode = typeof flight.airline === 'object' ? flight.airline.code : 'XX';
-      const fallbackUrl = `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/${searchData.departureDate.replace(/-/g, '')}/?adults=${searchData.passengers}&cabinclass=economy&rtn=0&preflight=${airlineCode}${flight.flightNumber}`;
-      window.open(fallbackUrl, '_blank');
+      const flightNumOnly = flight.flightNumber.replace(/[A-Z]/g, '');
+      
+      const params = new URLSearchParams({
+        adults: searchData.passengers.toString(),
+        cabinclass: 'economy',
+        rtn: '0',
+        airlines: airlineCode,
+        deptime: cleanedDepartureTime.replace(':', ''),
+        arrtime: cleanedArrivalTime.replace(':', ''),
+        flightnum: flightNumOnly,
+        stops: flight.stops.toString()
+      });
+      
+      const specificUrl = `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/${searchData.departureDate.replace(/-/g, '')}/?${params.toString()}`;
+      
+      console.log(`🔗 Opening specific flight URL for ${flight.flightNumber}:`, specificUrl);
+      window.open(specificUrl, '_blank');
     }
   };
 

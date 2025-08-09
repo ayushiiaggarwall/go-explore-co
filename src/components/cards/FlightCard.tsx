@@ -31,9 +31,30 @@ export default function FlightCard({ flight, onBook }: FlightCardProps) {
       passenger_count: 1
     });
 
-    // Redirect to Skyscanner
+    // Redirect to Skyscanner with specific flight details
     if (flight.bookingUrl) {
+      console.log(`🔗 Opening Skyscanner for flight ${flight.flightNumber}:`, flight.bookingUrl);
       window.open(flight.bookingUrl, '_blank');
+    } else {
+      // Build specific flight URL if no bookingUrl provided
+      const airlineCode = typeof flight.airline === 'object' ? flight.airline.code : 'XX';
+      const flightNumOnly = flight.flightNumber.replace(/[A-Z]/g, '');
+      
+      const params = new URLSearchParams({
+        adults: '1',
+        cabinclass: 'economy',
+        rtn: '0',
+        airlines: airlineCode,
+        deptime: flight.departure.time.replace(':', ''),
+        arrtime: flight.arrival.time.replace(':', ''),
+        flightnum: flightNumOnly,
+        stops: flight.stops.toString()
+      });
+      
+      const specificUrl = `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/${flight.departure.date.replace(/-/g, '')}/?${params.toString()}`;
+      
+      console.log(`🔗 Opening specific flight URL for ${flight.flightNumber}:`, specificUrl);
+      window.open(specificUrl, '_blank');
     }
   };
   return (
