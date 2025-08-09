@@ -128,8 +128,22 @@ export default function PlanTrip() {
   };
 
   const handleDestinationClick = (destination: string) => {
-    setFormData(prev => ({ ...prev, destination }));
+    setFormData(prev => ({ 
+      ...prev, 
+      currentDestination: '',
+      destinations: prev.destinations.includes(destination) 
+        ? prev.destinations 
+        : [...prev.destinations, destination]
+    }));
     setShowDestinations(false);
+  };
+
+  const removeDestination = (destinationToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      destinations: prev.destinations.filter(d => d !== destinationToRemove),
+      currentDestination: prev.currentDestination === destinationToRemove ? '' : prev.currentDestination
+    }));
   };
 
   const handleNext = () => {
