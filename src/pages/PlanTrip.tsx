@@ -197,7 +197,7 @@ export default function PlanTrip() {
             {/* Step 1: Destination */}
             {currentStep === 1 && (
               <div className="space-y-8 lg:pr-8">
-                <div className="text-center lg:text-left">
+                <div className="text-center">
                   <h2 className="text-4xl md:text-5xl font-bold text-foreground leading-tight mb-8">
                     What's your first destination?
                   </h2>
@@ -210,7 +210,7 @@ export default function PlanTrip() {
                       onFocus={() => setShowDestinations(true)}
                       onBlur={() => setTimeout(() => setShowDestinations(false), 200)}
                       placeholder="Enter your destination city..."
-                      className="text-lg p-4 h-14 text-center lg:text-left border-2 border-gray-200 focus:border-red-500 rounded-xl"
+                      className="text-lg p-4 h-14 text-center border-2 border-gray-200 focus:border-red-500 rounded-xl"
                     />
                     
                     {showDestinations && (
