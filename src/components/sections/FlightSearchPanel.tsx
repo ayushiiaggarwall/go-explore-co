@@ -15,8 +15,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
   const [formData, setFormData] = useState({
     from: '',
     destination: '',
-    passengers: 1,
-    tripType: 'round-trip'
+    passengers: 1
   });
   const [departureDate, setDepartureDate] = useState<Date>();
   const [returnDate, setReturnDate] = useState<Date>();
@@ -53,8 +52,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
       destination: formData.destination,
       departureDate: departureDate.toISOString().split('T')[0],
       returnDate: returnDate ? returnDate.toISOString().split('T')[0] : '',
-      passengers: formData.passengers.toString(),
-      tripType: formData.tripType
+      passengers: formData.passengers.toString()
     });
     
     navigate(`/search-flights?${searchParams.toString()}`);
@@ -75,31 +73,6 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Trip Type */}
-        <div className="flex space-x-4 mb-4">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="tripType"
-              value="round-trip"
-              checked={formData.tripType === 'round-trip'}
-              onChange={handleInputChange}
-              className="mr-2"
-            />
-            <span className="text-foreground">Round Trip</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="tripType"
-              value="one-way"
-              checked={formData.tripType === 'one-way'}
-              onChange={handleInputChange}
-              className="mr-2"
-            />
-            <span className="text-foreground">One Way</span>
-          </label>
-        </div>
 
         <div className="grid grid-cols-2 gap-4">
           {/* From */}
@@ -173,16 +146,14 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
             required
           />
 
-          {/* Return Date (only for round-trip) */}
-          {formData.tripType === 'round-trip' && (
-            <SimpleDatePicker
-              label="Return"
-              date={returnDate}
-              onSelect={setReturnDate}
-              placeholder="Select return date"
-              disabled={!departureDate}
-            />
-          )}
+          {/* Return Date */}
+          <SimpleDatePicker
+            label="Return"
+            date={returnDate}
+            onSelect={setReturnDate}
+            placeholder="Select return date"
+            disabled={!departureDate}
+          />
         </div>
 
         {/* Passengers */}
