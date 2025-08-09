@@ -61,19 +61,33 @@ interface CleanHotel {
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
+    console.log('🏨 Hotel search request received');
+
+    // Check request method
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Method not allowed'
+      }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const body = await req.json();
     const { 
       destination, 
       checkInDate, 
       checkOutDate, 
       numberOfPeople, 
       rooms 
-    } = await req.json();
+    } = body;
 
-    console.log('🏨 Hotel search request:', { destination, checkInDate, checkOutDate, numberOfPeople, rooms });
+    console.log('📋 Search params:', { destination, checkInDate, checkOutDate, numberOfPeople, rooms });
 
     // Validate required fields
     if (!destination || !checkInDate || !checkOutDate) {
@@ -107,7 +121,14 @@ serve(async (req) => {
     const APIFY_API_TOKEN = Deno.env.get('APIFY_API_TOKEN');
 
     if (!APIFY_API_TOKEN) {
-      throw new Error('APIFY_API_TOKEN not configured');
+      console.error('❌ Missing APIFY_API_TOKEN');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'API configuration error - missing token'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const apifyInput = {
@@ -120,7 +141,7 @@ serve(async (req) => {
       currency: "USD"
     };
 
-    console.log('🚀 Starting TripAdvisor hotel search with:', apifyInput);
+    console.log('🚀 Calling TripAdvisor actor:', apifyInput);
 
     // Start Apify actor run
     const runResponse = await fetch(
@@ -134,78 +155,136 @@ serve(async (req) => {
 
     if (!runResponse.ok) {
       const errorText = await runResponse.text();
-      console.error('❌ Apify API error:', runResponse.status, errorText);
-      throw new Error(`Apify API error: ${runResponse.status}`);
+      console.error('❌ Apify start failed:', runResponse.status, errorText);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Failed to start hotel search'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const runData = await runResponse.json();
     const runId = runData.data.id;
 
-    console.log('✅ Started Apify run:', runId);
+    console.log('🏃 Actor run started:', runId);
 
-    // Poll for results with timeout
+    // Poll for results with reduced timeout
     let attempts = 0;
-    const maxAttempts = 30; // 5 minutes timeout
+    const maxAttempts = 15; // 2.5 minutes timeout (reduced from 5 minutes)
 
     while (attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
 
-      const statusResponse = await fetch(
-        `https://api.apify.com/v2/acts/${ACTOR_ID}/runs/${runId}?token=${APIFY_API_TOKEN}`
-      );
-      const statusData = await statusResponse.json();
-
-      console.log(`📊 Attempt ${attempts + 1}: Status = ${statusData.data.status}`);
-
-      if (statusData.data.status === 'SUCCEEDED') {
-        // Fetch the results
-        const resultsResponse = await fetch(
-          `https://api.apify.com/v2/datasets/${statusData.data.defaultDatasetId}/items?token=${APIFY_API_TOKEN}`
+      try {
+        const statusResponse = await fetch(
+          `https://api.apify.com/v2/acts/${ACTOR_ID}/runs/${runId}?token=${APIFY_API_TOKEN}`
         );
-        const rawHotels = await resultsResponse.json();
 
-        console.log(`🏨 Found ${rawHotels.length} raw hotel results`);
+        if (!statusResponse.ok) {
+          console.error(`❌ Status check failed: ${statusResponse.status}`);
+          attempts++;
+          continue;
+        }
 
-        // Clean and format hotel data
-        const cleanHotels = cleanTripAdvisorHotelData(rawHotels, nights, {
-          destination,
-          checkInDate,
-          checkOutDate,
-          numberOfPeople,
-          rooms
-        });
+        const statusData = await statusResponse.json();
+        console.log(`📊 Run status: ${statusData.data.status} (attempt ${attempts + 1})`);
 
-        return new Response(JSON.stringify({
-          success: true,
-          hotels: cleanHotels,
-          searchParams: {
+        if (statusData.data.status === 'SUCCEEDED') {
+          // Fetch the results
+          const resultsResponse = await fetch(
+            `https://api.apify.com/v2/datasets/${statusData.data.defaultDatasetId}/items?token=${APIFY_API_TOKEN}`
+          );
+
+          if (!resultsResponse.ok) {
+            console.error('❌ Failed to fetch results');
+            return new Response(JSON.stringify({
+              success: false,
+              error: 'Failed to get search results'
+            }), {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          const rawHotels = await resultsResponse.json();
+          console.log(`✅ TripAdvisor API success: ${rawHotels.length} hotels found`);
+
+          // Clean and format hotel data
+          const cleanHotels = cleanTripAdvisorHotelData(rawHotels, nights, {
             destination,
             checkInDate,
             checkOutDate,
-            numberOfPeople,
-            rooms,
-            nights
-          },
-          totalResults: cleanHotels.length
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
+            numberOfPeople: numberOfPeople || 2,
+            rooms: rooms || 1
+          });
 
-      if (statusData.data.status === 'FAILED') {
-        throw new Error('TripAdvisor scraper failed');
+          return new Response(JSON.stringify({
+            success: true,
+            hotels: cleanHotels,
+            searchParams: {
+              destination,
+              checkInDate,
+              checkOutDate,
+              numberOfPeople: numberOfPeople || 2,
+              rooms: rooms || 1,
+              nights
+            },
+            totalResults: cleanHotels.length
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        if (statusData.data.status === 'FAILED') {
+          console.error('❌ Actor run failed with status:', statusData.data.status);
+          return new Response(JSON.stringify({
+            success: false,
+            error: 'Hotel search failed - please try again'
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        if (statusData.data.status === 'RUNNING' && attempts >= 10) {
+          // If still running after 10 attempts (100 seconds), return timeout
+          console.error('❌ Actor run did not complete successfully:', statusData.data.status);
+          return new Response(JSON.stringify({
+            success: false,
+            error: 'Search timeout - please try a more specific location'
+          }), {
+            status: 408,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+      } catch (pollError) {
+        console.error('❌ Polling error:', pollError);
+        attempts++;
+        continue;
       }
 
       attempts++;
     }
 
-    throw new Error('Search timeout - please try again');
-
-  } catch (error) {
-    console.error('❌ Hotel search error:', error);
+    // Final timeout
+    console.error('❌ Search timeout after', maxAttempts, 'attempts');
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Failed to search hotels'
+      error: 'Search timeout - please try again with a more specific destination'
+    }), {
+      status: 408,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('❌ TripAdvisor API Error:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message || 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
