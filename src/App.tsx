@@ -20,6 +20,9 @@ import EmailConfirmation from './pages/EmailConfirmation';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
+import FlightBooking from './pages/FlightBooking';
+import HotelBooking from './pages/HotelBooking';
+import PackageExplorer from './pages/PackageExplorer';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -48,6 +51,9 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/book-flight" element={<FlightBooking />} />
+                <Route path="/book-hotel" element={<HotelBooking />} />
+                <Route path="/explore-packages" element={<PackageExplorer />} />
               </Routes>
             </main>
             <Footer />

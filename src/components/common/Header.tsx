@@ -75,7 +75,7 @@ export default function Header() {
               {isTravelToolsOpen && (
                 <div className="absolute left-0 top-full mt-1 w-52 bg-card border border-border rounded-lg shadow-xl py-2 z-50 animate-fade-in">
                   <Link
-                    to="/search?type=flights"
+                    to="/book-flight"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                     onClick={() => setIsTravelToolsOpen(false)}
                   >
@@ -85,7 +85,7 @@ export default function Header() {
                     Book Flight
                   </Link>
                   <Link
-                    to="/search?type=hotels"
+                    to="/book-hotel"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                     onClick={() => setIsTravelToolsOpen(false)}
                   >
@@ -95,7 +95,7 @@ export default function Header() {
                     Book Hotels
                   </Link>
                   <Link
-                    to="/search?type=packages"
+                    to="/explore-packages"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                     onClick={() => setIsTravelToolsOpen(false)}
                   >
@@ -241,21 +241,21 @@ export default function Header() {
                 </Link>
               )}
               <Link
-                to="/search?type=flights"
+                to="/book-flight"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Book Flight
               </Link>
               <Link
-                to="/search?type=hotels"
+                to="/book-hotel"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Book Hotels
               </Link>
               <Link
-                to="/search?type=packages"
+                to="/explore-packages"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
