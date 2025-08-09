@@ -74,7 +74,7 @@ export default function Home() {
               className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105 w-full max-w-md"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"></div>
-              <div className="relative p-8 h-64 flex flex-col items-center justify-center text-center">
+              <div className="relative p-6 h-40 flex flex-col items-center justify-center text-center">
                 <MapPin className="w-16 h-16 text-white mb-4 group-hover:scale-110 transition-transform duration-300" />
                 <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Plan Trip</h2>
                 <p className="text-white/90 text-lg">Design your perfect journey</p>
