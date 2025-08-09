@@ -101,7 +101,7 @@ export default function About() {
       <section className="py-16 bg-muted/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">TravelEase by the Numbers</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Our Goal by the End of 2025</h2>
             <p className="text-lg text-muted-foreground">
               Our impact in the travel industry speaks for itself
             </p>
@@ -162,7 +162,7 @@ export default function About() {
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Pavitar</h3>
-                <p className="text-sky-600 mb-3">Backend Tech</p>
+                <p className="text-sky-600 mb-3">Backend Developer</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
                 </p>
@@ -207,7 +207,7 @@ export default function About() {
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Ayushi Aggarwal</h3>
-                <p className="text-sky-600 mb-3">Backend Tech</p>
+                <p className="text-sky-600 mb-3">Backend Developer</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
                 </p>
@@ -222,7 +222,7 @@ export default function About() {
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-1 text-foreground">Filipe Pinto</h3>
-                <p className="text-sky-600 mb-3">Frontend UI</p>
+                <p className="text-sky-600 mb-3">Frontend Developer</p>
                 <p className="text-muted-foreground">
                   Description of team member and their role.
                 </p>
