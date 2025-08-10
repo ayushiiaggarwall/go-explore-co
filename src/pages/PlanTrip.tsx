@@ -665,15 +665,6 @@ export default function PlanTrip() {
                 </div>
               )}
               
-              {/* Character Image positioned at bottom right */}
-              <div className="absolute bottom-20 right-6">
-                <img 
-                  src="/lovable-uploads/1f7694dd-1dce-430e-943d-eb8c54347a60.png"
-                  alt="Travel Character"
-                  className="w-32 h-auto object-contain"
-                />
-              </div>
-              
               <div className="absolute bottom-6 left-6 text-white">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-3">
                   <span className="text-orange-300 font-bold text-lg">TE</span>
