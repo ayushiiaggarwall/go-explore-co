@@ -420,6 +420,12 @@ export default function PlanTrip() {
                         onChange={(e) => setFormData(prev => ({ ...prev, currentDestination: e.target.value }))}
                         onFocus={() => setShowDestinations(true)}
                         onBlur={() => setTimeout(() => setShowDestinations(false), 200)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && formData.currentDestination.trim()) {
+                            e.preventDefault();
+                            fetchCityImage(formData.currentDestination.trim());
+                          }
+                        }}
                         placeholder={formData.destinations.length > 0 ? "Add another destination..." : "Enter your destination city..."}
                         className="text-lg p-4 h-14 text-center border-2 border-gray-200 focus:border-red-500 rounded-xl"
                       />
