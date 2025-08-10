@@ -152,8 +152,8 @@ export default function Home() {
                 <MapPin className="w-16 h-16 text-white" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2 text-center">Packages</h3>
-                <p className="text-muted-foreground mb-4 text-center">Personalise Trip Create your personalised vacation package with us</p>
+                <h3 className="text-xl font-semibold mb-2 text-center">Personalised Trip</h3>
+                <p className="text-muted-foreground mb-4 text-center">Create your personalised vacation package with us</p>
                 <button onClick={() => smoothNavigate('/search')} className="text-sky-500 hover:text-sky-600 font-medium block text-center w-full">
                   View Packages →
                 </button>
