@@ -16,18 +16,15 @@ TravelEase revolutionizes travel planning by offering an all-in-one platform whe
 - **Technology Stack**: Supabase Auth, React Router, TypeScript
 - **Features**:
   - Email/password authentication
-  - Protected routes with role-based access
   - Session management with automatic token refresh
   - Remember me functionality
-  - Password reset capabilities (optional)
+  - Password reset capabilities
 
 #### **2. Responsive Design System**
 - **Technology Stack**: Tailwind CSS, Radix UI, Lucide React Icons
 - **Features**:
   - Dark/light theme toggle
   - Mobile-first responsive design
-  - Custom component library with variants
-  - Semantic color tokens and design system
   - Accessible UI components
 
 ### ✈️ **Flight Search & Booking**
@@ -57,9 +54,9 @@ TravelEase revolutionizes travel planning by offering an all-in-one platform whe
 ### 🏨 **Hotel Search & Booking**
 
 #### **Technology Stack**:
-- **API**: TripAdvisor API / Hotel booking APIs
+- **API**: TripAdvisor API
 - **Backend**: Supabase Edge Functions
-- **UI**: Custom hotel cards with image galleries
+- **UI**: Custom hotel cards with image
 
 #### **Features**:
 - Location-based hotel search
@@ -82,7 +79,6 @@ TravelEase revolutionizes travel planning by offering an all-in-one platform whe
 - Interest-based activity suggestions
 - Multi-city trip planning
 - Date optimization
-- Budget consideration integration
 
 #### **Implementation**:
 ```typescript
@@ -114,41 +110,6 @@ TravelEase revolutionizes travel planning by offering an all-in-one platform whe
 - Automated lead processing
 ```
 
-### 🌍 **Dynamic City Image Generation**
-
-#### **Technology Stack**:
-- **API**: Custom city image database
-- **Fallback**: Unsplash API integration
-- **Caching**: Browser-based image caching
-
-#### **Features**:
-- Real-time city image loading
-- 200+ pre-configured city images
-- Intelligent fallback system
-- Loading states and error handling
-
-### 🎨 **Advanced Image Processing**
-
-#### **Technology Stack**:
-- **AI**: Hugging Face Transformers.js
-- **Model**: Segformer-b0-finetuned-ade-512-512
-- **Processing**: WebGPU acceleration
-
-#### **Features**:
-- Browser-based background removal
-- AI-powered image segmentation
-- Real-time image processing
-- WebGPU optimization for performance
-
-#### **Implementation**:
-```typescript
-// Background Removal Service
-- Client-side AI processing
-- No server dependency
-- Privacy-first approach
-- WebAssembly optimization
-```
-
 ### 📧 **Email Communication System**
 
 #### **Technology Stack**:
@@ -158,22 +119,17 @@ TravelEase revolutionizes travel planning by offering an all-in-one platform whe
 
 #### **Features**:
 - Custom email verification
-- Booking confirmations
-- Newsletter subscriptions
-- Transactional email support
 
 ### 💰 **Currency Conversion**
 
 #### **Technology Stack**:
-- **API**: Exchange rate APIs
+- **API**: Gemini API
 - **Caching**: Local storage caching
 - **Updates**: Real-time rate fetching
 
 #### **Features**:
 - Multi-currency support
 - Real-time exchange rates
-- Historical rate tracking
-- Auto-detection based on location
 
 ### 📋 **Visa Information System**
 
@@ -186,7 +142,13 @@ TravelEase revolutionizes travel planning by offering an all-in-one platform whe
 ### 🔗 **External Integrations**
 
 #### **Parallel Universe Integration**
-- **Link**: https://elegant-halva-e06184.netlify.app
+*Parallel Worlds Trip* is an revolutionary AI-powered travel application that takes you on a journey of self-discovery through alternate realities. Ever wondered who you could be in another universe? What if you were a billionaire in Dubai, a student in Mumbai, or an artist in Paris? 
+
+This app uses cutting-edge AI to generate your parallel universe persona and creates personalized travel itineraries based on that alternate version of yourself. It's not just travel planning—it's *multiverse exploration*.
+
+### 🎭 The Concept
+
+	⁠"What if you lived differently? Discover your alternate universe self, steal their amazing travel itinerary, and earn Universe Points by living their adventures."
 - Seamless navigation to partner platform
 - Integrated user experience
 
