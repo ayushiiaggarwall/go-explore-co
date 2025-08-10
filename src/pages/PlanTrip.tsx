@@ -129,40 +129,39 @@ export default function PlanTrip() {
     return filtered.slice(0, limit);
   };
 
-  // Function to fetch city image using predefined images
+  // Function to fetch AI-generated city image using Gemini
   const fetchCityImage = useCallback(async (cityName: string) => {
     if (!cityName || cityName.length < 3) return;
     
     setLoadingImage(true);
     try {
-      // Use predefined city images for better reliability
-      const cityImages: { [key: string]: string } = {
-        'mumbai': 'https://images.unsplash.com/photo-1595658658481-d53d3f999875?q=80&w=1000',
-        'delhi': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=1000', 
-        'bangalore': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=1000',
-        'hyderabad': 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?q=80&w=1000',
-        'chennai': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
-        'kolkata': 'https://images.unsplash.com/photo-1558431382-27343421d9a9?q=80&w=1000',
-        'pune': 'https://images.unsplash.com/photo-1595658658481-d53d3f999875?q=80&w=1000',
-        'jaipur': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1000',
-        'goa': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1000',
-        'paris': 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?q=80&w=1000',
-        'london': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=1000',
-        'tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1000',
-        'new york': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1000',
-        'los angeles': 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=1000',
-        'dubai': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1000',
-        'singapore': 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=1000'
-      };
+      console.log(`🎨 Generating AI image for: ${cityName}`);
       
-      const normalizedCity = cityName.toLowerCase();
-      const imageUrl = cityImages[normalizedCity] || 
-                      `https://images.unsplash.com/photo-1444927714506-8492d94b5ba0?q=80&w=1000&auto=format&fit=crop`;
+      const response = await fetch('https://ioifldpjlfotqvtaidem.supabase.co/functions/v1/generate-city-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cityName: cityName
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
       
-      setCityImage(imageUrl);
+      if (data.success && data.imageUrl) {
+        setCityImage(data.imageUrl);
+        console.log(`✅ ${data.isGenerated ? 'Generated' : 'Fallback'} image loaded for ${cityName}`);
+      } else {
+        throw new Error('No image URL in response');
+      }
     } catch (error) {
       console.error('Error fetching city image:', error);
-      // Fallback: use a default travel image
+      // Final fallback to a beautiful default travel image
       setCityImage('https://images.unsplash.com/photo-1444927714506-8492d94b5ba0?q=80&w=1000&auto=format&fit=crop');
     } finally {
       setLoadingImage(false);
