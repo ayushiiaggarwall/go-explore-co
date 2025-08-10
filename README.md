@@ -1,6 +1,5 @@
 # TravelEase - Comprehensive Travel Booking Platform
 
-![TravelEase Logo](public/image.png)
 
 TravelEase is a modern, full-stack travel booking and planning platform that combines AI-powered trip planning with comprehensive booking capabilities for flights, hotels, and vacation packages.
 
