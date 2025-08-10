@@ -157,15 +157,20 @@ export default function PlanTrip() {
       const data = await response.json();
       
       if (data.success && data.imageUrl) {
+        console.log(`🖼️ Setting city image URL:`, data.imageUrl);
         setCityImage(data.imageUrl);
         console.log(`✅ ${data.isGenerated ? 'Generated' : 'Fallback'} image loaded for ${cityName}`);
       } else {
+        console.log(`❌ No image URL in response:`, data);
         throw new Error('No image URL in response');
       }
     } catch (error) {
       console.error('Error fetching city image:', error);
+      console.log(`🔄 Setting fallback image for ${cityName}`);
       // Final fallback to a beautiful default travel image
-      setCityImage('https://images.unsplash.com/photo-1444927714506-8492d94b5ba0?q=80&w=1000&auto=format&fit=crop');
+      const fallbackUrl = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1000&auto=format&fit=crop';
+      setCityImage(fallbackUrl);
+      console.log(`✅ Fallback image set to:`, fallbackUrl);
     } finally {
       setLoadingImage(false);
     }
@@ -541,7 +546,13 @@ export default function PlanTrip() {
                     src={cityImage} 
                     alt={`${formData.destinations[formData.destinations.length - 1] || formData.currentDestination} cityscape`}
                     className="w-full h-full object-cover"
-                    onError={() => setCityImage(null)}
+                    onError={() => {
+                      console.error('Image failed to load:', cityImage);
+                      setCityImage(null);
+                    }}
+                    onLoad={() => {
+                      console.log('✅ Image successfully loaded:', cityImage);
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                 </div>
