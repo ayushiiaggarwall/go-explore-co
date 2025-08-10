@@ -154,22 +154,22 @@ export default function HotelSearchResults() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <section className="bg-gradient-to-br from-orange-600 via-orange-700 to-red-600 text-white py-8">
+      <section className="bg-gradient-to-br from-green-600 via-emerald-700 to-teal-800 text-white py-8">
         <div className="container mx-auto px-4">
           <Link 
             to="/book-hotel"
-            className="inline-flex items-center gap-2 text-orange-100 hover:text-white mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-green-100 hover:text-white mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Hotel Search
           </Link>
           
           <div className="flex items-center gap-4">
-            <Building2 className="w-8 h-8 text-orange-200" />
+            <Building2 className="w-8 h-8 text-green-200" />
             <div>
               <h1 className="text-2xl font-bold">TripAdvisor Hotel Results</h1>
               {destination && (
-                <p className="text-orange-100">{destination}</p>
+                <p className="text-green-100">{destination}</p>
               )}
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function HotelSearchResults() {
                   <span>•</span>
                   <span>{tripAdvisorResults.searchParams.rooms || 1} room{(tripAdvisorResults.searchParams.rooms || 1) > 1 ? 's' : ''}</span>
                   <span>•</span>
-                  <span className="text-orange-600 dark:text-orange-400">
+                  <span className="text-green-600 dark:text-green-400">
                     {tripAdvisorResults.totalResults} hotels found on TripAdvisor
                   </span>
                 </div>
@@ -257,12 +257,12 @@ export default function HotelSearchResults() {
                             {/* TripAdvisor Rating */}
                             {hotel.rating && hotel.rating > 0 && (
                               <div className="flex items-center gap-2 mb-2">
-                                <div className="flex text-orange-400">
+                                <div className="flex text-green-400">
                                   {[...Array(Math.floor(hotel.rating))].map((_, i) => (
                                     <Star key={i} className="w-4 h-4 fill-current" />
                                   ))}
                                 </div>
-                                <span className="bg-orange-600 text-white px-2 py-1 rounded text-sm font-medium">
+                                <span className="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">
                                   {hotel.rating.toFixed(1)}
                                 </span>
                                 <span className="text-sm text-muted-foreground">{getRatingText(hotel.rating)}</span>
@@ -293,7 +293,7 @@ export default function HotelSearchResults() {
                             {hotel.amenities && hotel.amenities.length > 0 && (
                               <div className="flex flex-wrap gap-1 mb-4">
                                 {hotel.amenities.slice(0, 4).map((amenity, i) => (
-                                  <span key={i} className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-1 rounded">
+                                  <span key={i} className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded">
                                     {amenity}
                                   </span>
                                 ))}
@@ -310,7 +310,7 @@ export default function HotelSearchResults() {
                           <div className="text-right ml-6">
                             {hotel.priceFrom && (
                               <div className="mb-4">
-                                <div className="text-lg font-bold text-orange-600">
+                                <div className="text-lg font-bold text-green-600">
                                   From ${hotel.priceFrom}
                                 </div>
                                 <div className="text-sm text-muted-foreground">per night</div>
@@ -355,7 +355,7 @@ export default function HotelSearchResults() {
                                   toast.error('Failed to save booking. Please try again.');
                                 }
                               }}
-                              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                             >
                               View on TripAdvisor
                               <ExternalLink className="w-4 h-4" />
