@@ -567,12 +567,12 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             {editingItem === item.id ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 w-full bg-background border border-border rounded-lg p-3">
                 <input
                   type="text"
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
-                  className="flex-1 px-2 py-1 text-sm border border-border rounded focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  className="flex-1 px-3 py-2 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       saveEdit(cityName, section, item.id);
@@ -581,13 +581,24 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
                       setEditText('');
                     }
                   }}
+                  placeholder="Enter new title..."
                   autoFocus
                 />
                 <Button
                   onClick={() => saveEdit(cityName, section, item.id)}
-                  className="px-2 py-1 text-xs"
+                  className="px-3 py-2 text-xs bg-green-500 hover:bg-green-600 text-white flex items-center space-x-1"
                 >
-                  Save
+                  <Save className="w-3 h-3" />
+                  <span>Save</span>
+                </Button>
+                <Button
+                  onClick={() => {
+                    setEditingItem(null);
+                    setEditText('');
+                  }}
+                  className="px-3 py-2 text-xs bg-gray-500 hover:bg-gray-600 text-white"
+                >
+                  Cancel
                 </Button>
               </div>
             ) : (
