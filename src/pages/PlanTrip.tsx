@@ -152,7 +152,7 @@ export default function PlanTrip() {
       'kanpur': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
       'nagpur': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=1000',
       'indore': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
-      'chandigarh': 'https://images.unsplash.com/photo-1580548379088-89a13c8e1c4f?q=80&w=1000',
+      'chandigarh': 'https://images.unsplash.com/photo-1590736969955-71cc94901144?q=80&w=1000',
       'bhopal': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
       'visakhapatnam': 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=1000',
       'patna': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
