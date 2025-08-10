@@ -1,11 +1,11 @@
-import { Plane, Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Plane, Facebook, Twitter, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
     <footer className="bg-white dark:bg-gray-950 text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
@@ -47,24 +47,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center space-x-2">
-                <Phone className="w-5 h-5 text-sky-500" />
-                <span className="text-gray-600 dark:text-gray-300">+1 (555) 123-4567</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <Mail className="w-5 h-5 text-sky-500" />
-                <span className="text-gray-600 dark:text-gray-300">info@travelease.com</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <MapPin className="w-5 h-5 text-sky-500" />
-                <span className="text-gray-600 dark:text-gray-300">123 Travel St, NY 10001</span>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Newsletter Signup */}
