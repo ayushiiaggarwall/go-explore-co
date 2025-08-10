@@ -152,7 +152,7 @@ export default function PlanTrip() {
       'kanpur': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
       'nagpur': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=1000',
       'indore': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
-      'chandigarh': 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1000',
+      'chandigarh': 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?q=80&w=1000',
       'bhopal': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
       'visakhapatnam': 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=1000',
       'patna': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
@@ -197,6 +197,7 @@ export default function PlanTrip() {
       'kashmir': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
       'leh': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
       'ladakh': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'khula haath': 'https://images.unsplash.com/photo-1578448073881-c71b2b2e0133?q=80&w=1000',
       
       // International Cities
       'paris': 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?q=80&w=1000',
