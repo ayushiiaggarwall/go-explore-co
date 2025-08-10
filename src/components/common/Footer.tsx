@@ -38,7 +38,9 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Travel Tools</h3>
             <ul className="space-y-2">
-              <li><Link to="/recommendations" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Books & Movies</Link></li>
+              <li><Link to="/book-flight" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Book Flights</Link></li>
+              <li><Link to="/book-hotel" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Book Hotels</Link></li>
+              <li><Link to="/plan-trip" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Plan Trip</Link></li>
               <li><Link to="/visa-info" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Visa Information</Link></li>
               <li><Link to="/currency-converter" className="text-gray-300 hover:text-sky-400 dark:hover:text-sky-300 transition-colors">Currency Converter</Link></li>
             </ul>
@@ -87,7 +89,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t border-gray-800 dark:border-gray-700 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            © 2024 TravelEase. All rights reserved. | Privacy Policy | Terms of Service
+            © 2025 TravelEase. All rights reserved. | Privacy Policy | Terms of Service
           </p>
         </div>
       </div>
