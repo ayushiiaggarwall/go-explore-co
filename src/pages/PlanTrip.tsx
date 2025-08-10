@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Input from '../components/ui/input';
@@ -116,6 +116,8 @@ export default function PlanTrip() {
   });
   const [showItinerary] = useState(false);
   const [showDestinations, setShowDestinations] = useState(false);
+  const [cityImage, setCityImage] = useState<string | null>(null);
+  const [loadingImage, setLoadingImage] = useState(false);
 
   const searchIndiaCities = (query: string, limit: number = 8): string[] => {
     if (!query) return INDIAN_CITIES.slice(0, limit);
@@ -127,6 +129,58 @@ export default function PlanTrip() {
     return filtered.slice(0, limit);
   };
 
+  // Function to fetch city image using predefined images
+  const fetchCityImage = useCallback(async (cityName: string) => {
+    if (!cityName || cityName.length < 3) return;
+    
+    setLoadingImage(true);
+    try {
+      // Use predefined city images for better reliability
+      const cityImages: { [key: string]: string } = {
+        'mumbai': 'https://images.unsplash.com/photo-1595658658481-d53d3f999875?q=80&w=1000',
+        'delhi': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=1000', 
+        'bangalore': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=1000',
+        'hyderabad': 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?q=80&w=1000',
+        'chennai': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+        'kolkata': 'https://images.unsplash.com/photo-1558431382-27343421d9a9?q=80&w=1000',
+        'pune': 'https://images.unsplash.com/photo-1595658658481-d53d3f999875?q=80&w=1000',
+        'jaipur': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1000',
+        'goa': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1000',
+        'paris': 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?q=80&w=1000',
+        'london': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=1000',
+        'tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1000',
+        'new york': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1000',
+        'los angeles': 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=1000',
+        'dubai': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1000',
+        'singapore': 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=1000'
+      };
+      
+      const normalizedCity = cityName.toLowerCase();
+      const imageUrl = cityImages[normalizedCity] || 
+                      `https://images.unsplash.com/photo-1444927714506-8492d94b5ba0?q=80&w=1000&auto=format&fit=crop`;
+      
+      setCityImage(imageUrl);
+    } catch (error) {
+      console.error('Error fetching city image:', error);
+      // Fallback: use a default travel image
+      setCityImage('https://images.unsplash.com/photo-1444927714506-8492d94b5ba0?q=80&w=1000&auto=format&fit=crop');
+    } finally {
+      setLoadingImage(false);
+    }
+  }, []);
+
+  // Debounced effect to fetch image when destination changes
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const destination = formData.destinations[formData.destinations.length - 1] || formData.currentDestination;
+      if (destination && destination.length >= 3) {
+        fetchCityImage(destination);
+      }
+    }, 1000); // Wait 1 second after user stops typing
+
+    return () => clearTimeout(timeout);
+  }, [formData.currentDestination, formData.destinations, fetchCityImage]);
+
   const handleDestinationClick = (destination: string) => {
     setFormData(prev => ({ 
       ...prev, 
@@ -136,6 +190,8 @@ export default function PlanTrip() {
         : [...prev.destinations, destination]
     }));
     setShowDestinations(false);
+    // Immediately fetch image for selected destination
+    fetchCityImage(destination);
   };
 
   const removeDestination = (destinationToRemove: string) => {
@@ -474,10 +530,33 @@ export default function PlanTrip() {
             )}
           </div>
 
-          {/* Right Column - Image */}
+          {/* Right Column - City Image */}
           <div className="lg:block hidden">
-            <div className="bg-gradient-to-br from-orange-400 via-red-500 to-purple-600 rounded-xl h-[500px] relative overflow-hidden shadow-xl">
-              <div className="absolute inset-0 bg-black/20"></div>
+            <div className="relative rounded-xl h-[500px] overflow-hidden shadow-xl">
+              {cityImage ? (
+                <div className="relative h-full">
+                  <img 
+                    src={cityImage} 
+                    alt={`${formData.destinations[formData.destinations.length - 1] || formData.currentDestination} cityscape`}
+                    className="w-full h-full object-cover"
+                    onError={() => setCityImage(null)}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                </div>
+              ) : (
+                <div className="bg-gradient-to-br from-orange-400 via-red-500 to-purple-600 h-full relative">
+                  <div className="absolute inset-0 bg-black/20"></div>
+                  {loadingImage && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                        <p className="text-sm">Loading city image...</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="absolute bottom-6 left-6 text-white">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-3">
                   <span className="text-orange-300 font-bold text-lg">TE</span>
