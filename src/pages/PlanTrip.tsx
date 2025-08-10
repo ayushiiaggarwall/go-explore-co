@@ -647,7 +647,12 @@ export default function PlanTrip() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                 </div>
               ) : (
-                <div className="bg-gradient-to-br from-orange-400 via-red-500 to-purple-600 h-full relative">
+                <div className="relative h-full">
+                  <img 
+                    src="/lovable-uploads/0b4e075b-7f65-4e86-827f-2442f5653512.png"
+                    alt="Airplane wing view above clouds"
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-black/20"></div>
                   {loadingImage && (
                     <div className="absolute inset-0 flex items-center justify-center">
