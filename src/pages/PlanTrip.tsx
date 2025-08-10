@@ -668,7 +668,7 @@ export default function PlanTrip() {
               {/* Character Image positioned at bottom right */}
               <div className="absolute bottom-20 right-6">
                 <img 
-                  src="/lovable-uploads/6388fcab-d647-45a2-8a45-ed2fa64b81a6.png"
+                  src="/lovable-uploads/1f7694dd-1dce-430e-943d-eb8c54347a60.png"
                   alt="Travel Character"
                   className="w-32 h-auto object-contain"
                 />
