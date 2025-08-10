@@ -41,6 +41,7 @@ export default function Footer() {
               <li><Link to="/book-flight" className="text-gray-600 dark:text-gray-300 hover:text-sky-500 dark:hover:text-sky-300 transition-colors">Book Flights</Link></li>
               <li><Link to="/book-hotel" className="text-gray-600 dark:text-gray-300 hover:text-sky-500 dark:hover:text-sky-300 transition-colors">Book Hotels</Link></li>
               <li><Link to="/plan-trip" className="text-gray-600 dark:text-gray-300 hover:text-sky-500 dark:hover:text-sky-300 transition-colors">Plan Trip</Link></li>
+              <li><a href="https://elegant-halva-e06184.netlify.app" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-gray-300 hover:text-sky-500 dark:hover:text-sky-300 transition-colors">Parallel Universe</a></li>
               <li><Link to="/visa-info" className="text-gray-600 dark:text-gray-300 hover:text-sky-500 dark:hover:text-sky-300 transition-colors">Visa Information</Link></li>
               <li><Link to="/currency-converter" className="text-gray-600 dark:text-gray-300 hover:text-sky-500 dark:hover:text-sky-300 transition-colors">Currency Converter</Link></li>
             </ul>
