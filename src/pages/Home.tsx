@@ -1,7 +1,5 @@
 import { Navigate } from 'react-router-dom';
 import { Plane, Hotel, MapPin, Star, Shield, Clock } from 'lucide-react';
-import PackageCard from '../components/cards/PackageCard';
-import { mockPackages } from '../services/mockData';
 import { useAuth } from '../hooks/useAuth';
 import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 
@@ -13,12 +11,6 @@ export default function Home() {
   if (!isLoading && user) {
     return <Navigate to="/dashboard" replace />;
   }
-
-  const handlePackageBook = () => {
-    smoothNavigate('/search');
-  };
-
-
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -119,34 +111,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Popular Packages */}
-      <section className="py-16 bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Popular Vacation Packages</h2>
-            <p className="text-lg text-muted-foreground">Discover our handpicked travel packages for the perfect getaway.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mockPackages.map(pkg => (
-              <PackageCard
-                key={pkg.id}
-                package={pkg}
-                onBook={handlePackageBook}
-              />
-            ))}
-          </div>
-          
-          <div className="text-center mt-12">
-            <button
-              onClick={() => smoothNavigate('/search')}
-              className="inline-flex items-center px-6 py-3 bg-sky-500 text-white font-medium rounded-md hover:bg-sky-600 transition-colors"
-            >
-              View All Packages
-            </button>
-          </div>
-        </div>
-      </section>
 
       {/* Services Overview */}
       <section className="py-16 bg-muted/50">
@@ -189,7 +153,7 @@ export default function Home() {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Packages</h3>
-                <p className="text-muted-foreground mb-4 text-center">Save with our curated vacation packages and deals.</p>
+                <p className="text-muted-foreground mb-4 text-center">Personalise Trip Create your personalised vacation package with us</p>
                 <button onClick={() => smoothNavigate('/search')} className="text-sky-500 hover:text-sky-600 font-medium block text-center w-full">
                   View Packages →
                 </button>
