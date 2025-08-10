@@ -63,7 +63,8 @@ You are an expert travel planner creating a personalized itinerary. Generate a d
 8. Consider opening hours and seasonal factors
 9. Include backup indoor activities for bad weather
 
-*OUTPUT FORMAT (JSON ONLY; NO EXTRA TEXT):*
+*OUTPUT FORMAT (VALID JSON ONLY; NO EXTRA TEXT OR MARKDOWN):*
+IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the JSON. Do not wrap in markdown code blocks. Ensure all strings are properly quoted and there are no trailing commas.
 {
   "cityName": "${cityName}",
   "tripDuration": "${numberOfDays} days",
@@ -183,19 +184,78 @@ You are an expert travel planner creating a personalized itinerary. Generate a d
       parsed = JSON.parse(raw);
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
-      // Last resort: try to fix trailing commas / smart quotes
-      const cleaned = raw
-        .replace(/[""]/g, '"')
-        .replace(/['']/g, "'")
-        .replace(/,\s*([}\]])/g, "$1");
+      console.log("Raw response causing error:", raw);
+      
+      // Enhanced cleanup: try to fix common JSON issues
+      let cleaned = raw
+        .replace(/[""]/g, '"')  // Smart quotes to regular quotes
+        .replace(/['']/g, "'")  // Smart single quotes
+        .replace(/,\s*([}\]])/g, "$1")  // Trailing commas
+        .replace(/([{,]\s*)(\w+):/g, '$1"$2":')  // Unquoted keys
+        .replace(/:\s*'([^']*)'/g, ': "$1"')  // Single quoted values to double
+        .replace(/\n\s*\n/g, '\n')  // Remove extra newlines
+        .trim();
+
+      // Try to fix common array/object issues
+      cleaned = cleaned
+        .replace(/,\s*}/g, '}')  // Trailing comma before }
+        .replace(/,\s*]/g, ']')  // Trailing comma before ]
+        .replace(/}\s*{/g, '},{')  // Missing comma between objects
+        .replace(/]\s*\[/g, '],[');  // Missing comma between arrays
+
       try {
         parsed = JSON.parse(cleaned);
+        console.log("✅ Successfully parsed JSON after cleanup");
       } catch (finalError) {
         console.error("Final parse error:", finalError);
-        console.log("Raw response:", raw);
-        return new Response(`JSON parse error: ${finalError}`, { status: 500, headers: cors });
+        console.log("Cleaned response:", cleaned);
+        
+        // Final attempt: try to extract valid JSON portion
+        try {
+          // Find the first { and try to match braces
+          const startIndex = cleaned.indexOf('{');
+          if (startIndex !== -1) {
+            let braceCount = 0;
+            let endIndex = startIndex;
+            
+            for (let i = startIndex; i < cleaned.length; i++) {
+              if (cleaned[i] === '{') braceCount++;
+              if (cleaned[i] === '}') braceCount--;
+              if (braceCount === 0) {
+                endIndex = i + 1;
+                break;
+              }
+            }
+            
+            const partialJson = cleaned.substring(startIndex, endIndex);
+            parsed = JSON.parse(partialJson);
+            console.log("✅ Successfully parsed partial JSON");
+          } else {
+            throw finalError;
+          }
+        } catch (partialError) {
+          return new Response(`JSON parse error: ${finalError}. Raw response: ${raw.substring(0, 1000)}...`, { status: 500, headers: cors });
+        }
       }
     }
+
+    // Validate the parsed JSON structure
+    const requiredFields = ['cityName', 'tripDuration', 'dayByDayItinerary'];
+    const missingFields = requiredFields.filter(field => !parsed[field]);
+    
+    if (missingFields.length > 0) {
+      console.error("Missing required fields:", missingFields);
+      // Try to provide defaults for missing fields
+      if (!parsed.cityName) parsed.cityName = cityName;
+      if (!parsed.tripDuration) parsed.tripDuration = `${numberOfDays} days`;
+      if (!parsed.dayByDayItinerary) parsed.dayByDayItinerary = [];
+    }
+
+    // Ensure arrays exist even if empty
+    parsed.mustDoAttractions = parsed.mustDoAttractions || [];
+    parsed.foodAndDrinks = parsed.foodAndDrinks || [];
+    parsed.hotelRecommendations = parsed.hotelRecommendations || [];
+    parsed.localInsiderTips = parsed.localInsiderTips || [];
 
     console.log("Successfully generated itinerary for:", cityName);
 

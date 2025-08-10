@@ -274,7 +274,7 @@ Make sure every recommendation is genuinely specific to ${city} and not generic 
 
   async generateFullItinerary(tripData: TripFormData): Promise<any> {
     try {
-      console.log(`🗺️ Gemini: Generating full itinerary for trip:`, tripData);
+      console.log(`🚀 Webhook: Generating itinerary for trip:`, tripData);
       
       const numberOfDays = tripData.startDate && tripData.endDate
         ? Math.max(1, Math.ceil((tripData.endDate.getTime() - tripData.startDate.getTime()) / (1000*60*60*24)) + 1)
@@ -290,10 +290,14 @@ Make sure every recommendation is genuinely specific to ${city} and not generic 
         foodDrinks: tripData.interests.filter(i => ['Coffee', 'International', 'Chinese', 'French', 'Indian', 'Italian', 'Japanese', 'Korean', 'Mexican', 'Thai', 'Vegan', 'Seafood', 'Sushi', 'Ice cream', 'Dining Establishments', 'Bakery', 'Bar', 'Cafe', 'Restaurants', 'Drinks'].includes(i)),
         entertainment: tripData.interests.filter(i => ['Shopping', 'Dancing', 'Cinemas', 'Adult entertainment', 'Comedy clubs'].includes(i)),
         sightseeing: tripData.interests.filter(i => ['Nature', 'Art', 'Museums', 'Historical sites', 'Bridges', 'Libraries', 'Memorials', 'Lookout points', 'Architecture', 'Ships', 'Aquariums', 'Urban architecture', 'Interesting streets'].includes(i)),
-        relaxation: tripData.interests.filter(i => ['Massage', 'Wellness'].includes(i))
+        relaxation: tripData.interests.filter(i => ['Massage', 'Wellness'].includes(i)),
+        // Add all interests for more comprehensive data
+        allInterests: tripData.interests
       };
 
-      const response = await fetch(`${this.supabaseUrl}/functions/v1/generate-itinerary`, {
+      console.log('🔗 Sending data to n8n webhook:', payload);
+
+      const response = await fetch('https://pzon8n.app.n8n.cloud/webhook/5a2b14ec-6a5d-436b-89fd-5675a268a6c4', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -303,14 +307,22 @@ Make sure every recommendation is genuinely specific to ${city} and not generic 
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Generate itinerary error: ${errorText}`);
+        console.error('❌ Webhook error response:', errorText);
+        
+        // Handle specific webhook errors
+        if (response.status === 404) {
+          throw new Error('Webhook not found - please activate the n8n workflow and try again');
+        }
+        
+        throw new Error(`Webhook error: ${response.status} - ${errorText}`);
       }
 
       const itinerary = await response.json();
-      console.log(`✅ Gemini: Generated full itinerary for ${tripData.tripName}`);
+      console.log(`✅ Webhook: Generated itinerary for ${tripData.tripName}`);
+      console.log('📄 Full webhook response:', JSON.stringify(itinerary, null, 2));
       return itinerary;
     } catch (error) {
-      console.error('❌ Gemini full itinerary generation error:', error);
+      console.error('❌ Webhook itinerary generation error:', error);
       throw error;
     }
   }

@@ -31,6 +31,366 @@ const PROGRESS_STEPS = [
   'Finalizing your personalized itinerary...'
 ];
 
+// Transform webhook response to match UI data structure
+function transformWebhookResponse(response: any, cityName: string): ItineraryData & any {
+  console.log('🔄 Transforming webhook response for', cityName);
+  console.log('📋 Raw response structure:', JSON.stringify(response, null, 2));
+  
+  // Handle different possible response structures
+  let data = response.data || response.body || response.result || response;
+  
+  // Handle n8n response format with 'output' field containing JSON string
+  if (data.output && typeof data.output === 'string') {
+    console.log('🔍 Found n8n output field, extracting JSON...');
+    try {
+      // Extract JSON from markdown code blocks
+      const jsonMatch = data.output.match(/```json\s*([\s\S]*?)```/i) || data.output.match(/```([\s\S]*?)```/i);
+      const jsonString = jsonMatch ? jsonMatch[1] : data.output;
+      data = JSON.parse(jsonString);
+      console.log('✅ Successfully parsed JSON from n8n output');
+    } catch (parseError) {
+      console.error('❌ Failed to parse n8n output JSON:', parseError);
+      // Try to parse the entire output as JSON
+      try {
+        data = JSON.parse(data.output);
+      } catch (finalError) {
+        console.error('❌ Final parse error for n8n output:', finalError);
+        data = response; // Fall back to original response
+      }
+    }
+  }
+  
+  console.log('📦 Extracted data:', JSON.stringify(data, null, 2));
+  
+  // If response already matches our structure, use it directly
+  if (data.mustDos && data.foodRecommendations && data.dayPlans) {
+    console.log('✅ Using direct structure match');
+    return data;
+  }
+  
+  // Transform structured response (similar to Gemini format)
+  if (data.mustDoAttractions || data.foodAndDrinks || data.dayByDayItinerary) {
+    console.log('✅ Using structured transformation (Gemini-like format)');
+    const transformedItinerary: ItineraryData & any = {
+      mustDos: (data.mustDoAttractions || []).map((attraction: any, index: number) => ({
+        id: `must_do_${index + 1}`,
+        title: attraction.name || attraction.title || 'Attraction',
+        description: `${attraction.description || ''}${attraction.bestTimeToVisit ? `. Best time: ${attraction.bestTimeToVisit}` : ''}${attraction.insiderTip ? `. ${attraction.insiderTip}` : ''}`,
+        category: 'sightseeing' as const,
+        estimatedTime: attraction.estimatedTime || '2-3 hours',
+        completed: false
+      })),
+      
+      foodRecommendations: (data.foodAndDrinks || []).map((food: any, index: number) => ({
+        id: `food_${index + 1}`,
+        title: food.restaurantName || food.name || food.title || 'Restaurant',
+        description: `${food.specialtyNote || food.description || ''}${food.mustTryDishes ? `. Must try: ${Array.isArray(food.mustTryDishes) ? food.mustTryDishes.join(', ') : food.mustTryDishes}` : ''}${food.priceRange ? `. ${food.priceRange}` : ''}`,
+        category: 'restaurant' as const,
+        cuisine: food.cuisine || 'Local',
+        completed: false
+      })),
+      
+      dayPlans: (data.dayByDayItinerary || []).map((day: any) => ({
+        id: `day_${day.day || day.dayNumber || 1}`,
+        day: `Day ${day.day || day.dayNumber || 1}`,
+        theme: day.theme || `Day ${day.day || day.dayNumber || 1} in ${cityName}`,
+        activities: [
+          {
+            id: `day${day.day || 1}_morning`,
+            time: 'Morning' as const,
+            title: day.morning?.activity || day.morning?.title || 'Morning Activity',
+            description: day.morning?.description || '',
+            completed: false
+          },
+          {
+            id: `day${day.day || 1}_afternoon`,
+            time: 'Afternoon' as const,
+            title: day.afternoon?.activity || day.afternoon?.title || 'Afternoon Activity',
+            description: `${day.afternoon?.description || ''}${day.afternoon?.lunchRecommendation ? ` | Lunch: ${day.afternoon.lunchRecommendation.restaurant || day.afternoon.lunchRecommendation.name} - ${day.afternoon.lunchRecommendation.dish || day.afternoon.lunchRecommendation.description}` : ''}`,
+            completed: false
+          },
+          {
+            id: `day${day.day || 1}_evening`,
+            time: 'Evening' as const,
+            title: day.evening?.activity || day.evening?.title || 'Evening Activity',
+            description: `${day.evening?.description || ''}${day.evening?.dinnerRecommendation ? ` | Dinner: ${day.evening.dinnerRecommendation.restaurant || day.evening.dinnerRecommendation.name} - ${day.evening.dinnerRecommendation.speciality || day.evening.dinnerRecommendation.description}` : ''}`,
+            completed: false
+          }
+        ]
+      })),
+      
+      hotels: (data.hotelRecommendations || []).map((hotel: any, index: number) => ({
+        id: `hotel_${index + 1}`,
+        title: hotel.name || hotel.title || 'Hotel',
+        name: hotel.name || hotel.title || 'Hotel',
+        category: hotel.priceRange?.includes('$$$$') || hotel.category === 'luxury' ? 'luxury' : 
+                 hotel.priceRange?.includes('$$$') || hotel.category === 'mid-range' ? 'mid-range' : 'budget' as const,
+        description: hotel.whyRecommended || hotel.description || 'Recommended accommodation',
+        estimatedPrice: hotel.priceRange || hotel.price || '$100-200/night',
+        nearbyAttractions: hotel.nearbyAttractions || [],
+        completed: false
+      })),
+      
+      transport: [
+        {
+          id: 'transport_getting_to_city',
+          title: 'Getting to City',
+          type: 'Airport Transfer',
+          description: data.transportationTips?.gettingToCity || 'Transportation to the city',
+          tips: data.transportationTips?.costSavingTips || 'Check for transportation options',
+          completed: false
+        },
+        {
+          id: 'transport_getting_around',
+          title: 'Getting Around',
+          type: 'Local Transport',
+          description: data.transportationTips?.gettingAround || 'Local transportation options',
+          tips: data.transportationTips?.downloadApps?.join?.(', ') || 'Download local transport apps',
+          completed: false
+        }
+      ],
+      
+      localTips: (data.localInsiderTips || []).map((tip: string | any, index: number) => ({
+        id: `tip_${index + 1}`,
+        title: `Insider Tip ${index + 1}`,
+        description: typeof tip === 'string' ? tip : tip.description || tip.tip || 'Local tip',
+        category: 'culture' as const,
+        tip: typeof tip === 'string' ? tip : tip.description || tip.tip || 'Local tip',
+        completed: false
+      })),
+      
+      // Additional data
+      overview: data.overview || `Discover the best of ${cityName} with this personalized itinerary.`,
+      budgetEstimate: data.budgetEstimate || {
+        dailyFoodBudget: '$30-80 per person',
+        attractionsCost: '$100-300 total',
+        transportationCost: '$15-40 per day',
+        totalEstimate: '$500-1000 for entire trip'
+      },
+      weatherConsiderations: data.weatherConsiderations || {
+        seasonalTips: `Check weather conditions for ${cityName} during your travel dates`,
+        backupIndoorActivities: ['Museums', 'Shopping Centers', 'Cafes'],
+        whatToPack: ['Comfortable walking shoes', 'Weather-appropriate clothing']
+      }
+    };
+    
+    console.log('🎯 Final transformed itinerary:', JSON.stringify(transformedItinerary, null, 2));
+    return transformedItinerary;
+  }
+  
+  // If response is in a different format, try to parse it flexibly
+  console.log('🔄 Using flexible parsing with fallback');
+  const fallbackItinerary = generateComprehensiveFallbackItinerary(cityName, { 
+    tripName: data.tripName || 'Your Trip',
+    cities: [cityName],
+    interests: data.allInterests || []
+  } as TripFormData);
+  
+  // Try to merge any available data from webhook response
+  if (data.attractions) {
+    fallbackItinerary.mustDos = data.attractions.map((attr: any, idx: number) => ({
+      id: `must_do_${idx + 1}`,
+      title: attr.name || attr.title || attr,
+      description: attr.description || 'Recommended attraction',
+      category: 'sightseeing' as const,
+      estimatedTime: attr.estimatedTime || '2-3 hours',
+      completed: false
+    }));
+  }
+  
+  if (data.restaurants) {
+    fallbackItinerary.foodRecommendations = data.restaurants.map((rest: any, idx: number) => ({
+      id: `food_${idx + 1}`,
+      title: rest.name || rest.title || rest,
+      description: rest.description || 'Recommended restaurant',
+      category: 'restaurant' as const,
+      cuisine: rest.cuisine || 'Local',
+      completed: false
+    }));
+  }
+  
+  console.log('🎯 Final fallback itinerary:', JSON.stringify(fallbackItinerary, null, 2));
+  return fallbackItinerary;
+}
+
+// Comprehensive fallback itinerary generator
+function generateComprehensiveFallbackItinerary(cityName: string, tripData: TripFormData): ItineraryData & any {
+  const numberOfDays = tripData.startDate && tripData.endDate
+    ? Math.max(1, Math.ceil((tripData.endDate.getTime() - tripData.startDate.getTime()) / (1000*60*60*24)) + 1)
+    : 7;
+
+  const cityLowerCase = cityName.toLowerCase();
+  
+  // City-specific data
+  const cityData: { [key: string]: any } = {
+    mumbai: {
+      mustDoAttractions: [
+        { name: "Gateway of India", location: "Apollo Bandar, Colaba", description: "Iconic arch monument overlooking the Arabian Sea", bestTimeToVisit: "Evening", insiderTip: "Visit at sunset for the best photos", estimatedTime: "1-2 hours" },
+        { name: "Marine Drive", location: "Netaji Subhash Chandra Bose Rd", description: "The Queen's Necklace - beautiful seafront promenade", bestTimeToVisit: "Evening", insiderTip: "Perfect for evening walks and street food", estimatedTime: "2-3 hours" },
+        { name: "Elephanta Caves", location: "Elephanta Island", description: "Ancient rock-cut caves with Hindu sculptures", bestTimeToVisit: "Morning", insiderTip: "Take the ferry early to avoid crowds", estimatedTime: "4-5 hours" },
+      ],
+      foodAndDrinks: [
+        { restaurantName: "Leopold Cafe", location: "Colaba Causeway", cuisine: "Continental & Indian", mustTryDishes: ["Chicken Tikka", "Fish & Chips"], priceRange: "$$", specialtyNote: "Historic cafe frequented by locals and tourists", bestTime: "Lunch" },
+        { restaurantName: "Trishna", location: "Fort, Mumbai", cuisine: "Seafood", mustTryDishes: ["Koliwada Prawns", "Crab Curry"], priceRange: "$$$", specialtyNote: "Award-winning seafood restaurant", bestTime: "Dinner" },
+        { restaurantName: "Mohammed Ali Road", location: "Mohammed Ali Road", cuisine: "Street Food", mustTryDishes: ["Seekh Kebabs", "Malpua"], priceRange: "$", specialtyNote: "Famous street food during Ramadan", bestTime: "Evening" },
+      ],
+      overview: "Mumbai, the financial capital of India, offers a perfect blend of colonial architecture, Bollywood glamour, street food culture, and bustling markets. From iconic landmarks to vibrant nightlife, Mumbai promises an unforgettable experience.",
+    },
+    paris: {
+      mustDoAttractions: [
+        { name: "Eiffel Tower", location: "Champ de Mars, 5 Avenue Anatole France", description: "Iconic iron lattice tower and symbol of Paris", bestTimeToVisit: "Evening", insiderTip: "Book skip-the-line tickets in advance", estimatedTime: "2-3 hours" },
+        { name: "Louvre Museum", location: "Rue de Rivoli", description: "World's largest art museum housing the Mona Lisa", bestTimeToVisit: "Morning", insiderTip: "Enter through the less crowded Carrousel entrance", estimatedTime: "4-6 hours" },
+        { name: "Notre-Dame Cathedral", location: "Île de la Cité", description: "Gothic masterpiece with stunning architecture", bestTimeToVisit: "Morning", insiderTip: "Climb the towers for panoramic city views", estimatedTime: "2-3 hours" },
+      ],
+      foodAndDrinks: [
+        { restaurantName: "L'As du Fallafel", location: "Rue des Rosiers, Marais", cuisine: "Middle Eastern", mustTryDishes: ["Fallafel Special", "Hummus"], priceRange: "$", specialtyNote: "Best falafel in Paris", bestTime: "Lunch" },
+        { restaurantName: "Le Comptoir du 7ème", location: "7th Arrondissement", cuisine: "French", mustTryDishes: ["Coq au Vin", "Crème Brûlée"], priceRange: "$$$", specialtyNote: "Classic French bistro experience", bestTime: "Dinner" },
+        { restaurantName: "Pierre Hermé", location: "Multiple locations", cuisine: "Patisserie", mustTryDishes: ["Macarons", "Croissants"], priceRange: "$$", specialtyNote: "World-renowned patisserie", bestTime: "Snack" },
+      ],
+      overview: "Paris, the City of Light, enchants visitors with its iconic landmarks, world-class museums, charming neighborhoods, and exquisite cuisine. Experience romance, art, and culture in one of the world's most beautiful cities.",
+    }
+  };
+
+  // Use city-specific data or generic fallback
+  const currentCityData = cityData[cityLowerCase] || {
+    mustDoAttractions: [
+      { name: `${cityName} City Center`, location: "Downtown Area", description: "Explore the heart of the city", bestTimeToVisit: "Morning", insiderTip: "Start early to avoid crowds", estimatedTime: "2-3 hours" },
+      { name: `${cityName} Historic District`, location: "Old Town", description: "Discover local history and architecture", bestTimeToVisit: "Afternoon", insiderTip: "Join a guided walking tour", estimatedTime: "3-4 hours" },
+    ],
+    foodAndDrinks: [
+      { restaurantName: `Best Local Restaurant in ${cityName}`, location: "City Center", cuisine: "Local", mustTryDishes: ["Local Specialty", "Regional Favorite"], priceRange: "$$", specialtyNote: "Authentic local cuisine", bestTime: "Dinner" },
+      { restaurantName: `${cityName} Street Food Market`, location: "Market Square", cuisine: "Street Food", mustTryDishes: ["Street Snacks", "Local Drinks"], priceRange: "$", specialtyNote: "Experience local food culture", bestTime: "Lunch" },
+    ],
+    overview: `Discover the unique charm of ${cityName} with its blend of culture, history, and local cuisine. This personalized itinerary will help you experience the best the city has to offer.`,
+  };
+
+  const itinerary: ItineraryData & any = {
+    mustDos: currentCityData.mustDoAttractions.map((attraction: any, index: number) => ({
+      id: `must_do_${index + 1}`,
+      title: attraction.name,
+      description: `${attraction.description}. Best time: ${attraction.bestTimeToVisit}. ${attraction.insiderTip}`,
+      category: 'sightseeing' as const,
+      estimatedTime: attraction.estimatedTime,
+      completed: false
+    })),
+    
+    foodRecommendations: currentCityData.foodAndDrinks.map((food: any, index: number) => ({
+      id: `food_${index + 1}`,
+      title: food.restaurantName,
+      description: `${food.specialtyNote}. Must try: ${food.mustTryDishes.join(', ')}. ${food.priceRange}`,
+      category: 'restaurant' as const,
+      cuisine: food.cuisine,
+      completed: false
+    })),
+    
+    dayPlans: Array.from({ length: Math.min(numberOfDays, 5) }, (_, dayIndex) => ({
+      id: `day_${dayIndex + 1}`,
+      day: `Day ${dayIndex + 1}`,
+      theme: dayIndex === 0 ? `First Day in ${cityName}` : dayIndex === 1 ? `Cultural Exploration` : dayIndex === 2 ? `Food & Markets` : dayIndex === 3 ? `Hidden Gems` : `Farewell ${cityName}`,
+      activities: [
+        {
+          id: `day${dayIndex + 1}_morning`,
+          time: 'Morning' as const,
+          title: dayIndex === 0 ? 'Arrival & City Overview' : dayIndex === 1 ? 'Main Attractions' : 'Local Experiences',
+          description: `Explore ${cityName} at your own pace`,
+          completed: false
+        },
+        {
+          id: `day${dayIndex + 1}_afternoon`,
+          time: 'Afternoon' as const,
+          title: dayIndex === 0 ? 'Walking Tour' : dayIndex === 1 ? 'Museums & Culture' : 'Shopping & Markets',
+          description: `Discover local culture and cuisine | Lunch: Local restaurant - Regional specialties`,
+          completed: false
+        },
+        {
+          id: `day${dayIndex + 1}_evening`,
+          time: 'Evening' as const,
+          title: dayIndex === 0 ? 'Welcome Dinner' : dayIndex === 1 ? 'Local Nightlife' : 'Sunset Views',
+          description: `Enjoy evening activities | Dinner: Recommended restaurant - Local favorites`,
+          completed: false
+        }
+      ]
+    })),
+    
+    hotels: [
+      {
+        id: 'hotel_luxury',
+        title: `Luxury Hotel in ${cityName}`,
+        name: `Premium ${cityName} Hotel`,
+        category: 'luxury' as const,
+        description: 'High-end accommodation with excellent service and amenities',
+        estimatedPrice: '$200-400/night',
+        nearbyAttractions: ['City Center', 'Main Attractions'],
+        completed: false
+      },
+      {
+        id: 'hotel_midrange',
+        title: `Boutique Hotel in ${cityName}`,
+        name: `${cityName} Boutique Stay`,
+        category: 'mid-range' as const,
+        description: 'Stylish accommodation with local character',
+        estimatedPrice: '$100-200/night',
+        nearbyAttractions: ['Historic District', 'Local Markets'],
+        completed: false
+      }
+    ],
+    
+    transport: [
+      {
+        id: 'transport_airport',
+        title: 'Airport Transfer',
+        type: 'Airport Connection',
+        description: `Best ways to get from the airport to ${cityName} city center`,
+        tips: 'Book transfers in advance for better rates',
+        completed: false
+      },
+      {
+        id: 'transport_local',
+        title: 'Local Transportation',
+        type: 'Public Transport',
+        description: `Navigate ${cityName} using local transport systems`,
+        tips: 'Get a city transport pass for convenience',
+        completed: false
+      }
+    ],
+    
+    localTips: [
+      {
+        id: 'tip_cultural',
+        title: 'Cultural Etiquette',
+        description: 'Learn basic local customs and greetings to connect with locals',
+        category: 'culture' as const,
+        tip: 'Learn basic local customs and greetings to connect with locals',
+        completed: false
+      },
+      {
+        id: 'tip_practical',
+        title: 'Practical Advice',
+        description: 'Download offline maps and keep emergency contacts handy',
+        category: 'practical' as const,
+        tip: 'Download offline maps and keep emergency contacts handy',
+        completed: false
+      }
+    ],
+    
+    // Additional structured data
+    overview: currentCityData.overview,
+    budgetEstimate: {
+      dailyFoodBudget: '$30-80 per person',
+      attractionsCost: '$100-300 total',
+      transportationCost: '$15-40 per day',
+      totalEstimate: `$${50 * numberOfDays}-${150 * numberOfDays} for entire trip`
+    },
+    weatherConsiderations: {
+      seasonalTips: `Check weather conditions for ${cityName} during your travel dates`,
+      backupIndoorActivities: ['Museums', 'Shopping Centers', 'Cafes'],
+      whatToPack: ['Comfortable walking shoes', 'Weather-appropriate clothing', 'Portable phone charger']
+    }
+  };
+
+  return itinerary;
+}
+
 export default function TravelItinerary({ tripData }: TravelItineraryProps) {
   const { smoothNavigate } = useSmoothNavigation();
   const { user } = useAuth();
@@ -72,27 +432,27 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
         ));
       }
 
-      // Generate full itinerary using the new edge function
-      const fullItinerary = await geminiApi.generateFullItinerary(tripData);
+      // Generate full itinerary using the webhook
+      const webhookResponse = await geminiApi.generateFullItinerary(tripData);
       
-      // Transform the response to match our current data structure
+      // Transform the webhook response to match our current data structure
       const newItineraryData: { [city: string]: ItineraryData } = {};
-      newItineraryData[tripData.cities[0]] = fullItinerary;
-
+      
+      // Handle flexible webhook response format
+      const transformedItinerary = transformWebhookResponse(webhookResponse, tripData.cities[0]);
+      
+      newItineraryData[tripData.cities[0]] = transformedItinerary;
+      console.log('💾 Setting itinerary data for city:', tripData.cities[0]);
+      console.log('💾 Final itinerary data being set:', JSON.stringify(newItineraryData, null, 2));
       setItineraryData(newItineraryData);
     } catch (error) {
       console.error('Failed to generate itinerary:', error);
-      // Fallback to old method if new one fails
+      // Use comprehensive fallback with detailed data
       try {
         const newItineraryData: { [city: string]: ItineraryData } = {};
         for (const city of tripData.cities) {
-          const itinerary = await geminiApi.generateItinerary(
-            city,
-            tripData.interests,
-            tripData.startDate,
-            tripData.endDate
-          );
-          newItineraryData[city] = itinerary;
+          const comprehensiveItinerary = generateComprehensiveFallbackItinerary(city, tripData);
+          newItineraryData[city] = comprehensiveItinerary;
         }
         setItineraryData(newItineraryData);
       } catch (fallbackError) {
@@ -507,10 +867,111 @@ export default function TravelItinerary({ tripData }: TravelItineraryProps) {
                 )}
               </div>
             </section>
+
+            {/* Budget & Weather Info */}
+            <section>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Budget Estimate */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center">
+                    💰 Budget Estimate
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Daily Food:</span>
+                      <span className="font-medium text-green-800">{(currentItinerary as any).budgetEstimate?.dailyFoodBudget || '$50-100'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Attractions:</span>
+                      <span className="font-medium text-green-800">{(currentItinerary as any).budgetEstimate?.attractionsCost || '$100-200'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Transport:</span>
+                      <span className="font-medium text-green-800">{(currentItinerary as any).budgetEstimate?.transportationCost || '$20-50/day'}</span>
+                    </div>
+                    <div className="border-t border-green-300 pt-2 mt-3">
+                      <div className="flex justify-between font-semibold">
+                        <span className="text-green-800">Total:</span>
+                        <span className="text-green-900">{(currentItinerary as any).budgetEstimate?.totalEstimate || '$500-1000'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Weather Considerations */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                    🌤️ Weather & Packing
+                  </h3>
+                  <div className="space-y-2 text-sm text-blue-700">
+                    <p><strong>Season:</strong> {(currentItinerary as any).weatherConsiderations?.seasonalTips || 'Check weather for travel dates'}</p>
+                    <div>
+                      <strong>Pack:</strong>
+                      <ul className="list-disc list-inside ml-2 mt-1">
+                        {((currentItinerary as any).weatherConsiderations?.whatToPack || ['Weather-appropriate clothing']).map((item: string, idx: number) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Backup Activities:</strong>
+                      <ul className="list-disc list-inside ml-2 mt-1">
+                        {((currentItinerary as any).weatherConsiderations?.backupIndoorActivities || ['Indoor museums and cafes']).map((activity: string, idx: number) => (
+                          <li key={idx}>{activity}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
 
           {/* Right Panel - Booking & Map */}
           <div className="space-y-8">
+            {/* Trip Overview */}
+            <section>
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                ✨ Trip Overview
+              </h3>
+              <div className="bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-lg p-4">
+                <p className="text-sm text-sky-800 leading-relaxed">
+                  {(currentItinerary as any).overview || `Discover the best of ${selectedCity} with this personalized itinerary tailored to your interests.`}
+                </p>
+              </div>
+            </section>
+
+            {/* Hotels */}
+            <section>
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                <Hotel className="w-5 h-5 mr-2 text-sky-500" />
+                Recommended Hotels
+              </h3>
+              <div className="space-y-3">
+                {currentItinerary.hotels.map(hotel => (
+                  <div key={hotel.id} className="bg-card border border-border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-medium text-foreground">{hotel.name}</h4>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        hotel.category === 'luxury' ? 'bg-purple-100 text-purple-700' :
+                        hotel.category === 'mid-range' ? 'bg-blue-100 text-blue-700' :
+                        'bg-green-100 text-green-700'
+                      }`}>
+                        {hotel.category}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">{hotel.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-green-600">{hotel.estimatedPrice}</span>
+                      <div className="text-xs text-muted-foreground">
+                        Nearby: {((hotel as any).nearbyAttractions || ['City center']).join(', ')}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             {/* Map Placeholder */}
             <section>
               <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
