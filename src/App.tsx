@@ -29,6 +29,7 @@ import HotelSearchResults from './pages/HotelSearchResults';
 import PackageExplorer from './pages/PackageExplorer';
 import PlanTrip from './pages/PlanTrip';
 import TripItinerary from './pages/TripItinerary';
+import BackgroundRemovalDemo from './pages/BackgroundRemovalDemo';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
         <Route path="/plan-trip" element={<ProtectedRoute><PlanTrip /></ProtectedRoute>} />
         <Route path="/trip-itinerary" element={<TripItinerary />} />
         <Route path="/explore-packages" element={<PackageExplorer />} />
+        <Route path="/background-removal" element={<BackgroundRemovalDemo />} />
               </Routes>
             </main>
             <Footer />
