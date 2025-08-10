@@ -627,53 +627,65 @@ export default function PlanTrip() {
             )}
           </div>
 
-          {/* Right Column - City Image */}
+          {/* Right Column - City Image and Character */}
           <div className="lg:block hidden">
-            <div className="relative rounded-xl h-[500px] overflow-hidden shadow-xl">
-              {cityImage ? (
-                <div className="relative h-full">
-                  <img 
-                    src={cityImage} 
-                    alt={`${formData.destinations[formData.destinations.length - 1] || formData.currentDestination} cityscape`}
-                    className="w-full h-full object-cover"
-                    onError={() => {
-                      console.error('Image failed to load:', cityImage);
-                      setCityImage(null);
-                    }}
-                    onLoad={() => {
-                      console.log('✅ Image successfully loaded:', cityImage);
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                </div>
-              ) : (
-                <div className="bg-gradient-to-br from-orange-400 via-red-500 to-purple-600 h-full relative">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  {loadingImage && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                        <p className="text-sm">Loading city image...</p>
+            <div className="space-y-6">
+              {/* City Image */}
+              <div className="relative rounded-xl h-[400px] overflow-hidden shadow-xl">
+                {cityImage ? (
+                  <div className="relative h-full">
+                    <img 
+                      src={cityImage} 
+                      alt={`${formData.destinations[formData.destinations.length - 1] || formData.currentDestination} cityscape`}
+                      className="w-full h-full object-cover"
+                      onError={() => {
+                        console.error('Image failed to load:', cityImage);
+                        setCityImage(null);
+                      }}
+                      onLoad={() => {
+                        console.log('✅ Image successfully loaded:', cityImage);
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  </div>
+                ) : (
+                  <div className="bg-gradient-to-br from-orange-400 via-red-500 to-purple-600 h-full relative">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    {loadingImage && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-white text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                          <p className="text-sm">Loading city image...</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                )}
+                
+                <div className="absolute bottom-6 left-6 text-white">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-3">
+                    <span className="text-orange-300 font-bold text-lg">TE</span>
+                  </div>
+                  <p className="text-base opacity-90 font-medium">
+                    {formData.destinations.length > 0 
+                      ? `${formData.destinations.join(', ')} • `
+                      : formData.currentDestination 
+                        ? `${formData.currentDestination} • ` 
+                        : ''
+                    }
+                    {formData.startDate ? format(formData.startDate, 'dd MMM') : '3 August'}
+                    {formData.endDate ? ` - ${format(formData.endDate, 'dd MMM')}` : ''}
+                  </p>
                 </div>
-              )}
-              
-              <div className="absolute bottom-6 left-6 text-white">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-orange-300 font-bold text-lg">TE</span>
-                </div>
-                <p className="text-base opacity-90 font-medium">
-                  {formData.destinations.length > 0 
-                    ? `${formData.destinations.join(', ')} • `
-                    : formData.currentDestination 
-                      ? `${formData.currentDestination} • ` 
-                      : ''
-                  }
-                  {formData.startDate ? format(formData.startDate, 'dd MMM') : '3 August'}
-                  {formData.endDate ? ` - ${format(formData.endDate, 'dd MMM')}` : ''}
-                </p>
+              </div>
+
+              {/* Character Image */}
+              <div className="flex justify-center">
+                <img 
+                  src="/lovable-uploads/6388fcab-d647-45a2-8a45-ed2fa64b81a6.png"
+                  alt="Travel Character"
+                  className="w-48 h-auto object-contain"
+                />
               </div>
             </div>
           </div>
