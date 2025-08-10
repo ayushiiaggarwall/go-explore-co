@@ -141,6 +141,7 @@ export default function PlanTrip() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvaWZsZHBqbGZvdHF2dGFpZGVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTkwODEsImV4cCI6MjA3MDIzNTA4MX0.4WgVJ79c5cDqq95FVNlsJVAGeA_CTUAe6OBY3p3MbS4',
         },
         body: JSON.stringify({
           cityName: cityName
@@ -148,7 +149,9 @@ export default function PlanTrip() {
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        throw new Error(`API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
