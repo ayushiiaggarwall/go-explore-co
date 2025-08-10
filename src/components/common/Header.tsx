@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plane, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
+import { Plane, Menu, X, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../ui/ThemeToggle';
 
@@ -172,14 +172,6 @@ export default function Header() {
                       <Settings className="w-4 h-4 mr-2" />
                       Profile Settings
                     </Link>
-                    <Link
-                      to="/dashboard"
-                      className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <LayoutDashboard className="w-4 h-4 mr-2" />
-                      My Bookings
-                    </Link>
                     <button
                       onClick={handleLogout}
                       className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent"
@@ -316,14 +308,6 @@ export default function Header() {
                   >
                     <Settings className="w-4 h-4" />
                     Profile Settings
-                  </Link>
-                  <Link
-                    to="/dashboard"
-                    className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    My Bookings
                   </Link>
                   <button
                     onClick={() => {
