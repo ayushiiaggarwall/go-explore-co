@@ -129,51 +129,134 @@ export default function PlanTrip() {
     return filtered.slice(0, limit);
   };
 
-  // Function to fetch AI-generated city image using Gemini
+  // Function to get predefined city images
   const fetchCityImage = useCallback(async (cityName: string) => {
     if (!cityName || cityName.length < 3) return;
     
     setLoadingImage(true);
-    try {
-      console.log(`🎨 Generating AI image for: ${cityName}`);
+    
+    // Predefined city images - no API calls needed
+    const cityImages: { [key: string]: string } = {
+      // Major Indian Cities
+      'mumbai': 'https://images.unsplash.com/photo-1595658658481-d53d3f999875?q=80&w=1000',
+      'delhi': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=1000', 
+      'bangalore': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=1000',
+      'hyderabad': 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?q=80&w=1000',
+      'chennai': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'kolkata': 'https://images.unsplash.com/photo-1558431382-27343421d9a9?q=80&w=1000',
+      'pune': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=1000',
+      'jaipur': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1000',
+      'ahmedabad': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
+      'surat': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'lucknow': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
+      'kanpur': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'nagpur': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=1000',
+      'indore': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
+      'chandigarh': 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1000',
+      'bhopal': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
+      'visakhapatnam': 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=1000',
+      'patna': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
+      'vadodara': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'ghaziabad': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=1000',
+      'ludhiana': 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1000',
+      'agra': 'https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1000',
+      'nashik': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
+      'faridabad': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=1000',
+      'meerut': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=1000',
+      'rajkot': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'varanasi': 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=1000',
+      'srinagar': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'jammu': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'amritsar': 'https://images.unsplash.com/photo-1608967303750-77bd0e7fe0e4?q=80&w=1000',
+      'allahabad': 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=1000',
+      'coimbatore': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'jabalpur': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
+      'gwalior': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1000',
+      'vijayawada': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'madurai': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'guwahati': 'https://images.unsplash.com/photo-1558431382-27343421d9a9?q=80&w=1000',
+      'mysore': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'tiruchirappalli': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'bhubaneswar': 'https://images.unsplash.com/photo-1558431382-27343421d9a9?q=80&w=1000',
+      'salem': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1000',
+      'goa': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1000',
+      'kochi': 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1000',
+      'thiruvananthapuram': 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1000',
+      'mangalore': 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1000',
+      'udaipur': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1000',
+      'jodhpur': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1000',
+      'bikaner': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1000',
+      'ajmer': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1000',
+      'dehradun': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'rishikesh': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'haridwar': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'shimla': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'manali': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'dharamshala': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'himachal pradesh': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'kashmir': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'leh': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
+      'ladakh': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000',
       
-      const response = await fetch('https://ioifldpjlfotqvtaidem.supabase.co/functions/v1/generate-city-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvaWZsZHBqbGZvdHF2dGFpZGVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTkwODEsImV4cCI6MjA3MDIzNTA4MX0.4WgVJ79c5cDqq95FVNlsJVAGeA_CTUAe6OBY3p3MbS4',
-        },
-        body: JSON.stringify({
-          cityName: cityName
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', response.status, errorText);
-        throw new Error(`API error: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success && data.imageUrl) {
-        console.log(`🖼️ Setting city image URL:`, data.imageUrl);
-        setCityImage(data.imageUrl);
-        console.log(`✅ ${data.isGenerated ? 'Generated' : 'Fallback'} image loaded for ${cityName}`);
-      } else {
-        console.log(`❌ No image URL in response:`, data);
-        throw new Error('No image URL in response');
-      }
-    } catch (error) {
-      console.error('Error fetching city image:', error);
-      console.log(`🔄 Setting fallback image for ${cityName}`);
-      // Final fallback to a beautiful default travel image
-      const fallbackUrl = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1000&auto=format&fit=crop';
-      setCityImage(fallbackUrl);
-      console.log(`✅ Fallback image set to:`, fallbackUrl);
-    } finally {
+      // International Cities
+      'paris': 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?q=80&w=1000',
+      'london': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=1000',
+      'new york': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1000',
+      'tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1000',
+      'singapore': 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=1000',
+      'dubai': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1000',
+      'hong kong': 'https://images.unsplash.com/photo-1536599018102-9f803c140fc1?q=80&w=1000',
+      'bangkok': 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?q=80&w=1000',
+      'kuala lumpur': 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=1000',
+      'bali': 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?q=80&w=1000',
+      'seoul': 'https://images.unsplash.com/photo-1540960221708-c1f1a9739d10?q=80&w=1000',
+      'beijing': 'https://images.unsplash.com/photo-1516908205727-40afad9449a8?q=80&w=1000',
+      'shanghai': 'https://images.unsplash.com/photo-1474181487882-5abf3f0ba6c2?q=80&w=1000',
+      'los angeles': 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=1000',
+      'san francisco': 'https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?q=80&w=1000',
+      'chicago': 'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?q=80&w=1000',
+      'las vegas': 'https://images.unsplash.com/photo-1506674677985-5a8ae936a68c?q=80&w=1000',
+      'miami': 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?q=80&w=1000',
+      'boston': 'https://images.unsplash.com/photo-1503318847278-52d50e9e5735?q=80&w=1000',
+      'rome': 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?q=80&w=1000',
+      'barcelona': 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=1000',
+      'madrid': 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=1000',
+      'amsterdam': 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?q=80&w=1000',
+      'berlin': 'https://images.unsplash.com/photo-1587330979470-3016b6702d89?q=80&w=1000',
+      'zurich': 'https://images.unsplash.com/photo-1544984243-ec57ea16fe25?q=80&w=1000',
+      'vienna': 'https://images.unsplash.com/photo-1516550135131-fe3dcb0bedc7?q=80&w=1000',
+      'prague': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000',
+      'budapest': 'https://images.unsplash.com/photo-1541220971793-f9671a5cb2ad?q=80&w=1000',
+      'istanbul': 'https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?q=80&w=1000',
+      'athens': 'https://images.unsplash.com/photo-1555993539-1732b0258235?q=80&w=1000',
+      'cairo': 'https://images.unsplash.com/photo-1578070181910-f1aab0d0f3b9?q=80&w=1000',
+      'cape town': 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?q=80&w=1000',
+      'sydney': 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?q=80&w=1000',
+      'melbourne': 'https://images.unsplash.com/photo-1545044846-351726a739f5?q=80&w=1000',
+      'toronto': 'https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1000',
+      'vancouver': 'https://images.unsplash.com/photo-1549880181-56a44cf4a9a5?q=80&w=1000',
+      'mexico city': 'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?q=80&w=1000',
+      'rio de janeiro': 'https://images.unsplash.com/photo-1544989164-ec1e4b31decd?q=80&w=1000',
+      'sao paulo': 'https://images.unsplash.com/photo-1544989164-ec1e4b31decd?q=80&w=1000',
+      'buenos aires': 'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?q=80&w=1000',
+      'lima': 'https://images.unsplash.com/photo-1531968455001-5c5272a41129?q=80&w=1000',
+      'phuket': 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?q=80&w=1000',
+      'maldives': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1000',
+      'mauritius': 'https://images.unsplash.com/photo-1544550285-f813152fb2fd?q=80&w=1000',
+      'seychelles': 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=1000'
+    };
+    
+    const normalizedCity = cityName.toLowerCase();
+    const selectedImageUrl = cityImages[normalizedCity] || 
+                            // Default beautiful travel destination image for any unlisted city
+                            'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1000&auto=format&fit=crop';
+    
+    console.log(`🖼️ Setting image for ${cityName}:`, selectedImageUrl);
+    setCityImage(selectedImageUrl);
+    
+    setTimeout(() => {
       setLoadingImage(false);
-    }
+    }, 500); // Small delay to show loading state
   }, []);
 
   // Debounced effect to fetch image when destination changes
