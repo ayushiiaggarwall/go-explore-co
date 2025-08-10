@@ -14,7 +14,7 @@ import Dashboard from './pages/Dashboard';
 import Confirmation from './pages/Confirmation';
 import Contact from './pages/Contact';
 import About from './pages/About';
-import Recommendations from './pages/Recommendations';
+
 import VisaInfo from './pages/VisaInfo';
 import CurrencyConverter from './pages/CurrencyConverter';
 import FlightApiTest from './pages/FlightApiTest';
@@ -51,7 +51,7 @@ function App() {
                 <Route path="/confirmation" element={<Confirmation />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/recommendations" element={<Recommendations />} />
+                
                 <Route path="/visa-info" element={<VisaInfo />} />
                 <Route path="/currency-converter" element={<CurrencyConverter />} />
                 <Route path="/flight-api-test" element={<FlightApiTest />} />
