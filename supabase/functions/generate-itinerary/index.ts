@@ -1,7 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -15,58 +16,59 @@ serve(async (req) => {
   }
   
   try {
-    if (!GEMINI_API_KEY) {
-      return new Response("Missing GEMINI_API_KEY", { status: 500, headers: cors });
+    if (!OPENAI_API_KEY) {
+      return new Response("Missing OPENAI_API_KEY", { status: 500, headers: cors });
     }
 
     const body = await req.json();
     const {
-      cityName,
-      startDate,
-      endDate,
-      tripName,
-      numberOfDays,
-      activities = [],
-      foodDrinks = [],
-      entertainment = [],
-      sightseeing = [],
-      relaxation = [],
+      personaSeed,
+      interests = [],
+      budget,
+      energy,
+      anonymityIdea,
+      dateRange,
+      timeWindows,
+      primaryCityOrRegion,
+      numberOfDays
     } = body || {};
 
-    console.log("Generating itinerary for:", { cityName, numberOfDays, startDate, endDate });
+    console.log("Generating itinerary for:", { cityName: primaryCityOrRegion, numberOfDays, startDate: dateRange?.start, endDate: dateRange?.end });
 
-    // Build the big prompt
-    const prompt = `
-You are an expert travel planner creating a personalized itinerary. Generate a detailed, day-by-day travel plan based on the following information:
+    // If we don't have a proper city name, return an error
+    if (!primaryCityOrRegion || primaryCityOrRegion === "Unknown destination") {
+      return new Response(JSON.stringify({ error: "Please select a destination city first" }), { 
+        status: 400, 
+        headers: { "Content-Type": "application/json", ...cors } 
+      });
+    }
+
+    // Build the prompt for OpenAI
+    const prompt = `You are an expert travel planner creating a personalized itinerary. Generate a detailed, day-by-day travel plan based on the following information:
 
 *TRIP DETAILS:*
-• Destination City: ${cityName}
-• Travel Dates: ${startDate} to ${endDate}
+• Destination: ${primaryCityOrRegion}
+• Travel Dates: ${dateRange?.start} to ${dateRange?.end}
 • Trip Duration: ${numberOfDays} days
-• Trip Name: ${tripName || "—"}
+• Persona: ${personaSeed}
 
-*USER INTERESTS:*
-• Activities & Adventures: ${activities.join(", ")}
-• Food & Drinks: ${foodDrinks.join(", ")}
-• Urban Entertainment & Nightlife: ${entertainment.join(", ")}
-• Sightseeing & Culture: ${sightseeing.join(", ")}
-• Relaxation & Wellness: ${relaxation.join(", ")}
+*USER PREFERENCES:*
+• Interests: ${interests.join(", ")}
+• Budget: ${budget}
+• Energy Level: ${energy}/10
+• Special Notes: ${anonymityIdea}
+
+*TIME PREFERENCES:*
+• Morning activities: ${timeWindows?.morning ? "Yes" : "No"}
+• Afternoon activities: ${timeWindows?.afternoon ? "Yes" : "No"}
+• Evening activities: ${timeWindows?.evening ? "Yes" : "No"}
 
 *REQUIREMENTS:*
-1. Create a day-by-day itinerary (Day 1, Day 2, etc.) with morning, afternoon, and evening activities
-2. Include specific venue names, addresses, and brief descriptions for each recommendation
-3. Prioritize recommendations based on user interests
-4. Include restaurants with specific dish recommendations and locations
-5. Add transportation tips between locations
-6. Include estimated time spent at each location
-7. Add insider tips and local secrets
-8. Consider opening hours and seasonal factors
-9. Include backup indoor activities for bad weather
+Create a detailed JSON response with day-by-day itinerary, specific venue recommendations, insider tips, and practical information.
 
-*OUTPUT FORMAT (VALID JSON ONLY; NO EXTRA TEXT OR MARKDOWN):*
-IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the JSON. Do not wrap in markdown code blocks. Ensure all strings are properly quoted and there are no trailing commas.
+Return ONLY valid JSON in this exact format:
 {
-  "cityName": "${cityName}",
+  "cityName": "${primaryCityOrRegion}",
   "tripDuration": "${numberOfDays} days",
   "overview": "Brief exciting description of what makes this city special for this traveler",
   "mustDoAttractions": [{
@@ -80,7 +82,7 @@ IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the J
   "foodAndDrinks": [{
     "restaurantName": "Specific restaurant name",
     "location": "Full address",
-    "cuisine": "Type of cuisine",
+    "cuisine": "Type of cuisine", 
     "mustTryDishes": ["Dish 1", "Dish 2"],
     "priceRange": "$/$$/$$$/$$$$",
     "specialtyNote": "Why this place is special",
@@ -88,16 +90,16 @@ IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the J
   }],
   "dayByDayItinerary": [{
     "day": 1,
-    "theme": "Exploring Historic ${cityName} / Cultural Immersion / etc.",
+    "theme": "Exploring Historic ${primaryCityOrRegion}",
     "morning": {
       "time": "9:00 AM - 12:00 PM",
       "activity": "Specific activity name",
       "location": "Venue name and address",
       "description": "What you'll do and why it's perfect for your interests",
-      "transportTip": "How to get there from hotel/previous location"
+      "transportTip": "How to get there"
     },
     "afternoon": {
-      "time": "1:00 PM - 5:00 PM",
+      "time": "1:00 PM - 5:00 PM", 
       "activity": "Specific activity name",
       "location": "Venue name and address",
       "description": "Detailed description",
@@ -109,7 +111,7 @@ IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the J
     },
     "evening": {
       "time": "6:00 PM - 10:00 PM",
-      "activity": "Specific activity name",
+      "activity": "Specific activity name", 
       "location": "Venue name and address",
       "description": "What makes this perfect for evening",
       "dinnerRecommendation": {
@@ -119,63 +121,55 @@ IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the J
       }
     }
   }],
-  "hotelRecommendations": [{
-    "name": "Specific hotel name",
-    "location": "Area/neighborhood",
-    "priceRange": "$/$$/$$$/$$$$",
-    "whyRecommended": "Based on user interests and itinerary",
-    "nearbyAttractions": ["Attraction 1", "Attraction 2"]
-  }],
-  "transportationTips": {
-    "gettingToCity": "Best way to reach the city",
-    "gettingAround": "Best local transportation options",
-    "costSavingTips": "Transportation cost-saving advice",
-    "downloadApps": ["App 1", "App 2"]
-  },
   "localInsiderTips": [
     "Tip 1: Specific actionable advice",
     "Tip 2: Hidden gem or local secret",
-    "Tip 3: Cultural etiquette or customs",
-    "Tip 4: Best times to avoid crowds",
-    "Tip 5: Money-saving or experience-enhancing tip"
+    "Tip 3: Cultural etiquette or customs"
   ],
-  "weatherConsiderations": {
-    "seasonalTips": "What to expect during travel dates",
-    "backupIndoorActivities": ["Activity 1", "Activity 2"],
-    "whatToPack": ["Essential items for the season"]
-  },
   "budgetEstimate": {
     "dailyFoodBudget": "$X - $Y per person",
-    "attractionsCost": "$X - $Y total",
+    "attractionsCost": "$X - $Y total", 
     "transportationCost": "$X - $Y per day",
     "totalEstimate": "$X - $Y for entire trip"
   }
-}`.trim();
+}`;
 
-    const geminiRes = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" + GEMINI_API_KEY,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7 },
-        }),
-      }
-    );
+    // Use OpenAI instead of Gemini
+    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert travel planner. Always respond with valid JSON only, no additional text or markdown formatting."
+          },
+          {
+            role: "user", 
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 4000
+      })
+    });
 
-    if (!geminiRes.ok) {
-      const errorText = await geminiRes.text();
-      console.error("Gemini API error:", errorText);
-      return new Response(`Gemini error: ${errorText}`, { status: 500, headers: cors });
+    if (!openaiRes.ok) {
+      const errorText = await openaiRes.text();
+      console.error("OpenAI API error:", errorText);
+      return new Response(`OpenAI error: ${errorText}`, { status: 500, headers: cors });
     }
 
-    const data = await geminiRes.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    const data = await openaiRes.json();
+    const text = data?.choices?.[0]?.message?.content ?? "";
 
-    console.log("Gemini response length:", text.length);
+    console.log("OpenAI response length:", text.length);
 
-    // Try to extract pure JSON (handles ```json ... ``` wrapping)
+    // Try to extract pure JSON
     const jsonMatch = text.match(/```json\s*([\s\S]*?)```/i) || text.match(/```([\s\S]*?)```/i);
     const raw = jsonMatch ? jsonMatch[1] : text;
 
@@ -186,56 +180,21 @@ IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the J
       console.error("JSON parse error:", parseError);
       console.log("Raw response causing error:", raw);
       
-      // Enhanced cleanup: try to fix common JSON issues
+      // Enhanced cleanup
       let cleaned = raw
-        .replace(/[""]/g, '"')  // Smart quotes to regular quotes
-        .replace(/['']/g, "'")  // Smart single quotes
-        .replace(/,\s*([}\]])/g, "$1")  // Trailing commas
-        .replace(/([{,]\s*)(\w+):/g, '$1"$2":')  // Unquoted keys
-        .replace(/:\s*'([^']*)'/g, ': "$1"')  // Single quoted values to double
-        .replace(/\n\s*\n/g, '\n')  // Remove extra newlines
+        .replace(/[""]/g, '"')
+        .replace(/['']/g, "'")
+        .replace(/,\s*([}\]])/g, "$1")
+        .replace(/([{,]\s*)(\w+):/g, '$1"$2":')
+        .replace(/:\s*'([^']*)'/g, ': "$1"')
+        .replace(/\n\s*\n/g, '\n')
         .trim();
-
-      // Try to fix common array/object issues
-      cleaned = cleaned
-        .replace(/,\s*}/g, '}')  // Trailing comma before }
-        .replace(/,\s*]/g, ']')  // Trailing comma before ]
-        .replace(/}\s*{/g, '},{')  // Missing comma between objects
-        .replace(/]\s*\[/g, '],[');  // Missing comma between arrays
 
       try {
         parsed = JSON.parse(cleaned);
         console.log("✅ Successfully parsed JSON after cleanup");
       } catch (finalError) {
-        console.error("Final parse error:", finalError);
-        console.log("Cleaned response:", cleaned);
-        
-        // Final attempt: try to extract valid JSON portion
-        try {
-          // Find the first { and try to match braces
-          const startIndex = cleaned.indexOf('{');
-          if (startIndex !== -1) {
-            let braceCount = 0;
-            let endIndex = startIndex;
-            
-            for (let i = startIndex; i < cleaned.length; i++) {
-              if (cleaned[i] === '{') braceCount++;
-              if (cleaned[i] === '}') braceCount--;
-              if (braceCount === 0) {
-                endIndex = i + 1;
-                break;
-              }
-            }
-            
-            const partialJson = cleaned.substring(startIndex, endIndex);
-            parsed = JSON.parse(partialJson);
-            console.log("✅ Successfully parsed partial JSON");
-          } else {
-            throw finalError;
-          }
-        } catch (partialError) {
-          return new Response(`JSON parse error: ${finalError}. Raw response: ${raw.substring(0, 1000)}...`, { status: 500, headers: cors });
-        }
+        return new Response(`JSON parse error: ${finalError}. Raw response: ${raw.substring(0, 1000)}...`, { status: 500, headers: cors });
       }
     }
 
@@ -246,7 +205,7 @@ IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the J
     if (missingFields.length > 0) {
       console.error("Missing required fields:", missingFields);
       // Try to provide defaults for missing fields
-      if (!parsed.cityName) parsed.cityName = cityName;
+      if (!parsed.cityName) parsed.cityName = primaryCityOrRegion;
       if (!parsed.tripDuration) parsed.tripDuration = `${numberOfDays} days`;
       if (!parsed.dayByDayItinerary) parsed.dayByDayItinerary = [];
     }
@@ -254,10 +213,9 @@ IMPORTANT: Return ONLY valid JSON. Do not include any text before or after the J
     // Ensure arrays exist even if empty
     parsed.mustDoAttractions = parsed.mustDoAttractions || [];
     parsed.foodAndDrinks = parsed.foodAndDrinks || [];
-    parsed.hotelRecommendations = parsed.hotelRecommendations || [];
     parsed.localInsiderTips = parsed.localInsiderTips || [];
 
-    console.log("Successfully generated itinerary for:", cityName);
+    console.log("Successfully generated itinerary for:", primaryCityOrRegion);
 
     return new Response(JSON.stringify(parsed), {
       status: 200,
