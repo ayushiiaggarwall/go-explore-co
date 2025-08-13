@@ -68,20 +68,29 @@ export default function ImageStep({ onNext, onBack }: ImageStepProps) {
       const anonymityIdea = questionnaireData?.anonymityIdea || '';
       const primaryCity = questionnaireData?.primaryCity || 'unknown destination';
 
-      const prompt = `Create a stylized "Parallel Universe" portrait.
+      const prompt = `Create a stylized, human-in-cartoon-form travel portrait using the attached reference image for facial likeness.
 
-Persona core: ${personaData?.seed}
-Key traits: ${interests}, budget=${budget}, energy=${energy}, anonymityIdea="${anonymityIdea}"
-Locale vibe to reflect: ${primaryCity}
+Persona:
+- Core idea: ${personaData?.seed}
+- Destination: ${primaryCity}
+- Top interests: ${interests}
+- Optional notes: budget=${budget}, energy=${energy}, anonymityIdea="${anonymityIdea}"
 
-Art direction:
-- Style: cinematic, travel editorial, lightly surreal accents
-- Wardrobe & props: infer from persona (non-branded, modest, public-friendly)
-- Background: iconic hints of ${primaryCity} (no trademarked logos)
-- Color: rich yet realistic; golden-hour lighting if outdoors
-- Output: 1024x1024 PNG, single subject, face clearly visible
+Art Direction:
+- Style: clean, semi-realistic cartoon (cel-shaded), soft gradients, light outlines; NOT photorealistic
+- Pose & crop: centered, 3/4 view, head-and-shoulders to mid-torso, friendly expression
+- Wardrobe/props: infer tasteful items that reflect interests & destination (non-branded)
+- Background: subtle, iconic cues from the destination (e.g., recognizable skyline/landmarks) without logos or text
+- Color & lighting: vibrant but natural; gentle golden-hour vibe
 
-${uploadedImage ? 'If a reference image is provided, align facial structure and tones while respecting safety filters.' : ''}`;
+Requirements:
+- Preserve the person's key facial structure and skin tone from the reference
+- Keep content PG-13, respectful, and culturally sensitive
+- No text, watermarks, or brand logos
+- Single subject only; no extra people
+- Output: 1024×1024 PNG
+
+${uploadedImage ? 'If the reference image is low quality or occluded, approximate respectfully while keeping the same overall vibe and attributes.' : ''}`;
 
       // Call the edge function to generate image
       const { data, error } = await supabase.functions.invoke('generate-image', {
