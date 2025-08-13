@@ -221,11 +221,18 @@ ${uploadedImage ? 'If a reference image is provided, align facial structure and 
               <img
                 src={generatedImage.url}
                 alt="Generated parallel universe portrait"
-                className="max-w-md w-full rounded-lg shadow-lg"
+                className="max-w-md w-full rounded-lg shadow-lg border"
+                onError={(e) => {
+                  console.error('Image failed to load:', generatedImage.url);
+                  e.currentTarget.style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log('Image loaded successfully');
+                }}
               />
             </div>
             <p className="text-xs text-muted-foreground text-center bg-muted p-3 rounded">
-              Prompt used: {generatedImage.prompt.substring(0, 200)}...
+              <strong>Prompt used:</strong> {generatedImage.prompt.substring(0, 200)}...
             </p>
           </Card>
         )}
