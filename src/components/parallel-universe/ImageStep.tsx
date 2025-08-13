@@ -95,10 +95,14 @@ Requirements:
 
 ${uploadedImage ? 'If the reference image is low quality or occluded, approximate respectfully while keeping the same overall vibe and attributes.' : ''}`;
 
-      // Call the edge function to generate image
+      // Call the edge function to generate image with new API structure
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { 
-          prompt,
+          personaSeed: personaData?.seed || '',
+          destinationCity: primaryCity,
+          destinationRegionOrCountry: primaryCity, // Using same value for now
+          interests: questionnaireData?.interests || [],
+          styleNotes: `budget=${budget}, energy=${energy}, anonymityIdea="${anonymityIdea}"`,
           referenceImage: uploadedImage ? await convertFileToBase64(uploadedImage) : undefined
         }
       });
