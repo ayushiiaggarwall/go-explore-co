@@ -39,7 +39,8 @@ Art Direction:
 - Color & lighting: vibrant but natural; gentle golden-hour vibe
 
 Requirements:
-- Preserve the person's key facial structure and skin tone from the reference
+- CRITICAL: Preserve the person's exact gender presentation, facial structure, and skin tone from the reference
+- Maintain the same gender identity and physical characteristics as shown in the reference image
 - Keep content PG-13, respectful, and culturally sensitive
 - No text, watermarks, or brand logos
 - Single subject only; no extra people
@@ -66,7 +67,7 @@ async function analyzeReferenceImage(imageBase64: string): Promise<string> {
           content: [
             {
               type: 'text',
-              text: 'Analyze this person\'s appearance for creating a cartoon portrait. Describe their: facial structure, skin tone, hair color/style, eye color, distinctive features, approximate age, and any visible cultural elements. Be specific but respectful.'
+              text: 'Describe the general appearance of this person for creating a cartoon portrait: gender presentation, general build, hair style/color, and any distinctive visual characteristics. Keep it brief and artistic.'
             },
             {
               type: 'image_url',
@@ -77,7 +78,7 @@ async function analyzeReferenceImage(imageBase64: string): Promise<string> {
           ]
         }
       ],
-      max_tokens: 300
+      max_tokens: 150
     })
   });
 
@@ -85,11 +86,15 @@ async function analyzeReferenceImage(imageBase64: string): Promise<string> {
     const result = await response.json();
     const description = result.choices[0].message.content;
     console.log('📝 Image analysis result:', description);
-    return description;
-  } else {
-    console.log('⚠️ Failed to analyze image, using generic description');
-    return 'person with distinctive features';
+    
+    // Check if the analysis was successful (not a refusal)
+    if (description && !description.toLowerCase().includes("i can't") && !description.toLowerCase().includes("i'm sorry")) {
+      return description;
+    }
   }
+  
+  console.log('⚠️ Image analysis failed or was refused, using fallback');
+  return 'person maintaining their original gender presentation and distinctive features';
 }
 
 serve(async (req) => {
