@@ -211,13 +211,13 @@ export const useGenerationCredits = () => {
   const oneDay = 24 * oneHour;
   
   // Reset counters if enough time has passed
-  const canGenerateImage = !lastImageGen || (now - lastImageGen > oneHour) || imageGenerations < 3;
+  const canGenerateImage = !lastImageGen || (now - lastImageGen > oneHour) || imageGenerations < 10;
   const canGenerateItinerary = !lastItineraryGen || (now - lastItineraryGen > oneDay) || itineraryGenerations < 5;
   
   return {
     canGenerateImage,
     canGenerateItinerary,
-    imageCreditsRemaining: Math.max(0, 3 - imageGenerations),
+    imageCreditsRemaining: Math.max(0, 10 - imageGenerations),
     itineraryCreditsRemaining: Math.max(0, 5 - itineraryGenerations),
   };
 };

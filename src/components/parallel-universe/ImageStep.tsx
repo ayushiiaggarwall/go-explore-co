@@ -198,7 +198,7 @@ ${uploadedImage ? 'If the reference image is low quality or occluded, approximat
           <div className="text-center space-y-4">
             <h4 className="font-medium">Generate Your Portrait</h4>
             <p className="text-sm text-muted-foreground">
-              Credits remaining: {imageCreditsRemaining}/3 per hour
+              Credits remaining: {imageCreditsRemaining}/10 per hour
             </p>
             
             <Button
