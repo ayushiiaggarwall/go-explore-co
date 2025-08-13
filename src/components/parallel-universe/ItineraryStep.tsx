@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { MapPin, ArrowLeft, Sparkles, RefreshCw, Download, RotateCcw, Clock, DollarSign } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
+import { getDestinationFromPersona } from '../../utils/parseDestination';
 
 interface ItineraryStepProps {
   onBack: () => void;
@@ -39,6 +40,9 @@ export default function ItineraryStep({ onBack, onReset }: ItineraryStepProps) {
         Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24)) + 1 : 
         1;
 
+      // Extract destination from persona seed
+      const destinationCity = getDestinationFromPersona(personaData?.seed || '', 'Unknown destination');
+
       // Build the request data
       const requestData = {
         personaSeed: personaData?.seed,
@@ -53,7 +57,7 @@ export default function ItineraryStep({ onBack, onReset }: ItineraryStepProps) {
         timeWindows: questionnaireData?.timeWindows,
         dietary: questionnaireData?.dietary,
         mobility: questionnaireData?.mobility,
-        primaryCityOrRegion: questionnaireData?.primaryCity || 'Unknown destination',
+        primaryCityOrRegion: destinationCity,
         numberOfDays: days
       };
 

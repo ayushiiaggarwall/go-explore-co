@@ -6,6 +6,7 @@ import { Card } from '../ui/card';
 import { Camera, Upload, ArrowLeft, Sparkles, RefreshCw } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
+import { getDestinationFromPersona } from '../../utils/parseDestination';
 
 interface ImageStepProps {
   onNext: () => void;
@@ -69,19 +70,18 @@ export default function ImageStep({ onNext, onBack }: ImageStepProps) {
       const budget = questionnaireData?.budget || '';
       const energy = questionnaireData?.energy || 5;
       const anonymityIdea = questionnaireData?.anonymityIdea || '';
-      const primaryCity = questionnaireData?.primaryCity || '';
-
-      // Don't proceed if we don't have a destination
-      if (!primaryCity) {
-        toast.error('Please go back and enter your destination city first.');
-        return;
-      }
+      
+      // Extract destination from persona seed
+      const destinationCity = getDestinationFromPersona(personaData?.seed || '', 'Unknown destination');
+      
+      // Show destination info to user
+      console.log('Extracted destination from persona:', destinationCity);
 
       const prompt = `Create a stylized, human-in-cartoon-form travel portrait using the attached reference image for facial likeness.
 
 Persona:
 - Core idea: ${personaData?.seed}
-- Destination: ${primaryCity}
+- Destination: ${destinationCity}
 - Top interests: ${interests}
 - Optional notes: budget=${budget}, energy=${energy}, anonymityIdea="${anonymityIdea}"
 
@@ -105,8 +105,8 @@ ${uploadedImage ? 'If the reference image is low quality or occluded, approximat
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { 
           personaSeed: personaData?.seed || '',
-          destinationCity: primaryCity,
-          destinationRegionOrCountry: primaryCity, // Using same value for now
+          destinationCity: destinationCity,
+          destinationRegionOrCountry: destinationCity,
           interests: questionnaireData?.interests || [],
           styleNotes: `budget=${budget}, energy=${energy}, anonymityIdea="${anonymityIdea}"`,
           referenceImage: uploadedImage ? await convertFileToBase64(uploadedImage) : undefined
