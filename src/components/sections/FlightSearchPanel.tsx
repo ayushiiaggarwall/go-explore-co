@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Users, Plane } from 'lucide-react';
+import { Search, MapPin, Calendar, Users, Plane } from 'lucide-react';
 import Input from '../ui/input';
 import Button from '../ui/Button';
-import { SimpleDatePicker } from '../ui/simple-date-picker';
 import { searchCities } from '../../data/cities';
 
 interface FlightSearchPanelProps {
@@ -15,9 +14,11 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
   const [formData, setFormData] = useState({
     from: '',
     destination: '',
-    passengers: 1
+    departureDate: '',
+    returnDate: '',
+    passengers: 1,
+    tripType: 'round-trip'
   });
-  const [departureDate, setDepartureDate] = useState<Date>();
   const [showFromDestinations, setShowFromDestinations] = useState(false);
   const [showDestinations, setShowDestinations] = useState(false);
 
@@ -41,7 +42,7 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.from || !formData.destination || !departureDate) {
+    if (!formData.from || !formData.destination || !formData.departureDate) {
       return;
     }
     
@@ -49,14 +50,16 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
       type: 'flight',
       from: formData.from,
       destination: formData.destination,
-      departureDate: departureDate.toISOString().split('T')[0],
-      passengers: formData.passengers.toString()
+      departureDate: formData.departureDate,
+      returnDate: formData.returnDate,
+      passengers: formData.passengers.toString(),
+      tripType: formData.tripType
     });
     
-    navigate(`/search-flights?${searchParams.toString()}`);
+    navigate(`/search?${searchParams.toString()}`);
   };
 
-  
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className={`bg-card rounded-lg shadow-lg p-6 border border-border ${className}`}>
@@ -71,6 +74,31 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Trip Type */}
+        <div className="flex space-x-4 mb-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="tripType"
+              value="round-trip"
+              checked={formData.tripType === 'round-trip'}
+              onChange={handleInputChange}
+              className="mr-2"
+            />
+            <span className="text-foreground">Round Trip</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="tripType"
+              value="one-way"
+              checked={formData.tripType === 'one-way'}
+              onChange={handleInputChange}
+              className="mr-2"
+            />
+            <span className="text-foreground">One Way</span>
+          </label>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           {/* From */}
@@ -136,13 +164,29 @@ export default function FlightSearchPanel({ className = '' }: FlightSearchPanelP
 
         <div className="grid grid-cols-2 gap-4">
           {/* Departure Date */}
-          <SimpleDatePicker
+          <Input
             label="Departure"
-            date={departureDate}
-            onSelect={setDepartureDate}
-            placeholder="Select departure date"
+            name="departureDate"
+            type="date"
+            value={formData.departureDate}
+            onChange={handleInputChange}
+            min={today}
+            icon={<Calendar className="w-5 h-5 text-gray-400" />}
             required
           />
+
+          {/* Return Date (only for round-trip) */}
+          {formData.tripType === 'round-trip' && (
+            <Input
+              label="Return"
+              name="returnDate"
+              type="date"
+              value={formData.returnDate}
+              onChange={handleInputChange}
+              min={formData.departureDate || today}
+              icon={<Calendar className="w-5 h-5 text-gray-400" />}
+            />
+          )}
         </div>
 
         {/* Passengers */}

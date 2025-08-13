@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SlidersHorizontal } from 'lucide-react';
-import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import { mockHotels, mockFlights, mockPackages } from '../services/mockData';
 import { tripAdvisorApi, TripAdvisorHotel } from '../services/tripAdvisorApi';
 import { skyscannerApi, SkyscannerFlight } from '../services/skyscannerApi';
@@ -10,13 +9,13 @@ import HotelCard from '../components/cards/HotelCard';
 import FlightCard from '../components/cards/FlightCard';
 import PackageCard from '../components/cards/PackageCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { Slider } from '../components/ui/slider-number-flow';
+import Input from '../components/ui/input';
 
 type SearchType = 'hotels' | 'flights' | 'packages';
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
-  const { smoothNavigate } = useSmoothNavigation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [searchType, setSearchType] = useState<SearchType>('hotels');
   const [apiHotels, setApiHotels] = useState<TripAdvisorHotel[]>([]);
@@ -89,9 +88,7 @@ export default function SearchResults() {
           } else if (value.type === 'flights') {
             if ('data' in value && value.data) {
               console.log('✅ Flight API Results received:', value.data);
-              // Handle both old array format and new FlightApiResponse format
-              const flightsData = (value.data as any).flights || value.data;
-              setApiFlights(Array.isArray(flightsData) ? flightsData as SkyscannerFlight[] : []);
+              setApiFlights(value.data as SkyscannerFlight[]);
             } else if ('error' in value && value.error) {
               console.error('❌ Error fetching flights:', value.error);
               setFlightError(`Failed to fetch flights from Skyscanner: ${value.error instanceof Error ? value.error.message : 'Unknown error'}`);
@@ -109,7 +106,7 @@ export default function SearchResults() {
   }, [from, destination, checkIn, checkOut, guests]);
 
   const handleBookHotel = (hotel: Hotel) => {
-    smoothNavigate('/booking', { 
+    navigate('/booking', { 
       state: { 
         type: 'hotel', 
         item: hotel, 
@@ -124,7 +121,7 @@ export default function SearchResults() {
   };
 
   const handleBookFlight = (flight: Flight) => {
-    smoothNavigate('/booking', { 
+    navigate('/booking', { 
       state: { 
         type: 'flight', 
         item: flight, 
@@ -139,7 +136,7 @@ export default function SearchResults() {
   };
 
   const handleBookPackage = (pkg: Package) => {
-    smoothNavigate('/booking', { 
+    navigate('/booking', { 
       state: { 
         type: 'package', 
         item: pkg, 
@@ -172,7 +169,6 @@ export default function SearchResults() {
   const convertApiFlightsToFlights = (apiFlights: SkyscannerFlight[]): Flight[] => {
     return apiFlights.map((flight, index) => ({
       id: `sky-${index}`,
-      flightNumber: flight.flightNumber,
       airline: flight.airline,
       departure: {
         airport: flight.departure.airport,
@@ -188,8 +184,7 @@ export default function SearchResults() {
       },
       duration: flight.duration,
       price: flight.price,
-      stops: flight.stops,
-      bookingUrl: flight.bookingUrl
+      stops: flight.stops
     }));
   };
 
@@ -328,16 +323,15 @@ export default function SearchResults() {
                       Price Range (per night)
                     </label>
                     <div className="space-y-2">
-                      <Slider
-                        value={[filters.priceRange[1]]}
-                        onValueChange={(value) => setFilters(prev => ({
+                      <Input
+                        type="range"
+                        min="0"
+                        max="1000"
+                        value={filters.priceRange[1]}
+                        onChange={(e) => setFilters(prev => ({
                           ...prev,
-                          priceRange: [0, value[0]]
+                          priceRange: [0, parseInt(e.target.value)]
                         }))}
-                        min={0}
-                        max={1000}
-                        step={1}
-                        className="w-1/2"
                       />
                       <div className="flex justify-between text-sm text-muted-foreground">
                         <span>$0</span>

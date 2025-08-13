@@ -87,7 +87,7 @@ export default function PackageCard({ package: pkg, onBook }: PackageCardProps) 
         
         <Button
           onClick={() => onBook(pkg)}
-          className="w-full transition-transform duration-200 hover:scale-105"
+          className="w-full"
           size="lg"
         >
           Book Package

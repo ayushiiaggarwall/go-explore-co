@@ -335,8 +335,10 @@ export default function VisaInfo() {
                   <p className="ml-4 text-muted-foreground">Getting personalized visa advice...</p>
                 </div>
               ) : (
-                <div className="whitespace-pre-wrap text-foreground">
-                  {aiVisaTips}
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <div className="whitespace-pre-wrap text-foreground">
+                    {aiVisaTips}
+                  </div>
                 </div>
               )}
             </div>

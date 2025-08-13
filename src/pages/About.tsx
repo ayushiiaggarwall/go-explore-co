@@ -32,11 +32,11 @@ export default function About() {
                 travel deals, comprehensive options, and 24/7 support for your peace of mind.
               </p>
             </div>
-            <div className="relative h-full flex items-center">
+            <div className="relative">
               <img
                 src="https://images.pexels.com/photos/1020016/pexels-photo-1020016.jpeg?auto=compress&cs=tinysrgb&w=800"
                 alt="Travel planning"
-                className="rounded-lg shadow-lg w-full h-full object-cover max-h-80"
+                className="rounded-lg shadow-lg"
               />
             </div>
           </div>
@@ -101,9 +101,9 @@ export default function About() {
       <section className="py-16 bg-muted/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Our Goal by the End of 2025</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-4">TravelEase by the Numbers</h2>
             <p className="text-lg text-muted-foreground">
-              Let's change the travel industry together
+              Our impact in the travel industry speaks for itself
             </p>
           </div>
 
@@ -141,73 +141,46 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
               <img
-                src="/lovable-uploads/2b4e80c9-e1c0-489e-b6d8-85465a1d3bf2.png"
-                alt="Team Member 1"
-                className="w-full h-80 object-cover"
+                src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400"
+                alt="Sarah Johnson"
+                className="w-full h-48 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Akhil Gupta</h3>
-                <p className="text-sky-600 mb-3">Research Analyst</p>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Sarah Johnson</h3>
+                <p className="text-sky-600 mb-3">CEO & Founder</p>
+                <p className="text-muted-foreground">
+                  With 15 years in the travel industry, Sarah leads our vision of making travel accessible to all.
+                </p>
               </div>
             </div>
 
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
               <img
-                src="/lovable-uploads/5dd6f82e-a3cf-4dac-a9dd-114df45f0d4c.png"
-                alt="Team Member 2"
-                className="w-full h-80 object-cover"
+                src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400"
+                alt="Michael Chen"
+                className="w-full h-48 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Pavitar</h3>
-                <p className="text-sky-600 mb-3">Backend Developer</p>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Michael Chen</h3>
+                <p className="text-sky-600 mb-3">CTO</p>
+                <p className="text-muted-foreground">
+                  Michael ensures our platform remains cutting-edge and user-friendly with the latest technology.
+                </p>
               </div>
             </div>
 
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
               <img
-                src="/lovable-uploads/178e7eb4-9389-4eaf-bfa2-f2e356028fb8.png"
-                alt="Team Member 3"
-                className="w-full h-80 object-cover"
+                src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=400"
+                alt="Emily Rodriguez"
+                className="w-full h-48 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Ravi Mansha</h3>
-                <p className="text-sky-600 mb-3">Research Analyst</p>
-              </div>
-            </div>
-
-            <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
-              <img
-                src="/lovable-uploads/fe5f69de-0d88-433a-af2d-95092cbbf024.png"
-                alt="Team Member 4"
-                className="w-full h-80 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Awdesh Kumar</h3>
-                <p className="text-sky-600 mb-3">Research Analyst</p>
-              </div>
-            </div>
-
-            <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
-              <img
-                src="/lovable-uploads/bdfb9d91-cd9c-48f0-9abf-54e12ace25ee.png"
-                alt="Team Member 5"
-                className="w-full h-80 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Ayushi Aggarwal</h3>
-                <p className="text-sky-600 mb-3">Backend Developer</p>
-              </div>
-            </div>
-
-            <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
-              <img
-                src="/lovable-uploads/07b5215d-c3dd-4bb4-a367-91d1c1439e33.png"
-                alt="Team Member 6"
-                className="w-full h-80 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1 text-foreground">Filipe Pinto</h3>
-                <p className="text-sky-600 mb-3">Frontend Developer</p>
+                <h3 className="text-xl font-semibold mb-1 text-foreground">Emily Rodriguez</h3>
+                <p className="text-sky-600 mb-3">Head of Customer Success</p>
+                <p className="text-muted-foreground">
+                  Emily leads our customer support team to ensure every traveler has an exceptional experience.
+                </p>
               </div>
             </div>
           </div>
@@ -253,8 +226,8 @@ export default function About() {
             </div>
             <div>
               <img
-                src="/lovable-uploads/c66146ce-1c1e-45fd-93b3-6d37871b336f.png"
-                alt="Travel planning with maps and travel essentials"
+                src="https://images.pexels.com/photos/1591061/pexels-photo-1591061.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Happy travelers"
                 className="rounded-lg shadow-lg"
               />
             </div>

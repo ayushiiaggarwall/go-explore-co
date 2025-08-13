@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Users } from 'lucide-react';
+import { Search, MapPin, Calendar, Users } from 'lucide-react';
 import Input from '../ui/input';
 import Button from '../ui/Button';
-import { SimpleDatePicker } from '../ui/simple-date-picker';
 import { searchCities } from '../../data/cities';
 
 interface HotelSearchPanelProps {
@@ -14,11 +13,11 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     destination: '',
+    checkIn: '',
+    checkOut: '',
     guests: 2,
     rooms: 1
   });
-  const [checkInDate, setCheckInDate] = useState<Date>();
-  const [checkOutDate, setCheckOutDate] = useState<Date>();
   const [showDestinations, setShowDestinations] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -36,22 +35,23 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.destination || !checkInDate || !checkOutDate) {
+    if (!formData.destination || !formData.checkIn || !formData.checkOut) {
       return;
     }
     
     const searchParams = new URLSearchParams({
+      type: 'hotel',
       destination: formData.destination,
-      checkIn: checkInDate.toISOString().split('T')[0],
-      checkOut: checkOutDate.toISOString().split('T')[0],
+      checkIn: formData.checkIn,
+      checkOut: formData.checkOut,
       guests: formData.guests.toString(),
       rooms: formData.rooms.toString()
     });
     
-    navigate(`/search-hotels?${searchParams.toString()}`);
+    navigate(`/search?${searchParams.toString()}`);
   };
 
-  
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className={`bg-card rounded-lg shadow-lg p-6 border border-border ${className}`}>
@@ -98,21 +98,26 @@ export default function HotelSearchPanel({ className = '' }: HotelSearchPanelPro
 
         <div className="grid grid-cols-2 gap-4">
           {/* Check-in */}
-          <SimpleDatePicker
+          <Input
             label="Check-in"
-            date={checkInDate}
-            onSelect={setCheckInDate}
-            placeholder="Select check-in date"
+            name="checkIn"
+            type="date"
+            value={formData.checkIn}
+            onChange={handleInputChange}
+            min={today}
+            icon={<Calendar className="w-5 h-5 text-gray-400" />}
             required
           />
 
           {/* Check-out */}
-          <SimpleDatePicker
+          <Input
             label="Check-out"
-            date={checkOutDate}
-            onSelect={setCheckOutDate}
-            placeholder="Select check-out date"
-            disabled={!checkInDate}
+            name="checkOut"
+            type="date"
+            value={formData.checkOut}
+            onChange={handleInputChange}
+            min={formData.checkIn || today}
+            icon={<Calendar className="w-5 h-5 text-gray-400" />}
             required
           />
         </div>
