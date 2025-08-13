@@ -48,18 +48,36 @@ serve(async (req) => {
       })
     });
 
+    console.log('📡 OpenAI API response status:', response.status);
+    
     if (response.ok) {
       const result = await response.json();
+      console.log('📊 OpenAI response data:', JSON.stringify(result, null, 2));
       
-      if (result.data && result.data[0] && result.data[0].b64_json) {
-        const imageBase64 = result.data[0].b64_json;
-        const imageUrl = `data:image/png;base64,${imageBase64}`;
+      if (result.data && result.data[0]) {
+        // OpenAI returns either url or b64_json depending on response_format
+        const imageData = result.data[0];
+        let imageUrl;
         
-        console.log('✅ Successfully generated cartoon portrait with OpenAI');
+        if (imageData.url) {
+          imageUrl = imageData.url;
+          console.log('🔗 Got image URL from OpenAI');
+        } else if (imageData.b64_json) {
+          imageUrl = `data:image/png;base64,${imageData.b64_json}`;
+          console.log('📄 Got base64 image from OpenAI');
+        }
         
-        return new Response(JSON.stringify({ imageUrl }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+        if (imageUrl) {
+          console.log('✅ Successfully generated cartoon portrait with OpenAI');
+          
+          return new Response(JSON.stringify({ imageUrl }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } else {
+          console.log('❌ No image data found in OpenAI response');
+        }
+      } else {
+        console.log('❌ No data array found in OpenAI response');
       }
     }
     
