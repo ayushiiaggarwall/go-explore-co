@@ -297,7 +297,7 @@ Make sure every recommendation is genuinely specific to ${city} and not generic 
 
       console.log('🔗 Sending data to n8n webhook:', payload);
 
-      const response = await fetch('https://pzon8n.app.n8n.cloud/webhook/5a2b14ec-6a5d-436b-89fd-5675a268a6c4', {
+      const response = await fetch('https://ayushiaggarwal.app.n8n.cloud/webhook/5a2b14ec-6a5d-436b-89fd-5675a268a6c4', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
