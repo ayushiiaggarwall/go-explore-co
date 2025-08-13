@@ -1,8 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -16,8 +15,8 @@ serve(async (req) => {
   }
   
   try {
-    if (!OPENAI_API_KEY) {
-      return new Response("Missing OPENAI_API_KEY", { status: 500, headers: cors });
+    if (!GEMINI_API_KEY) {
+      return new Response("Missing GEMINI_API_KEY", { status: 500, headers: cors });
     }
 
     const body = await req.json();
@@ -43,7 +42,7 @@ serve(async (req) => {
       });
     }
 
-    // Build the prompt for OpenAI
+    // Build the prompt for Gemini
     const prompt = `You are an expert travel planner creating a personalized itinerary. Generate a detailed, day-by-day travel plan based on the following information:
 
 *TRIP DETAILS:*
@@ -134,40 +133,29 @@ Return ONLY valid JSON in this exact format:
   }
 }`;
 
-    // Use OpenAI instead of Gemini
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert travel planner. Always respond with valid JSON only, no additional text or markdown formatting."
-          },
-          {
-            role: "user", 
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 4000
-      })
-    });
+    // Use Gemini for itinerary generation
+    const geminiRes = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" + GEMINI_API_KEY,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7 },
+        }),
+      }
+    );
 
-    if (!openaiRes.ok) {
-      const errorText = await openaiRes.text();
-      console.error("OpenAI API error:", errorText);
-      return new Response(`OpenAI error: ${errorText}`, { status: 500, headers: cors });
+    if (!geminiRes.ok) {
+      const errorText = await geminiRes.text();
+      console.error("Gemini API error:", errorText);
+      return new Response(`Gemini error: ${errorText}`, { status: 500, headers: cors });
     }
 
-    const data = await openaiRes.json();
-    const text = data?.choices?.[0]?.message?.content ?? "";
+    const data = await geminiRes.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
-    console.log("OpenAI response length:", text.length);
+    console.log("Gemini response length:", text.length);
 
     // Try to extract pure JSON
     const jsonMatch = text.match(/```json\s*([\s\S]*?)```/i) || text.match(/```([\s\S]*?)```/i);
@@ -190,11 +178,44 @@ Return ONLY valid JSON in this exact format:
         .replace(/\n\s*\n/g, '\n')
         .trim();
 
+      // Try to fix common array/object issues
+      cleaned = cleaned
+        .replace(/,\s*}/g, '}')
+        .replace(/,\s*]/g, ']')
+        .replace(/}\s*{/g, '},{')
+        .replace(/]\s*\[/g, '],[');
+
       try {
         parsed = JSON.parse(cleaned);
         console.log("✅ Successfully parsed JSON after cleanup");
       } catch (finalError) {
-        return new Response(`JSON parse error: ${finalError}. Raw response: ${raw.substring(0, 1000)}...`, { status: 500, headers: cors });
+        console.error("Final parse error:", finalError);
+        
+        // Final attempt: try to extract valid JSON portion
+        try {
+          const startIndex = cleaned.indexOf('{');
+          if (startIndex !== -1) {
+            let braceCount = 0;
+            let endIndex = startIndex;
+            
+            for (let i = startIndex; i < cleaned.length; i++) {
+              if (cleaned[i] === '{') braceCount++;
+              if (cleaned[i] === '}') braceCount--;
+              if (braceCount === 0) {
+                endIndex = i + 1;
+                break;
+              }
+            }
+            
+            const partialJson = cleaned.substring(startIndex, endIndex);
+            parsed = JSON.parse(partialJson);
+            console.log("✅ Successfully parsed partial JSON");
+          } else {
+            throw finalError;
+          }
+        } catch (partialError) {
+          return new Response(`JSON parse error: ${finalError}. Raw response: ${raw.substring(0, 1000)}...`, { status: 500, headers: cors });
+        }
       }
     }
 
