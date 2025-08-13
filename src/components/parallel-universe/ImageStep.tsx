@@ -1,0 +1,246 @@
+import { useState, useRef } from 'react';
+import { useParallelUniverseStore } from '../../hooks/useParallelUniverseStore';
+import { useGenerationCredits } from '../../hooks/useParallelUniverseStore';
+import Button from '../ui/Button';
+import { Card } from '../ui/card';
+import { Camera, Upload, ArrowLeft, Sparkles, RefreshCw } from 'lucide-react';
+import { supabase } from '../../integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface ImageStepProps {
+  onNext: () => void;
+  onBack: () => void;
+}
+
+export default function ImageStep({ onNext, onBack }: ImageStepProps) {
+  const { 
+    generatedImage, 
+    setGeneratedImage, 
+    personaData, 
+    questionnaireData,
+    incrementImageGenerations 
+  } = useParallelUniverseStore();
+  
+  const { canGenerateImage, imageCreditsRemaining } = useGenerationCredits();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) { // 8MB limit
+      toast.error('Image must be smaller than 8MB');
+      return;
+    }
+
+    setUploadedImage(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setUploadPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const generateParallelUniversePortrait = async () => {
+    if (!canGenerateImage) {
+      toast.error('Image generation limit reached. Try again later.');
+      return;
+    }
+
+    setIsGenerating(true);
+    
+    try {
+      // Build the prompt based on user data
+      const interests = questionnaireData?.interests.join(', ') || '';
+      const budget = questionnaireData?.budget || '';
+      const energy = questionnaireData?.energy || 5;
+      const anonymityIdea = questionnaireData?.anonymityIdea || '';
+      const primaryCity = questionnaireData?.primaryCity || 'unknown destination';
+
+      const prompt = `Create a stylized "Parallel Universe" portrait.
+
+Persona core: ${personaData?.seed}
+Key traits: ${interests}, budget=${budget}, energy=${energy}, anonymityIdea="${anonymityIdea}"
+Locale vibe to reflect: ${primaryCity}
+
+Art direction:
+- Style: cinematic, travel editorial, lightly surreal accents
+- Wardrobe & props: infer from persona (non-branded, modest, public-friendly)
+- Background: iconic hints of ${primaryCity} (no trademarked logos)
+- Color: rich yet realistic; golden-hour lighting if outdoors
+- Output: 1024x1024 PNG, single subject, face clearly visible
+
+${uploadedImage ? 'If a reference image is provided, align facial structure and tones while respecting safety filters.' : ''}`;
+
+      // Call the edge function to generate image
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { 
+          prompt,
+          referenceImage: uploadedImage ? await convertFileToBase64(uploadedImage) : undefined
+        }
+      });
+
+      if (error) {
+        console.error('Image generation error:', error);
+        toast.error('Failed to generate image. Please try again.');
+        return;
+      }
+
+      if (data?.imageUrl) {
+        setGeneratedImage({
+          url: data.imageUrl,
+          prompt: prompt
+        });
+        incrementImageGenerations();
+        toast.success('Parallel Universe portrait generated!');
+      } else {
+        toast.error('No image was generated. Please try again.');
+      }
+
+    } catch (error) {
+      console.error('Error generating image:', error);
+      toast.error('Failed to generate image. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (generatedImage) {
+      onNext();
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <Camera className="w-12 h-12 text-primary mx-auto mb-4" />
+        <h3 className="text-xl font-semibold mb-2">Create Your Parallel Universe Portrait</h3>
+        <p className="text-muted-foreground max-w-md mx-auto">
+          Generate an AI portrait of yourself in this alternate reality. You can optionally upload a reference photo.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Reference Image Upload */}
+        <Card className="p-6">
+          <h4 className="font-medium mb-4 flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            Reference Photo (Optional)
+          </h4>
+          <p className="text-sm text-muted-foreground mb-4">
+            Upload a photo to help the AI understand your facial features (PNG/JPG, max 8MB)
+          </p>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/jpg"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          
+          <div className="space-y-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              {uploadedImage ? 'Change Photo' : 'Upload Photo'}
+            </Button>
+            
+            {uploadPreview && (
+              <div className="flex justify-center">
+                <img
+                  src={uploadPreview}
+                  alt="Upload preview"
+                  className="max-w-xs max-h-64 rounded-lg border"
+                />
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Generate Button */}
+        <Card className="p-6">
+          <div className="text-center space-y-4">
+            <h4 className="font-medium">Generate Your Portrait</h4>
+            <p className="text-sm text-muted-foreground">
+              Credits remaining: {imageCreditsRemaining}/3 per hour
+            </p>
+            
+            <Button
+              type="button"
+              onClick={generateParallelUniversePortrait}
+              disabled={!canGenerateImage || isGenerating}
+              className="w-full max-w-sm"
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Generating Portrait...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate Parallel Universe Portrait
+                </>
+              )}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Generated Image */}
+        {generatedImage && (
+          <Card className="p-6">
+            <h4 className="font-medium mb-4 text-center">Your Parallel Universe Portrait</h4>
+            <div className="flex justify-center mb-4">
+              <img
+                src={generatedImage.url}
+                alt="Generated parallel universe portrait"
+                className="max-w-md w-full rounded-lg shadow-lg"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground text-center bg-muted p-3 rounded">
+              Prompt used: {generatedImage.prompt.substring(0, 200)}...
+            </p>
+          </Card>
+        )}
+
+        {/* Navigation */}
+        <div className="flex justify-between pt-4">
+          <Button type="button" variant="ghost" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          <Button type="submit" disabled={!generatedImage} className="px-8">
+            Continue to Itinerary
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}

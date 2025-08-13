@@ -31,6 +31,7 @@ import PackageExplorer from './pages/PackageExplorer';
 import PlanTrip from './pages/PlanTrip';
 import TripItinerary from './pages/TripItinerary';
 import BackgroundRemovalDemo from './pages/BackgroundRemovalDemo';
+import ParallelUniverse from './pages/ParallelUniverse';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -69,6 +70,7 @@ function App() {
         <Route path="/trip-itinerary" element={<TripItinerary />} />
         <Route path="/explore-packages" element={<PackageExplorer />} />
         <Route path="/background-removal" element={<BackgroundRemovalDemo />} />
+        <Route path="/parallel-universe" element={<ParallelUniverse />} />
               </Routes>
             </main>
             <Footer />

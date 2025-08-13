@@ -106,22 +106,16 @@ export default function Header() {
                     </svg>
                     Plan Trip
                   </Link>
-                  <button
-                    onClick={() => {
-                      setIsTravelToolsOpen(false);
-                      if (user) {
-                        navigateToParallelUniverse();
-                      } else {
-                        window.open('https://elegant-halva-e06184.netlify.app/', '_blank', 'noopener,noreferrer');
-                      }
-                    }}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left"
+                  <Link
+                    to="/parallel-universe"
+                    onClick={() => setIsTravelToolsOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     Parallel Universe
-                  </button>
+                  </Link>
                   <div className="border-t border-border my-2"></div>
                   <Link
                     to="/visa-info"
