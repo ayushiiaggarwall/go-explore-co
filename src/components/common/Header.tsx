@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plane, Menu, X, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useParallelUniverseAuth } from '../../hooks/useParallelUniverseAuth';
 import ThemeToggle from '../ui/ThemeToggle';
 
 export default function Header() {
@@ -9,6 +10,7 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isTravelToolsOpen, setIsTravelToolsOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { navigateToParallelUniverse } = useParallelUniverseAuth();
   const navigate = useNavigate();
   const travelToolsRef = useRef<HTMLDivElement>(null);
 
@@ -104,18 +106,22 @@ export default function Header() {
                     </svg>
                     Plan Trip
                   </Link>
-                  <a
-                    href="https://elegant-halva-e06184.netlify.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                    onClick={() => setIsTravelToolsOpen(false)}
+                  <button
+                    onClick={() => {
+                      setIsTravelToolsOpen(false);
+                      if (user) {
+                        navigateToParallelUniverse();
+                      } else {
+                        window.open('https://elegant-halva-e06184.netlify.app/', '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     Parallel Universe
-                  </a>
+                  </button>
                   <div className="border-t border-border my-2"></div>
                   <Link
                     to="/visa-info"
@@ -255,15 +261,19 @@ export default function Header() {
               >
                 Plan Trip
                </Link>
-               <a
-                 href="https://elegant-halva-e06184.netlify.app"
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
-                 onClick={() => setIsMenuOpen(false)}
-               >
-                 Parallel Universe
-               </a>
+               <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    if (user) {
+                      navigateToParallelUniverse();
+                    } else {
+                      window.open('https://elegant-halva-e06184.netlify.app/', '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors w-full text-left"
+                >
+                  Parallel Universe
+                </button>
               <Link
                 to="/visa-info"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
