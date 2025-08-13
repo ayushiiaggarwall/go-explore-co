@@ -54,7 +54,7 @@ export default function DatesStep({ onNext, onBack }: DatesStepProps) {
               selected={startDate}
               onSelect={setStartDate}
               placeholder="Select start date"
-              disabled={(date) => date < new Date()}
+              disabled={(date: Date) => date < new Date()}
             />
           </Card>
 
@@ -64,7 +64,7 @@ export default function DatesStep({ onNext, onBack }: DatesStepProps) {
               selected={endDate}
               onSelect={setEndDate}
               placeholder="Select end date"
-              disabled={(date) => date < new Date() || (startDate && date < startDate)}
+              disabled={(date: Date) => date < new Date() || (startDate ? date < startDate : false)}
             />
           </Card>
         </div>

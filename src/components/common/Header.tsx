@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plane, Menu, X, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { useParallelUniverseAuth } from '../../hooks/useParallelUniverseAuth';
 import ThemeToggle from '../ui/ThemeToggle';
 
 export default function Header() {
@@ -10,7 +9,6 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isTravelToolsOpen, setIsTravelToolsOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { navigateToParallelUniverse } = useParallelUniverseAuth();
   const navigate = useNavigate();
   const travelToolsRef = useRef<HTMLDivElement>(null);
 
@@ -255,19 +253,13 @@ export default function Header() {
               >
                 Plan Trip
                </Link>
-               <button
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    if (user) {
-                      navigateToParallelUniverse();
-                    } else {
-                      window.open('https://elegant-halva-e06184.netlify.app/', '_blank', 'noopener,noreferrer');
-                    }
-                  }}
-                  className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors w-full text-left"
-                >
-                  Parallel Universe
-                </button>
+               <Link
+                 to="/parallel-universe"
+                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
+                 onClick={() => setIsMenuOpen(false)}
+               >
+                 Parallel Universe
+               </Link>
               <Link
                 to="/visa-info"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"

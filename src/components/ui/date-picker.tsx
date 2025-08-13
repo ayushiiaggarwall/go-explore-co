@@ -12,9 +12,10 @@ import {
 
 interface DatePickerProps {
   date?: Date
+  selected?: Date
   onSelect?: (date: Date | undefined) => void
   placeholder?: string
-  disabled?: boolean
+  disabled?: boolean | ((date: Date) => boolean)
   className?: string
   label?: string
   required?: boolean
@@ -22,6 +23,7 @@ interface DatePickerProps {
 
 export function DatePicker({
   date,
+  selected,
   onSelect,
   placeholder = "Pick a date",
   disabled = false,
@@ -29,6 +31,7 @@ export function DatePicker({
   label,
   required = false
 }: DatePickerProps) {
+  const selectedDate = selected || date;
   return (
     <div className={className}>
       {label && (
@@ -43,19 +46,20 @@ export function DatePicker({
             variant="outline"
             className={cn(
               "w-full justify-start text-left font-normal h-12 px-3",
-              !date && "text-muted-foreground"
+              !selectedDate && "text-muted-foreground"
             )}
-            disabled={disabled}
+            disabled={typeof disabled === 'boolean' ? disabled : false}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>{placeholder}</span>}
+            {selectedDate ? format(selectedDate, "PPP") : <span>{placeholder}</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            selected={date}
+            selected={selectedDate}
             onSelect={onSelect}
+            disabled={typeof disabled === 'function' ? disabled : undefined}
             initialFocus
             className="p-3 pointer-events-auto"
           />
