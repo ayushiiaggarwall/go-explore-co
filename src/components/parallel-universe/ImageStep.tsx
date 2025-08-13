@@ -52,7 +52,10 @@ export default function ImageStep({ onNext, onBack }: ImageStepProps) {
     reader.readAsDataURL(file);
   };
 
-  const generateParallelUniversePortrait = async () => {
+  const generateParallelUniversePortrait = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    
     if (!canGenerateImage) {
       toast.error('Image generation limit reached. Try again later.');
       return;
