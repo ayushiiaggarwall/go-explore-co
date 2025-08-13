@@ -65,7 +65,7 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (interests.length > 0 && budget && anonymityIdea.length >= 20) {
+    if (interests.length > 0 && budget && anonymityIdea.length >= 20 && primaryCity.trim()) {
       setQuestionnaireData({
         interests,
         budget: budget as any,
@@ -74,13 +74,13 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
         timeWindows,
         dietary: dietary || undefined,
         mobility: mobility || undefined,
-        primaryCity: primaryCity || undefined
+        primaryCity: primaryCity.trim()
       });
       onNext();
     }
   };
 
-  const canProceed = interests.length > 0 && budget && anonymityIdea.length >= 20;
+  const canProceed = interests.length > 0 && budget && anonymityIdea.length >= 20 && primaryCity.trim();
 
   return (
     <div className="space-y-8">
@@ -202,21 +202,31 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
           </div>
         </Card>
 
+        {/* Required Destination */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Destination</h3>
+          <div>
+            <label htmlFor="primary-city" className="block text-sm font-medium mb-2">
+              Where do you want to go? *
+            </label>
+            <Input
+              id="primary-city"
+              value={primaryCity}
+              onChange={(e) => setPrimaryCity(e.target.value)}
+              placeholder="e.g., Tokyo, Paris, New York, Bangkok..."
+              required
+              className={!primaryCity.trim() ? 'border-red-300' : ''}
+            />
+            {!primaryCity.trim() && (
+              <p className="text-red-500 text-sm mt-1">Please enter your destination city</p>
+            )}
+          </div>
+        </Card>
+
         {/* Optional Details */}
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Optional Details</h3>
           <div className="space-y-4">
-            <div>
-              <label htmlFor="primary-city" className="block text-sm font-medium mb-2">
-                Primary destination city (if known)
-              </label>
-              <Input
-                id="primary-city"
-                value={primaryCity}
-                onChange={(e) => setPrimaryCity(e.target.value)}
-                placeholder="e.g., Tokyo, Paris, New York..."
-              />
-            </div>
             
             <div>
               <label htmlFor="dietary" className="block text-sm font-medium mb-2">

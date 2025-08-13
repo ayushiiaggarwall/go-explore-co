@@ -69,7 +69,13 @@ export default function ImageStep({ onNext, onBack }: ImageStepProps) {
       const budget = questionnaireData?.budget || '';
       const energy = questionnaireData?.energy || 5;
       const anonymityIdea = questionnaireData?.anonymityIdea || '';
-      const primaryCity = questionnaireData?.primaryCity || 'unknown destination';
+      const primaryCity = questionnaireData?.primaryCity || '';
+
+      // Don't proceed if we don't have a destination
+      if (!primaryCity) {
+        toast.error('Please go back and enter your destination city first.');
+        return;
+      }
 
       const prompt = `Create a stylized, human-in-cartoon-form travel portrait using the attached reference image for facial likeness.
 
