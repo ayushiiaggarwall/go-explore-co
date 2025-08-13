@@ -149,18 +149,21 @@ ${uploadedImage ? 'If the reference image is low quality or occluded, approximat
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (generatedImage) {
-      onNext();
-    }
+    // Allow continuing with or without generated image
+    onNext();
+  };
+
+  const handleSkipPortrait = () => {
+    onNext();
   };
 
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
         <Camera className="w-12 h-12 text-primary mx-auto mb-4" />
-        <h3 className="text-xl font-semibold mb-2">Create Your Parallel Universe Portrait</h3>
+        <h3 className="text-xl font-semibold mb-2">Create Your Parallel Universe Portrait (Optional)</h3>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Generate an AI portrait of yourself in this alternate reality. You can optionally upload a reference photo.
+          Generate an AI portrait of yourself in this alternate reality, or skip to continue with your itinerary.
         </p>
       </div>
 
@@ -265,9 +268,23 @@ ${uploadedImage ? 'If the reference image is low quality or occluded, approximat
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <Button type="submit" disabled={!generatedImage} className="px-8">
-            Continue to Itinerary
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleSkipPortrait}
+              className="px-6"
+            >
+              Skip Portrait
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={!generatedImage} 
+              className="px-8"
+            >
+              Continue with Portrait
+            </Button>
+          </div>
         </div>
       </form>
     </div>
