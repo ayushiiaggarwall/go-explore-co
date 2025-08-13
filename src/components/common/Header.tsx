@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plane, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
+import { Plane, Menu, X, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParallelUniverseAuth } from '../../hooks/useParallelUniverseAuth';
 import ThemeToggle from '../ui/ThemeToggle';
@@ -10,8 +10,8 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isTravelToolsOpen, setIsTravelToolsOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { navigateToParallelUniverse } = useParallelUniverseAuth();
   const navigate = useNavigate();
-  const { redirectToParallelUniverse, isGeneratingToken } = useParallelUniverseAuth();
   const travelToolsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -106,17 +106,23 @@ export default function Header() {
                     </svg>
                     Plan Trip
                   </Link>
-                  <div className="border-t border-border my-2"></div>
-                  <Link
-                    to="/recommendations"
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                    onClick={() => setIsTravelToolsOpen(false)}
+                  <button
+                    onClick={() => {
+                      setIsTravelToolsOpen(false);
+                      if (user) {
+                        navigateToParallelUniverse();
+                      } else {
+                        window.open('https://elegant-halva-e06184.netlify.app/', '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    Books & Movies
-                  </Link>
+                    Parallel Universe
+                  </button>
+                  <div className="border-t border-border my-2"></div>
                   <Link
                     to="/visa-info"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -137,24 +143,6 @@ export default function Header() {
                     </svg>
                     Currency Converter
                   </Link>
-                  <div className="border-t border-border my-2"></div>
-                  <button
-                    onClick={() => {
-                      if (user) {
-                        redirectToParallelUniverse();
-                      } else {
-                        window.open('https://jovial-longma-141474.netlify.app/', '_blank');
-                      }
-                      setIsTravelToolsOpen(false);
-                    }}
-                    disabled={isGeneratingToken}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left disabled:opacity-50"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    {isGeneratingToken ? 'Connecting...' : 'Parallel Universe'}
-                  </button>
                 </div>
               )}
             </div>
@@ -189,14 +177,6 @@ export default function Header() {
                     >
                       <Settings className="w-4 h-4 mr-2" />
                       Profile Settings
-                    </Link>
-                    <Link
-                      to="/dashboard"
-                      className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <LayoutDashboard className="w-4 h-4 mr-2" />
-                      My Bookings
                     </Link>
                     <button
                       onClick={handleLogout}
@@ -280,14 +260,20 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Plan Trip
-              </Link>
-              <Link
-                to="/recommendations"
-                className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Books & Movies
-              </Link>
+               </Link>
+               <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    if (user) {
+                      navigateToParallelUniverse();
+                    } else {
+                      window.open('https://elegant-halva-e06184.netlify.app/', '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors w-full text-left"
+                >
+                  Parallel Universe
+                </button>
               <Link
                 to="/visa-info"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
@@ -302,20 +288,6 @@ export default function Header() {
               >
                 Currency Converter
               </Link>
-              <button
-                onClick={() => {
-                  if (user) {
-                    redirectToParallelUniverse();
-                  } else {
-                    window.open('https://jovial-longma-141474.netlify.app/', '_blank');
-                  }
-                  setIsMenuOpen(false);
-                }}
-                disabled={isGeneratingToken}
-                className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors text-left w-full disabled:opacity-50"
-              >
-                {isGeneratingToken ? 'Connecting...' : 'Parallel Universe'}
-              </button>
               <Link
                 to="/about"
                 className="block px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
@@ -346,14 +318,6 @@ export default function Header() {
                   >
                     <Settings className="w-4 h-4" />
                     Profile Settings
-                  </Link>
-                  <Link
-                    to="/dashboard"
-                    className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-sky-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    My Bookings
                   </Link>
                   <button
                     onClick={() => {

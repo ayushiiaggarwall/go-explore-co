@@ -30,7 +30,12 @@ export interface Hotel {
 
 export interface Flight {
   id: string;
-  airline: string;
+  flightNumber: string;
+  airline: {
+    name: string;
+    code: string;
+    logo?: string;
+  };
   departure: {
     airport: string;
     city: string;
@@ -46,6 +51,7 @@ export interface Flight {
   duration: string;
   price: number;
   stops: number;
+  bookingUrl?: string;
 }
 
 export interface Package {

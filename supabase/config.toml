@@ -48,3 +48,18 @@ uri = "https://ioifldpjlfotqvtaidem.supabase.co/functions/v1/send-verification-e
 enabled = true
 policy = "per_worker"
 inspector_port = 8083
+
+[functions.search-tripadvisor]
+verify_jwt = false
+
+[functions.search-flights]
+verify_jwt = false
+
+[functions.gemini-api]
+verify_jwt = false
+
+[functions.generate-itinerary]
+verify_jwt = false
+
+[functions.generate-city-image]
+verify_jwt = false

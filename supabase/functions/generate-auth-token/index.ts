@@ -1,3 +1,4 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -5,10 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
@@ -22,58 +23,60 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Get the authenticated user
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+    // Get the user from the request
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseClient.auth.getUser()
 
     if (userError || !user) {
-      console.log('User authentication failed:', userError)
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401 
         }
       )
     }
 
-    // Generate a temporary token with user information
+    // Get user profile if it exists
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+
+    // Generate a temporary token (valid for 10 minutes)
     const tokenData = {
-      userId: user.id,
+      user_id: user.id,
       email: user.email,
-      name: user.user_metadata?.full_name || user.email,
-      timestamp: Date.now(),
-      // Token expires in 10 minutes
-      expiresAt: Date.now() + (10 * 60 * 1000)
+      full_name: user.user_metadata?.full_name || profile?.display_name,
+      phone_number: profile?.phone_number,
+      avatar_url: profile?.avatar_url,
+      created_at: user.created_at,
+      expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes from now
     }
 
-    // Create a simple encoded token (in production, you'd want to sign this)
+    // In a real implementation, you'd want to:
+    // 1. Store this token in a temporary table in your database
+    // 2. Use JWT or encrypt the token for security
+    // For simplicity, we'll encode it as base64 (NOT secure for production)
     const token = btoa(JSON.stringify(tokenData))
 
-    console.log('Generated auth token for user:', user.email)
-
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.user_metadata?.full_name || user.email
-        }
-      }),
+      JSON.stringify({ token }),
       { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
       }
     )
 
   } catch (error) {
-    console.error('Error generating auth token:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: error.message }),
       { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
       }
     )
   }

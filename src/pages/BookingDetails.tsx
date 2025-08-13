@@ -179,7 +179,7 @@ export default function BookingDetails() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-semibold mb-2">{flight.airline}</h3>
+              <h3 className="text-xl font-semibold mb-2">{typeof flight.airline === 'string' ? flight.airline : flight.airline.name}</h3>
               <div className="flex items-center space-x-4">
                 <div>
                   <div className="font-semibold">{flight.departure.time}</div>

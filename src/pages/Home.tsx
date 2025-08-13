@@ -1,21 +1,16 @@
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { Plane, Hotel, MapPin, Star, Shield, Clock } from 'lucide-react';
-import PackageCard from '../components/cards/PackageCard';
-import { mockPackages } from '../services/mockData';
 import { useAuth } from '../hooks/useAuth';
+import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 
 export default function Home() {
   const { user, isLoading } = useAuth();
+  const { smoothNavigate } = useSmoothNavigation();
 
   // Redirect authenticated users to dashboard
   if (!isLoading && user) {
     return <Navigate to="/dashboard" replace />;
   }
-
-  const handlePackageBook = (pkg: any) => {
-    // In a real app, this would navigate to booking page
-    console.log('Booking package:', pkg);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -41,9 +36,9 @@ export default function Home() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-8">
             {/* Hotels Button */}
-            <Link 
-              to="/book-hotel" 
-              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+            <button 
+              onClick={() => smoothNavigate('/book-hotel')}
+              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105 w-full"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-yellow-500/20"></div>
               <div className="relative p-8 h-64 flex flex-col items-center justify-center text-center">
@@ -51,12 +46,12 @@ export default function Home() {
                 <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">HOTELS</h2>
                 <p className="text-white/90 text-lg">Find perfect accommodations</p>
               </div>
-            </Link>
+            </button>
 
             {/* Flights Button */}
-            <Link 
-              to="/book-flight" 
-              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+            <button 
+              onClick={() => smoothNavigate('/book-flight')}
+              className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105 w-full"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-sky-500/20"></div>
               <div className="relative p-8 h-64 flex flex-col items-center justify-center text-center">
@@ -64,22 +59,22 @@ export default function Home() {
                 <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Flights</h2>
                 <p className="text-white/90 text-lg">Book your next adventure</p>
               </div>
-            </Link>
+            </button>
           </div>
 
           {/* Plan Trip Button - Centered below */}
           <div className="flex justify-center max-w-6xl mx-auto">
-            <Link 
-              to="/plan-trip" 
+            <button 
+              onClick={() => smoothNavigate('/plan-trip')}
               className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 transform hover:scale-105 w-full max-w-md"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"></div>
-              <div className="relative p-8 h-64 flex flex-col items-center justify-center text-center">
+              <div className="relative p-6 h-48 flex flex-col items-center justify-center text-center">
                 <MapPin className="w-16 h-16 text-white mb-4 group-hover:scale-110 transition-transform duration-300" />
                 <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Plan Trip</h2>
                 <p className="text-white/90 text-lg">Design your perfect journey</p>
               </div>
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -116,34 +111,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Popular Packages */}
-      <section className="py-16 bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Popular Vacation Packages</h2>
-            <p className="text-lg text-muted-foreground">Discover our handpicked travel packages for the perfect getaway.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mockPackages.map(pkg => (
-              <PackageCard
-                key={pkg.id}
-                package={pkg}
-                onBook={handlePackageBook}
-              />
-            ))}
-          </div>
-          
-          <div className="text-center mt-12">
-            <Link
-              to="/search"
-              className="inline-flex items-center px-6 py-3 bg-sky-500 text-white font-medium rounded-md hover:bg-sky-600 transition-colors"
-            >
-              View All Packages
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* Services Overview */}
       <section className="py-16 bg-muted/50">
@@ -161,9 +128,9 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Flights</h3>
                 <p className="text-muted-foreground mb-4 text-center">Compare and book flights from hundreds of airlines worldwide.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <button onClick={() => smoothNavigate('/search')} className="text-sky-500 hover:text-sky-600 font-medium block text-center w-full">
                   Search Flights →
-                </Link>
+                </button>
               </div>
             </div>
             
@@ -174,9 +141,9 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2 text-center">Hotels</h3>
                 <p className="text-muted-foreground mb-4 text-center">Find and book the perfect accommodation for your stay.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <button onClick={() => smoothNavigate('/search')} className="text-sky-500 hover:text-sky-600 font-medium block text-center w-full">
                   Search Hotels →
-                </Link>
+                </button>
               </div>
             </div>
             
@@ -185,11 +152,11 @@ export default function Home() {
                 <MapPin className="w-16 h-16 text-white" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2 text-center">Packages</h3>
-                <p className="text-muted-foreground mb-4 text-center">Save with our curated vacation packages and deals.</p>
-                <Link to="/search" className="text-sky-500 hover:text-sky-600 font-medium block text-center">
+                <h3 className="text-xl font-semibold mb-2 text-center">Personalised Trip</h3>
+                <p className="text-muted-foreground mb-4 text-center">Create your personalised vacation package with us</p>
+                <button onClick={() => smoothNavigate('/search')} className="text-sky-500 hover:text-sky-600 font-medium block text-center w-full">
                   View Packages →
-                </Link>
+                </button>
               </div>
             </div>
           </div>

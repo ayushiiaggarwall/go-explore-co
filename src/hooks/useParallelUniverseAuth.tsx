@@ -1,41 +1,34 @@
-import { useState } from 'react';
 import { supabase } from '../integrations/supabase/client';
 
-export function useParallelUniverseAuth() {
-  const [isGeneratingToken, setIsGeneratingToken] = useState(false);
-
-  const redirectToParallelUniverse = async () => {
-    setIsGeneratingToken(true);
-    
+export const useParallelUniverseAuth = () => {
+  const generateAuthToken = async (): Promise<string | null> => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-auth-token');
       
       if (error) {
         console.error('Error generating auth token:', error);
-        // Redirect without token if generation fails
-        window.open('https://jovial-longma-141474.netlify.app/', '_blank');
-        return;
+        return null;
       }
-
-      if (data?.token) {
-        // Redirect with authentication token
-        const redirectUrl = `https://jovial-longma-141474.netlify.app/?auth_token=${data.token}`;
-        window.open(redirectUrl, '_blank');
-      } else {
-        // Fallback to redirect without token
-        window.open('https://jovial-longma-141474.netlify.app/', '_blank');
-      }
+      
+      return data.token;
     } catch (error) {
-      console.error('Error during parallel universe auth:', error);
-      // Fallback to redirect without token
-      window.open('https://jovial-longma-141474.netlify.app/', '_blank');
-    } finally {
-      setIsGeneratingToken(false);
+      console.error('Error generating auth token:', error);
+      return null;
     }
   };
 
-  return {
-    redirectToParallelUniverse,
-    isGeneratingToken
+  const navigateToParallelUniverse = async (): Promise<void> => {
+    const token = await generateAuthToken();
+    
+    if (token) {
+      // Pass the token as a URL parameter
+      const url = `https://elegant-halva-e06184.netlify.app/?auth_token=${token}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      // Fallback to regular navigation without auth
+      window.open('https://elegant-halva-e06184.netlify.app/', '_blank', 'noopener,noreferrer');
+    }
   };
-}
+
+  return { navigateToParallelUniverse };
+};

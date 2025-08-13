@@ -17,6 +17,8 @@ export default function Login() {
     password: ''
   });
   
+  const [rememberMe, setRememberMe] = useState(false);
+  
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [showPassword, setShowPassword] = useState(false);
 
@@ -110,12 +112,18 @@ export default function Login() {
               required
             />
 
-            <div className="flex items-center justify-end">
-              <div className="text-sm">
-                <Link to="/forgot-password" className="font-medium text-primary hover:text-primary/80">
-                  Forgot your password?
-                </Link>
-              </div>
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
+                Remember me
+              </label>
             </div>
 
             <Button
