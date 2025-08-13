@@ -35,8 +35,8 @@ Art Direction:
 - Style: clean, semi-realistic cartoon (cel-shaded), soft gradients, light outlines; NOT photorealistic
 - Pose & crop: centered, 3/4 view, head-and-shoulders to mid-torso, friendly expression
 - Wardrobe/props: infer tasteful items that reflect interests & destination (non-branded)
-- Background: subtle, iconic cues from the destination (no logos or text)
-- Color & lighting: vibrant but natural; gentle golden-hour vibe
+- Background: incorporate specific iconic landmarks, architecture, or natural features from ${destinationCity}, ${destinationRegionOrCountry} that relate to the interests: ${interestsCsv}. Make the background prominent but not overwhelming.
+- Color & lighting: vibrant but natural; gentle golden-hour vibe that complements the destination
 
 Requirements:
 - CRITICAL: Preserve the person's exact gender presentation, facial structure, and skin tone from the reference
