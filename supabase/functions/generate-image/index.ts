@@ -8,6 +8,49 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+async function analyzeReferenceImage(imageBase64: string): Promise<string> {
+  console.log('🔍 Analyzing reference image with GPT-4o...');
+  
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Analyze this person\'s appearance for creating a cartoon portrait. Describe their: facial structure, skin tone, hair color/style, eye color, distinctive features, approximate age, and any visible cultural elements. Be specific but respectful.'
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: imageBase64
+              }
+            }
+          ]
+        }
+      ],
+      max_tokens: 300
+    })
+  });
+
+  if (response.ok) {
+    const result = await response.json();
+    const description = result.choices[0].message.content;
+    console.log('📝 Image analysis result:', description);
+    return description;
+  } else {
+    console.log('⚠️ Failed to analyze image, using generic description');
+    return 'person with distinctive features';
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -30,7 +73,18 @@ serve(async (req) => {
       });
     }
 
-    console.log('🎨 Generating cartoon portrait with OpenAI:', prompt.substring(0, 100) + '...');
+    // If reference image is provided, analyze it first
+    let enhancedPrompt = prompt;
+    if (referenceImage) {
+      console.log('📷 Reference image provided, analyzing first...');
+      const imageDescription = await analyzeReferenceImage(referenceImage);
+      enhancedPrompt = prompt.replace(
+        'using the attached reference image for facial likeness',
+        `based on this person: ${imageDescription}`
+      );
+    }
+
+    console.log('🎨 Generating cartoon portrait with OpenAI:', enhancedPrompt.substring(0, 100) + '...');
 
     // Use OpenAI's gpt-image-1 model for cartoon-style portraits
     const response = await fetch('https://api.openai.com/v1/images/generations', {
@@ -41,7 +95,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'gpt-image-1',
-        prompt: prompt,
+        prompt: enhancedPrompt,
         n: 1,
         size: '1024x1024',
         quality: 'high'
