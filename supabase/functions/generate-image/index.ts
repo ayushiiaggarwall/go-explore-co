@@ -23,7 +23,7 @@ function buildCartoonPrompt({
 }) {
   const interestsCsv = interests.filter(Boolean).join(", ");
   return `
-Create a stylized, human-in-cartoon-form travel portrait using the attached reference image for facial likeness.
+Create a stylized, human-in-cartoon-form travel portrait using the attached reference image for facial likeness ONLY.
 
 Persona:
 - Core idea: ${personaSeed}
@@ -34,13 +34,26 @@ Persona:
 Art Direction:
 - Style: clean, semi-realistic cartoon (cel-shaded), soft gradients, light outlines; NOT photorealistic
 - Pose & crop: centered, 3/4 view, head-and-shoulders to mid-torso, friendly expression
-- Wardrobe/props: infer tasteful items that reflect interests & destination (non-branded)
-- Background: MUST show authentic landmarks/scenery ONLY from ${destinationCity}, ${destinationRegionOrCountry}. Do NOT include landmarks from other cities or countries. Connect the background to these interests: ${interestsCsv}. Make the background recognizable but subtle.
+- Wardrobe/props: Generate outfit and accessories based ONLY on the interests (${interestsCsv}) and persona notes (${styleNotes}). DO NOT copy clothing from the reference image.
+- Background: MUST show authentic landmarks/scenery ONLY from ${destinationCity}, ${destinationRegionOrCountry}. Do NOT include landmarks from other cities or countries. Make the background recognizable and connect to the destination.
 - Color & lighting: vibrant but natural; gentle golden-hour vibe that complements the specific destination
+
+What to preserve from reference image:
+- Facial structure, features, and bone structure
+- Skin tone and complexion
+- Hair color, style, and texture
+- Eye color and shape
+- Gender presentation
+
+What to generate NEW (do NOT copy from reference):
+- Clothing and outfit (base on interests: ${interestsCsv})
+- Accessories and props (base on interests and destination)
+- Pose and expression (friendly, travel-ready)
+- Background scenery (authentic to ${destinationCity})
 
 Requirements:
 - CRITICAL: Preserve the person's exact gender presentation, facial structure, and skin tone from the reference
-- Maintain the same gender identity and physical characteristics as shown in the reference image
+- Generate clothing/outfit based on interests and travel destination, not reference image clothing
 - Keep content PG-13, respectful, and culturally sensitive
 - No text, watermarks, or brand logos
 - Single subject only; no extra people
