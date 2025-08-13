@@ -29,7 +29,8 @@ Art Direction:
 - Color & lighting: vibrant but natural; gentle golden-hour vibe
 
 Requirements:
-- Preserve the person's key facial structure and skin tone from the reference
+- Preserve the person's key facial structure, skin tone, and gender presentation from the reference
+- Maintain the same gender identity and physical characteristics as shown in the reference image
 - Keep content PG-13, respectful, and culturally sensitive
 - No text, watermarks, or brand logos
 - Single subject only; no extra people
