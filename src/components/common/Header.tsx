@@ -143,7 +143,7 @@ export default function Header() {
                       if (user) {
                         redirectToParallelUniverse();
                       } else {
-                        window.open('https://jovial-longma-141474.netlify.app', '_blank');
+                        window.open('https://jovial-longma-141474.netlify.app/', '_blank');
                       }
                       setIsTravelToolsOpen(false);
                     }}
@@ -307,7 +307,7 @@ export default function Header() {
                   if (user) {
                     redirectToParallelUniverse();
                   } else {
-                    window.open('https://jovial-longma-141474.netlify.app', '_blank');
+                    window.open('https://jovial-longma-141474.netlify.app/', '_blank');
                   }
                   setIsMenuOpen(false);
                 }}
