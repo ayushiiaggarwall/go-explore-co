@@ -373,7 +373,7 @@ export default function Dashboard() {
             ) : (
               <div>
                 {tripPlans.map(plan => (
-                  <div key={plan.id} className="bg-card rounded-lg shadow-md p-6 mb-6">
+                  <div key={plan.id} className="bg-card rounded-lg shadow-md p-6 mb-6 border border-border">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-lg font-semibold text-foreground">{plan.trip_name}</h3>
@@ -452,7 +452,7 @@ export default function Dashboard() {
             ) : (
               <div>
                 {parallelItineraries.map(itinerary => (
-                  <div key={itinerary.id} className="bg-card rounded-lg shadow-md p-6 mb-6">
+                  <div key={itinerary.id} className="bg-card rounded-lg shadow-md p-6 mb-6 border border-border">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-start gap-4">
                         <div className="flex-shrink-0">
