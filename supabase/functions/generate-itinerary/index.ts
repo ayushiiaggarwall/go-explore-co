@@ -133,9 +133,9 @@ Return ONLY valid JSON in this exact format:
   }
 }`;
 
-    // Use Gemini for itinerary generation
+    // Use Gemini 2.5 Flash for itinerary generation
     const geminiRes = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" + GEMINI_API_KEY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=" + GEMINI_API_KEY,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
