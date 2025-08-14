@@ -242,6 +242,37 @@ ${uploadedImage ? 'If the reference image is low quality or occluded, approximat
         {generatedImage && (
           <Card className="p-6">
             <h4 className="font-medium mb-4 text-center">Your Parallel Universe Portrait</h4>
+            
+            {/* Persona Name & Description */}
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-primary mb-3">
+                {personaData?.seed ? 
+                  personaData.seed.split(' ').slice(0, 3).join(' ') + '...' : 
+                  'Your Parallel Self'
+                }
+              </h3>
+              <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-4 rounded-lg border border-primary/20">
+                <p className="text-sm text-muted-foreground mb-2">
+                  <strong>Persona Description:</strong>
+                </p>
+                <p className="text-sm leading-relaxed">
+                  In this parallel universe, you are someone who {personaData?.seed?.toLowerCase() || 'explores new possibilities'}. 
+                  {questionnaireData?.interests && questionnaireData.interests.length > 0 && (
+                    <> Your interests in {questionnaireData.interests.slice(0, 2).join(' and ')} shape your adventures.</>
+                  )}
+                  {questionnaireData?.secretDesire && (
+                    <> You harbor a secret desire to {questionnaireData.secretDesire}.</>
+                  )}
+                  {questionnaireData?.personalityShift && (
+                    <> In this reality, your personality has shifted towards being {questionnaireData.personalityShift}.</>
+                  )}
+                  {questionnaireData?.hiddenTalent && (
+                    <> You possess a hidden talent for {questionnaireData.hiddenTalent}.</>
+                  )}
+                </p>
+              </div>
+            </div>
+
             <div className="flex justify-center mb-4">
               <img
                 src={generatedImage.url}

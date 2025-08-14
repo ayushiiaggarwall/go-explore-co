@@ -57,6 +57,12 @@ export default function ItineraryStep({ onBack, onReset }: ItineraryStepProps) {
         timeWindows: questionnaireData?.timeWindows,
         dietary: questionnaireData?.dietary,
         mobility: questionnaireData?.mobility,
+        // Include persona-specific fields
+        secretDesire: questionnaireData?.secretDesire,
+        personalityShift: questionnaireData?.personalityShift,
+        socialRole: questionnaireData?.socialRole,
+        fearToOvercome: questionnaireData?.fearToOvercome,
+        hiddenTalent: questionnaireData?.hiddenTalent,
         primaryCityOrRegion: destinationCity,
         numberOfDays: days
       };
@@ -278,6 +284,63 @@ ${itinerary.budgetEstimate ? `
               </CardContent>
             </Card>
           ))}
+
+          {/* Best Places for Eating & Must Try */}
+          {itinerary.foodAndDrinks && itinerary.foodAndDrinks.length > 0 && (
+            <Card className="p-6">
+              <h4 className="font-semibold mb-4 flex items-center gap-2">
+                🍽️ Best Places for Eating & Must Try
+              </h4>
+              <div className="grid gap-4 md:grid-cols-2">
+                {itinerary.foodAndDrinks.map((food, idx) => (
+                  <div key={idx} className="border border-border rounded-lg p-4 bg-card">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="font-medium text-sm">{food.restaurantName}</h5>
+                      <span className="text-xs text-muted-foreground">{food.priceRange}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">{food.location}</p>
+                    <p className="text-xs text-primary mb-2">{food.cuisine} • {food.bestTime}</p>
+                    {food.mustTryDishes && food.mustTryDishes.length > 0 && (
+                      <div className="mb-2">
+                        <span className="text-xs font-medium">Must try: </span>
+                        <span className="text-xs">{food.mustTryDishes.join(', ')}</span>
+                      </div>
+                    )}
+                    {food.specialtyNote && (
+                      <p className="text-xs text-muted-foreground italic">{food.specialtyNote}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Must Do Attractions */}
+          {itinerary.mustDoAttractions && itinerary.mustDoAttractions.length > 0 && (
+            <Card className="p-6">
+              <h4 className="font-semibold mb-4 flex items-center gap-2">
+                ⭐ Must-Do Attractions
+              </h4>
+              <div className="space-y-4">
+                {itinerary.mustDoAttractions.map((attraction, idx) => (
+                  <div key={idx} className="border border-border rounded-lg p-4 bg-card">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="font-medium text-sm">{attraction.name}</h5>
+                      <span className="text-xs text-muted-foreground">{attraction.estimatedTime}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">{attraction.location}</p>
+                    <p className="text-xs mb-2">{attraction.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-primary">Best time: {attraction.bestTimeToVisit}</span>
+                      {attraction.insiderTip && (
+                        <span className="text-xs text-accent">💡 {attraction.insiderTip}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* Local Tips */}
           {itinerary.localInsiderTips && itinerary.localInsiderTips.length > 0 && (

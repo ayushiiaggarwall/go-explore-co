@@ -28,8 +28,16 @@ serve(async (req) => {
       anonymityIdea,
       dateRange,
       timeWindows,
+      dietary,
+      mobility,
       primaryCityOrRegion,
-      numberOfDays
+      numberOfDays,
+      // New persona fields
+      secretDesire,
+      personalityShift,
+      socialRole,
+      fearToOvercome,
+      hiddenTalent
     } = body || {};
 
     console.log("Generating itinerary for:", { cityName: primaryCityOrRegion, numberOfDays, startDate: dateRange?.start, endDate: dateRange?.end });
@@ -49,18 +57,29 @@ serve(async (req) => {
 • Destination: ${primaryCityOrRegion}
 • Travel Dates: ${dateRange?.start} to ${dateRange?.end}
 • Trip Duration: ${numberOfDays} days
-• Persona: ${personaSeed}
+
+*PARALLEL UNIVERSE PERSONA:*
+• Core Identity: ${personaSeed}
+• Secret Desire: ${secretDesire || 'Not specified'}
+• Personality Shift: ${personalityShift || 'Not specified'}
+• Social Role: ${socialRole || 'Not specified'}
+• Fear to Overcome: ${fearToOvercome || 'Not specified'}
+• Hidden Talent: ${hiddenTalent || 'Not specified'}
+• Anonymity Idea: ${anonymityIdea}
 
 *USER PREFERENCES:*
 • Interests: ${interests.join(", ")}
 • Budget: ${budget}
 • Energy Level: ${energy}/10
-• Special Notes: ${anonymityIdea}
+• Dietary Restrictions: ${dietary || 'None'}
+• Mobility Needs: ${mobility || 'None'}
 
 *TIME PREFERENCES:*
 • Morning activities: ${timeWindows?.morning ? "Yes" : "No"}
 • Afternoon activities: ${timeWindows?.afternoon ? "Yes" : "No"}
 • Evening activities: ${timeWindows?.evening ? "Yes" : "No"}
+
+*IMPORTANT:* Use ALL the persona information to create activities that would help this person live out their parallel universe identity. Consider their secret desires, personality shifts, and hidden talents when selecting activities and experiences.
 
 *REQUIREMENTS:*
 Create a detailed JSON response with day-by-day itinerary, specific venue recommendations, insider tips, and practical information.

@@ -39,6 +39,23 @@ export interface GeneratedImage {
 export interface Itinerary {
   title: string;
   overview?: string;
+  mustDoAttractions?: Array<{
+    name: string;
+    location: string;
+    description: string;
+    estimatedTime: string;
+    bestTimeToVisit: string;
+    insiderTip: string;
+  }>;
+  foodAndDrinks?: Array<{
+    restaurantName: string;
+    location: string;
+    cuisine: string;
+    mustTryDishes: string[];
+    priceRange: string;
+    specialtyNote: string;
+    bestTime: string;
+  }>;
   dayByDayItinerary?: Array<{
     day: number;
     theme: string;
