@@ -20,11 +20,67 @@ export default function ItineraryStep({ onBack, onReset }: ItineraryStepProps) {
     personaData, 
     questionnaireData,
     dateRange,
+    generatedImage,
     incrementItineraryGenerations 
   } = useParallelUniverseStore();
   
   const { canGenerateItinerary, itineraryCreditsRemaining } = useGenerationCredits();
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Generate persona name based on inputs
+  const generatePersonaName = () => {
+    if (!personaData?.seed || !questionnaireData) return "The Wanderer";
+    
+    const destination = getDestinationFromPersona(personaData.seed, '');
+    const personalityShift = questionnaireData.personalityShift;
+    const secretDesire = questionnaireData.secretDesire;
+    
+    // Extract key words for name generation
+    const destinationWord = destination.split(' ')[0] || 'Global';
+    
+    const personalityAdjectives = {
+      'More confident and assertive': 'Bold',
+      'Spontaneous and adventurous': 'Wild',
+      'Mysterious and intriguing': 'Enigmatic',
+      'Social and outgoing': 'Vibrant',
+      'Creative and artistic': 'Artistic',
+      'Intellectual and curious': 'Sage'
+    };
+    
+    const desireNouns = {
+      'Learn extreme sports': 'Daredevil',
+      'Start my own business': 'Entrepreneur',
+      'Become a travel blogger': 'Storyteller',
+      'Learn a new language fluently': 'Linguist',
+      'Try performing arts': 'Performer',
+      'Master photography': 'Visionary'
+    };
+    
+    const personality = personalityAdjectives[personalityShift as keyof typeof personalityAdjectives] || 'Free';
+    const desire = desireNouns[secretDesire as keyof typeof desireNouns] || 'Spirit';
+    
+    return `${personality} ${desire} of ${destinationWord}`;
+  };
+
+  // Generate persona description
+  const generatePersonaDescription = () => {
+    if (!personaData?.seed || !questionnaireData) return "A mysterious traveler seeking new experiences.";
+    
+    const destination = getDestinationFromPersona(personaData.seed, 'the world');
+    const personality = questionnaireData.personalityShift;
+    const secret = questionnaireData.secretDesire;
+    const anonymity = questionnaireData.anonymityIdea;
+    
+    return `In this parallel universe, you transform into someone ${personality?.toLowerCase() || 'completely different'}. Your secret desire to ${secret?.toLowerCase() || 'explore new horizons'} drives your journey to ${destination}. ${anonymity ? `When nobody knows you, you ${anonymity.toLowerCase()}.` : ''} This version of yourself embraces adventure and lives without the usual constraints.`;
+  };
+
+  const personaName = generatePersonaName();
+  const personaDescription = generatePersonaDescription();
+
+  // Generate initials for fallback
+  const getInitials = (name: string) => {
+    return name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
+  };
 
   const generateItinerary = async () => {
     if (!canGenerateItinerary) {
@@ -158,6 +214,29 @@ ${itinerary.budgetEstimate ? `
           Get a personalized day-by-day travel plan designed for your alternate reality persona.
         </p>
       </div>
+
+      {/* Persona Display */}
+      <Card className="p-6 mb-6">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            {generatedImage?.url ? (
+              <img 
+                src={generatedImage.url} 
+                alt={personaName}
+                className="w-20 h-20 rounded-full object-cover border-2 border-primary"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <span className="text-primary font-bold text-lg">{getInitials(personaName)}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex-1">
+            <h4 className="text-lg font-semibold mb-2">{personaName}</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">{personaDescription}</p>
+          </div>
+        </div>
+      </Card>
 
       {!itinerary && (
         <Card className="p-6">
