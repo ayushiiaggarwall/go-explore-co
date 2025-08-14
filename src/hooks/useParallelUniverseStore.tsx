@@ -18,6 +18,12 @@ export interface QuestionnaireData {
   dietary?: string;
   mobility?: string;
   primaryCity?: string;
+  // New persona-specific fields
+  secretDesire?: string;
+  personalityShift?: string;
+  socialRole?: string;
+  fearToOvercome?: string;
+  hiddenTalent?: string;
 }
 
 export interface DateRange {

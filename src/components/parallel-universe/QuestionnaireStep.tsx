@@ -6,7 +6,7 @@ import { Textarea } from '../ui/textarea';
 import { Card } from '../ui/card';
 import { Slider } from '../ui/slider';
 import { Checkbox } from '../ui/checkbox';
-import { ArrowLeft, Heart, DollarSign, Clock } from 'lucide-react';
+import { ArrowLeft, Heart, DollarSign, Clock, Shield, User } from 'lucide-react';
 
 interface QuestionnaireStepProps {
   onNext: () => void;
@@ -46,6 +46,13 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
   });
   const [dietary, setDietary] = useState(questionnaireData?.dietary || '');
   const [mobility, setMobility] = useState(questionnaireData?.mobility || '');
+  
+  // New persona-specific questions
+  const [secretDesire, setSecretDesire] = useState(questionnaireData?.secretDesire || '');
+  const [personalityShift, setPersonalityShift] = useState(questionnaireData?.personalityShift || '');
+  const [socialRole, setSocialRole] = useState(questionnaireData?.socialRole || '');
+  const [fearToOvercome, setFearToOvercome] = useState(questionnaireData?.fearToOvercome || '');
+  const [hiddenTalent, setHiddenTalent] = useState(questionnaireData?.hiddenTalent || '');
 
   const handleInterestToggle = (interestId: string) => {
     setInterests(prev => 
@@ -64,7 +71,7 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (interests.length > 0 && budget && anonymityIdea.length >= 20) {
+    if (interests.length > 0 && budget && anonymityIdea.length >= 20 && secretDesire.length >= 15 && personalityShift.length >= 15) {
       setQuestionnaireData({
         interests,
         budget: budget as any,
@@ -72,13 +79,18 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
         energy,
         timeWindows,
         dietary: dietary || undefined,
-        mobility: mobility || undefined
+        mobility: mobility || undefined,
+        secretDesire,
+        personalityShift,
+        socialRole,
+        fearToOvercome,
+        hiddenTalent
       });
       onNext();
     }
   };
 
-  const canProceed = interests.length > 0 && budget && anonymityIdea.length >= 20;
+  const canProceed = interests.length > 0 && budget && anonymityIdea.length >= 20 && secretDesire.length >= 15 && personalityShift.length >= 15;
 
   return (
     <div className="space-y-8">
@@ -134,24 +146,126 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
           </div>
         </Card>
 
-        {/* Anonymity Question */}
+        {/* Parallel Identity Questions */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            If nobody knew you, what would you do differently?
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" />
+            Your Parallel Identity
           </h3>
-          <p className="text-muted-foreground text-sm mb-4">
-            Be honest and specific. This helps us understand your true desires.
-          </p>
-          <Textarea
-            value={anonymityIdea}
-            onChange={(e) => setAnonymityIdea(e.target.value)}
-            placeholder="When I'm completely anonymous, I would..."
-            className="min-h-24"
-            minLength={20}
-            maxLength={500}
-          />
-          <div className="text-xs text-muted-foreground mt-2">
-            {anonymityIdea.length}/500 characters (minimum 20)
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                If nobody knew you, what would you do differently?
+              </label>
+              <p className="text-muted-foreground text-xs mb-3">
+                Be honest and specific. This helps us understand your true desires.
+              </p>
+              <Textarea
+                value={anonymityIdea}
+                onChange={(e) => setAnonymityIdea(e.target.value)}
+                placeholder="When I'm completely anonymous, I would..."
+                className="min-h-20"
+                minLength={20}
+                maxLength={300}
+              />
+              <div className="text-xs text-muted-foreground mt-1">
+                {anonymityIdea.length}/300 characters (minimum 20)
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                What secret desire would you finally pursue?
+              </label>
+              <p className="text-muted-foreground text-xs mb-3">
+                That dream, hobby, or experience you've always wanted but never dared to try.
+              </p>
+              <Textarea
+                value={secretDesire}
+                onChange={(e) => setSecretDesire(e.target.value)}
+                placeholder="I've always secretly wanted to..."
+                className="min-h-20"
+                minLength={15}
+                maxLength={300}
+              />
+              <div className="text-xs text-muted-foreground mt-1">
+                {secretDesire.length}/300 characters (minimum 15)
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                How would your personality shift in this parallel universe?
+              </label>
+              <p className="text-muted-foreground text-xs mb-3">
+                More confident? Adventurous? Spontaneous? Mysterious? Outgoing?
+              </p>
+              <Textarea
+                value={personalityShift}
+                onChange={(e) => setPersonalityShift(e.target.value)}
+                placeholder="In this parallel universe, I become more..."
+                className="min-h-20"
+                minLength={15}
+                maxLength={300}
+              />
+              <div className="text-xs text-muted-foreground mt-1">
+                {personalityShift.length}/300 characters (minimum 15)
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Additional Persona Questions */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <User className="w-5 h-5 text-primary" />
+            Your Role & Aspirations
+          </h3>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                What social role would you play? (Optional)
+              </label>
+              <p className="text-muted-foreground text-xs mb-3">
+                The mysterious stranger, the confident local, the curious explorer, the sophisticated traveler...
+              </p>
+              <Input
+                value={socialRole}
+                onChange={(e) => setSocialRole(e.target.value)}
+                placeholder="I would be the..."
+                maxLength={150}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                What fear would you overcome? (Optional)
+              </label>
+              <p className="text-muted-foreground text-xs mb-3">
+                Heights, social anxiety, trying new foods, speaking to strangers...
+              </p>
+              <Input
+                value={fearToOvercome}
+                onChange={(e) => setFearToOvercome(e.target.value)}
+                placeholder="I would finally overcome my fear of..."
+                maxLength={150}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                What hidden talent would you explore? (Optional)
+              </label>
+              <p className="text-muted-foreground text-xs mb-3">
+                Dancing, singing, photography, cooking, languages, art...
+              </p>
+              <Input
+                value={hiddenTalent}
+                onChange={(e) => setHiddenTalent(e.target.value)}
+                placeholder="I would finally try..."
+                maxLength={150}
+              />
+            </div>
           </div>
         </Card>
 
