@@ -3,10 +3,11 @@ import { useParallelUniverseStore } from '../../hooks/useParallelUniverseStore';
 import { useGenerationCredits } from '../../hooks/useParallelUniverseStore';
 import Button from '../ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { MapPin, ArrowLeft, Sparkles, RefreshCw, Download, RotateCcw, Clock, DollarSign } from 'lucide-react';
+import { MapPin, ArrowLeft, Sparkles, RefreshCw, Download, RotateCcw, Clock, DollarSign, Save } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from 'sonner';
 import { getDestinationFromPersona } from '../../utils/parseDestination';
+import { useAuth } from '../../hooks/useAuth';
 
 interface ItineraryStepProps {
   onBack: () => void;
@@ -25,7 +26,9 @@ export default function ItineraryStep({ onBack, onReset }: ItineraryStepProps) {
   } = useParallelUniverseStore();
   
   const { canGenerateItinerary, itineraryCreditsRemaining } = useGenerationCredits();
+  const { user } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Generate persona name based on inputs
   const generatePersonaName = () => {
@@ -205,6 +208,45 @@ ${itinerary.budgetEstimate ? `
     URL.revokeObjectURL(url);
   };
 
+  const saveItineraryToDashboard = async () => {
+    if (!itinerary || !user) {
+      toast.error('Please log in to save your itinerary');
+      return;
+    }
+
+    setIsSaving(true);
+    
+    try {
+      const destination = getDestinationFromPersona(personaData?.seed || '', 'Unknown');
+      
+      const { error } = await supabase
+        .from('parallel_universe_itineraries')
+        .insert({
+          user_id: user.id,
+          persona_name: personaName,
+          persona_description: personaDescription,
+          persona_image_url: generatedImage?.url || null,
+          itinerary_data: JSON.parse(JSON.stringify(itinerary)),
+          destination: destination,
+          start_date: dateRange?.start ? dateRange.start.toISOString().split('T')[0] : null,
+          end_date: dateRange?.end ? dateRange.end.toISOString().split('T')[0] : null
+        });
+
+      if (error) {
+        console.error('Save error:', error);
+        toast.error('Failed to save itinerary. Please try again.');
+        return;
+      }
+
+      toast.success('Itinerary saved to your dashboard!');
+    } catch (error) {
+      console.error('Error saving itinerary:', error);
+      toast.error('Failed to save itinerary. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
@@ -282,6 +324,10 @@ ${itinerary.budgetEstimate ? `
                 <Button variant="outline" onClick={downloadItinerary}>
                   <Download className="w-4 h-4 mr-2" />
                   Download
+                </Button>
+                <Button variant="outline" onClick={saveItineraryToDashboard} disabled={isSaving}>
+                  <Save className="w-4 h-4 mr-2" />
+                  {isSaving ? 'Saving...' : 'Save to Dashboard'}
                 </Button>
                 <Button variant="outline" onClick={generateItinerary} disabled={isGenerating}>
                   <RefreshCw className="w-4 h-4 mr-2" />

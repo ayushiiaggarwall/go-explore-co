@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Star, User, Trash2, Plane, Building } from 'lucide-react';
+import { Calendar, MapPin, Star, User, Trash2, Plane, Building, Sparkles } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useBookings } from '../hooks/useBookings';
 import { formatPrice, formatDate } from '../utils/validation';
@@ -21,12 +21,25 @@ interface TripPlan {
   created_at: string;
 }
 
+interface ParallelUniverseItinerary {
+  id: string;
+  persona_name: string;
+  persona_description?: string | null;
+  persona_image_url?: string | null;
+  itinerary_data: any;
+  destination?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  created_at: string;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
   const { flightBookings, hotelBookings, loading: bookingsLoading, deleteFlight, deleteHotel } = useBookings();
   const [tripPlans, setTripPlans] = useState<TripPlan[]>([]);
-  const [activeTab, setActiveTab] = useState<'bookings' | 'trips'>('bookings');
+  const [parallelItineraries, setParallelItineraries] = useState<ParallelUniverseItinerary[]>([]);
+  const [activeTab, setActiveTab] = useState<'bookings' | 'trips' | 'parallel'>('bookings');
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -37,6 +50,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) {
       loadTripPlans();
+      loadParallelItineraries();
     }
   }, [user]);
 
@@ -54,6 +68,20 @@ export default function Dashboard() {
     }
   };
 
+  const loadParallelItineraries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('parallel_universe_itineraries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setParallelItineraries(data || []);
+    } catch (error) {
+      console.error('Error loading parallel universe itineraries:', error);
+    }
+  };
+
   const deleteTripPlan = async (planId: string) => {
     try {
       const { error } = await supabase
@@ -66,6 +94,21 @@ export default function Dashboard() {
       setTripPlans(prev => prev.filter(plan => plan.id !== planId));
     } catch (error) {
       console.error('Error deleting trip plan:', error);
+    }
+  };
+
+  const deleteParallelItinerary = async (itineraryId: string) => {
+    try {
+      const { error } = await supabase
+        .from('parallel_universe_itineraries')
+        .delete()
+        .eq('id', itineraryId);
+
+      if (error) throw error;
+      
+      setParallelItineraries(prev => prev.filter(itinerary => itinerary.id !== itineraryId));
+    } catch (error) {
+      console.error('Error deleting parallel universe itinerary:', error);
     }
   };
 
@@ -275,6 +318,16 @@ export default function Dashboard() {
             >
               Planned Trips ({tripPlans.length})
             </button>
+            <button
+              onClick={() => setActiveTab('parallel')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'parallel'
+                  ? 'border-sky-500 text-sky-600'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+              }`}
+            >
+              Parallel Universe ({parallelItineraries.length})
+            </button>
           </nav>
         </div>
 
@@ -303,7 +356,7 @@ export default function Dashboard() {
                 )}
               </div>
             )
-          ) : (
+          ) : activeTab === 'trips' ? (
             tripPlans.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-muted-foreground mb-4">
@@ -375,6 +428,93 @@ export default function Dashboard() {
                         }}
                       >
                         View Itinerary
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : (
+            // Parallel Universe tab
+            parallelItineraries.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground mb-4">
+                  <Sparkles className="w-16 h-16 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-foreground mb-2">No parallel universe itineraries yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Create your alternate reality persona and generate unique travel experiences.
+                </p>
+                <Button onClick={() => window.location.href = '/parallel-universe'}>
+                  Explore Parallel Universe
+                </Button>
+              </div>
+            ) : (
+              <div>
+                {parallelItineraries.map(itinerary => (
+                  <div key={itinerary.id} className="bg-card rounded-lg shadow-md p-6 mb-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0">
+                          {itinerary.persona_image_url ? (
+                            <img 
+                              src={itinerary.persona_image_url} 
+                              alt={itinerary.persona_name}
+                              className="w-16 h-16 rounded-full object-cover border-2 border-primary"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                              <span className="text-primary font-bold text-sm">
+                                {itinerary.persona_name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground">{itinerary.persona_name}</h3>
+                          <p className="text-muted-foreground text-sm">{itinerary.destination}</p>
+                          {itinerary.persona_description && (
+                            <p className="text-xs text-muted-foreground mt-1 max-w-md">{itinerary.persona_description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteParallelItinerary(itinerary.id)}
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                    
+                    {(itinerary.start_date || itinerary.end_date) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        {itinerary.start_date && itinerary.end_date && (
+                          <div className="flex items-center">
+                            <Calendar className="w-4 h-4 text-muted-foreground mr-2" />
+                            <span className="text-sm">
+                              {new Date(itinerary.start_date).toLocaleDateString()} - {new Date(itinerary.end_date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center">
+                          <span className="text-sm">Created: {formatDate(itinerary.created_at)}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          // You could navigate to a detailed view if needed
+                          console.log('View itinerary:', itinerary);
+                        }}
+                      >
+                        View Details
                       </Button>
                     </div>
                   </div>
