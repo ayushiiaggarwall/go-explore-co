@@ -100,7 +100,9 @@ export default function ItineraryStep({ onBack, onReset }: ItineraryStepProps) {
         1;
 
       // Extract destination from persona seed
+      console.log('Original persona seed:', personaData?.seed);
       const destinationCity = getDestinationFromPersona(personaData?.seed || '', 'Unknown destination');
+      console.log('Extracted destination:', destinationCity);
 
       // Build the request data
       const requestData = {
