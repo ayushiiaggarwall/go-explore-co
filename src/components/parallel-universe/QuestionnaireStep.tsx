@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParallelUniverseStore } from '../../hooks/useParallelUniverseStore';
 import Button from '../ui/Button';
 import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+
 import { Card } from '../ui/card';
 import { Slider } from '../ui/slider';
 import { Checkbox } from '../ui/checkbox';
@@ -30,6 +30,41 @@ const BUDGET_OPTIONS = [
   { id: 'modest', label: 'Modest', description: 'Comfortable with some splurges' },
   { id: 'comfortable', label: 'Comfortable', description: 'Mid-range options, good value' },
   { id: 'luxury', label: 'Luxury', description: 'Premium experiences, no budget limits' }
+];
+
+const ANONYMITY_OPTIONS = [
+  'Start a business in a completely new field',
+  'Travel solo to remote destinations',
+  'Learn an extreme sport or skill',
+  'Express myself through bold fashion or art',
+  'Speak up confidently in any situation',
+  'Try performing on stage or public speaking',
+  'Approach anyone and start conversations',
+  'Take creative risks without fear of judgment',
+];
+
+const SECRET_DESIRE_OPTIONS = [
+  'Learn to dance professionally',
+  'Write a novel or poetry',
+  'Master a musical instrument',
+  'Become a chef or food critic',
+  'Learn martial arts or combat sports',
+  'Study astronomy or space science',
+  'Start a creative business',
+  'Become a travel photographer',
+  'Learn extreme sports like skydiving',
+  'Study ancient cultures or archaeology',
+];
+
+const PERSONALITY_SHIFT_OPTIONS = [
+  'More confident and assertive',
+  'Spontaneous and adventurous',
+  'Mysterious and intriguing',
+  'Outgoing and socially fearless',
+  'Creative and artistic',
+  'Bold and risk-taking',
+  'Intellectual and philosophical',
+  'Charming and charismatic',
 ];
 
 export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepProps) {
@@ -71,7 +106,7 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (interests.length > 0 && budget && anonymityIdea.length >= 20 && secretDesire.length >= 15 && personalityShift.length >= 15) {
+    if (interests.length > 0 && budget && anonymityIdea && secretDesire && personalityShift) {
       setQuestionnaireData({
         interests,
         budget: budget as any,
@@ -90,7 +125,7 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
     }
   };
 
-  const canProceed = interests.length > 0 && budget && anonymityIdea.length >= 20 && secretDesire.length >= 15 && personalityShift.length >= 15;
+  const canProceed = interests.length > 0 && budget && anonymityIdea && secretDesire && personalityShift;
 
   return (
     <div className="space-y-8">
@@ -160,16 +195,21 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
               <p className="text-muted-foreground text-xs mb-3">
                 Be honest and specific. This helps us understand your true desires.
               </p>
-              <Textarea
-                value={anonymityIdea}
-                onChange={(e) => setAnonymityIdea(e.target.value)}
-                placeholder="When I'm completely anonymous, I would..."
-                className="min-h-20"
-                minLength={20}
-                maxLength={300}
-              />
-              <div className="text-xs text-muted-foreground mt-1">
-                {anonymityIdea.length}/300 characters (minimum 20)
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {ANONYMITY_OPTIONS.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setAnonymityIdea(option)}
+                    className={`p-3 rounded-lg border transition-all text-left text-sm ${
+                      anonymityIdea === option
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -180,16 +220,21 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
               <p className="text-muted-foreground text-xs mb-3">
                 That dream, hobby, or experience you've always wanted but never dared to try.
               </p>
-              <Textarea
-                value={secretDesire}
-                onChange={(e) => setSecretDesire(e.target.value)}
-                placeholder="I've always secretly wanted to..."
-                className="min-h-20"
-                minLength={15}
-                maxLength={300}
-              />
-              <div className="text-xs text-muted-foreground mt-1">
-                {secretDesire.length}/300 characters (minimum 15)
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {SECRET_DESIRE_OPTIONS.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setSecretDesire(option)}
+                    className={`p-3 rounded-lg border transition-all text-left text-sm ${
+                      secretDesire === option
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -200,16 +245,21 @@ export default function QuestionnaireStep({ onNext, onBack }: QuestionnaireStepP
               <p className="text-muted-foreground text-xs mb-3">
                 More confident? Adventurous? Spontaneous? Mysterious? Outgoing?
               </p>
-              <Textarea
-                value={personalityShift}
-                onChange={(e) => setPersonalityShift(e.target.value)}
-                placeholder="In this parallel universe, I become more..."
-                className="min-h-20"
-                minLength={15}
-                maxLength={300}
-              />
-              <div className="text-xs text-muted-foreground mt-1">
-                {personalityShift.length}/300 characters (minimum 15)
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {PERSONALITY_SHIFT_OPTIONS.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setPersonalityShift(option)}
+                    className={`p-3 rounded-lg border transition-all text-left text-sm ${
+                      personalityShift === option
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
