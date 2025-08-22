@@ -71,11 +71,18 @@ serve(async (req) => {
 
     const { from, to, departDate, returnDate, passengers } = await req.json();
     
-    // Detect India-to-India flights for INR pricing
-    const isIndiaToIndia = from.includes(', India') && to.includes(', India');
-    const currency = isIndiaToIndia ? 'INR' : 'USD';
+    // Detect India-to-India flights for INR pricing (supports city strings and IATA codes)
+    const INDIAN_IATA = new Set([
+      'DEL','BOM','MAA','BLR','HYD','CCU','COK','GOI','GOX','PNQ','AMD','ATQ','TRV','TRZ','IXM','IXC','IXE','VTZ','BBI','IXZ','NAG','LKO','GAU','IXB','SXR','JAI','PAT','RPR','UDR','BDQ','IXR','IXA','IMF','IXL','IXJ','IDR','VGA','IXY','BHU','BHO','IXU','HJR','DIB','DHM','DED','JLR','KNU','TIR','IXS','IXW','STV','TCR'
+    ]);
+    const isIndiaCode = (code: string) => INDIAN_IATA.has(String(code).toUpperCase());
+    const isIndiaStr = (val: string) => typeof val === 'string' && val.toLowerCase().includes(', india');
+    const isIndiaToIndia = (isIndiaStr(from) || isIndiaCode(from)) && (isIndiaStr(to) || isIndiaCode(to));
     
-    console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers, currency, isIndiaToIndia });
+    // Default display currency; amount conversion handled after fetching results
+    let displayCurrency = isIndiaToIndia ? 'INR' : 'USD';
+    
+    console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers, displayCurrency, isIndiaToIndia });
 
     // Use ONLY the rented Apify actor for flights
     const preferredActorSlug = 'jupri~skyscanner-flight';
@@ -136,6 +143,21 @@ serve(async (req) => {
 
     console.log(`✅ Flight search completed, processing ${results.length} results...`);
 
+    // Optional FX conversion: USD -> INR for India domestic
+    let usdToInr = 84;
+    if (isIndiaToIndia) {
+      try {
+        const fxRes = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=INR');
+        if (fxRes.ok) {
+          const fx = await fxRes.json();
+          const rate = fx?.rates?.INR;
+          if (typeof rate === 'number' && isFinite(rate)) usdToInr = rate;
+        }
+      } catch (e) {
+        console.warn('⚠️ FX fetch failed, using fallback 84', e);
+      }
+    }
+
     // Transform results to our format using proper Apify structure
     const flights: SkyscannerFlight[] = results
       .map((item: any, index: number) => {
@@ -162,12 +184,26 @@ serve(async (req) => {
 
           // Get price from pricing_options
           const pricingOption = item.pricing_options?.[0];
-          const priceInfo = pricingOption?.items?.[0]?.price;
-          const rawPrice = priceInfo?.amount;
-          const finalPrice = Number.isFinite(rawPrice) ? Math.round(Number(rawPrice)) : Math.floor(Math.random() * 800) + 200;
-          const priceCurrency = priceInfo?.currency || currency;
+          const priceItem = pricingOption?.items?.[0];
+          const priceInfo = priceItem?.price;
+          const rawAmount = Number(priceInfo?.amount);
+          const sourceCurrency = String(priceInfo?.currency || 'USD');
+          let amount = Number.isFinite(rawAmount) ? rawAmount : Math.floor(Math.random() * 800) + 200;
+          let priceCurrency = sourceCurrency;
 
-          console.log(`💰 Flight ${index}: ${finalPrice} ${priceCurrency} (${flightNumber})`);
+          // Convert to INR for India domestic routes
+          if (isIndiaToIndia) {
+            if (sourceCurrency !== 'INR') {
+              amount = Math.round(amount * usdToInr);
+            } else {
+              amount = Math.round(amount);
+            }
+            priceCurrency = 'INR';
+          } else {
+            amount = Math.round(amount);
+          }
+
+          console.log(`💰 Flight ${index}: ${amount} ${priceCurrency} (${flightNumber})`);
 
           // Format times from ISO strings
           const formatTime = (isoString: string) => {
@@ -210,7 +246,7 @@ serve(async (req) => {
           const arrivalCity = arrivalPlace?.name || to;
 
           return {
-            price: finalPrice,
+            price: amount,
             currency: String(priceCurrency),
             airline: {
               name: airlineName,
