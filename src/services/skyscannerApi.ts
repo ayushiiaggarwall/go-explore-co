@@ -1,4 +1,4 @@
-// import { geminiApi } from './geminiApi'; // Temporarily disabled
+import { geminiApi } from './geminiApi';
 
 export interface SkyscannerFlight {
   price: number;
@@ -44,24 +44,13 @@ class SkyscannerApiService {
     console.log('✈️ Flight Search: Starting real-time search', { from, to, departDate, returnDate });
     
     try {
-      // Skip Gemini API for now and use hardcoded mappings
-      console.log('🤖 Using hardcoded airport codes to bypass Gemini issues...');
+      // Use Gemini API to convert city names to airport codes for the API
+      console.log('🤖 Converting cities to airport codes with Gemini...');
       
-      const cityToAirportMap: { [key: string]: string } = {
-        'Chennai, India': 'MAA',
-        'Mumbai, India': 'BOM',
-        'Delhi, India': 'DEL',
-        'Bangalore, India': 'BLR',
-        'Kolkata, India': 'CCU',
-        'Hyderabad, India': 'HYD',
-        'New York': 'JFK',
-        'London': 'LHR',
-        'Paris': 'CDG',
-        'Tokyo': 'NRT'
-      };
-      
-      const fromCode = cityToAirportMap[from] || 'JFK';
-      const toCode = cityToAirportMap[to] || 'LHR';
+      const [fromCode, toCode] = await Promise.all([
+        geminiApi.convertCityToAirportCode(from),
+        geminiApi.convertCityToAirportCode(to)
+      ]);
       
       console.log(`🌍 Searching real flights from ${fromCode} (${from}) to ${toCode} (${to})`);
       
