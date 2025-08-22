@@ -40,7 +40,10 @@ serve(async (req) => {
   try {
     const apifyToken = Deno.env.get('APIFY_API_TOKEN');
     if (!apifyToken) {
-      console.warn('⚠️ APIFY_API_TOKEN not found. Will skip Apify fallback.');
+      return new Response(
+        JSON.stringify({ error: 'Missing APIFY_API_TOKEN secret', flights: [] }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const { from, to, departDate, returnDate, passengers } = await req.json();
@@ -51,18 +54,14 @@ serve(async (req) => {
     
     console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers, currency, isIndiaToIndia });
 
-    // Actor configuration (override via secret APIFY_FLIGHTS_ACTOR_SLUG if needed)
-    const preferredActorSlug = Deno.env.get('APIFY_FLIGHTS_ACTOR_SLUG') || 'jupri~skyscanner-flight';
-
-    // Apify-only mode: Kiwi Tequila API disabled per request
-
-    // Fallback to Apify scrapers
+    // Use ONLY the rented Apify actor for flights
+    const preferredActorSlug = 'jupri~skyscanner-flight'; // normalized slug format
+    // Call the single Apify actor (no fallbacks)
     let actorResponse: Response;
     let actorData: any;
-    let actorType = 'harvest/skyscanner-scraper';
+    const actorType = preferredActorSlug;
     
-    console.log(`🚀 Trying ${preferredActorSlug} actor first...`);
-    actorType = preferredActorSlug;
+    console.log(`🚀 Starting Apify actor: ${preferredActorSlug}...`);
     actorResponse = await fetch(`https://api.apify.com/v2/acts/${preferredActorSlug}/runs?token=${apifyToken}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apifyToken}` },
@@ -76,31 +75,11 @@ serve(async (req) => {
 
     if (!actorResponse.ok) {
       const errText = await actorResponse.text();
-      console.error('❌ Jupri actor start failed:', actorResponse.status, errText);
-
-      console.log('🔁 Falling back to Harvest Skyscanner scraper...');
-      actorType = 'harvest/skyscanner-scraper';
-      actorResponse = await fetch(`https://api.apify.com/v2/acts/ehpgZWomxoDtIiZco/runs?token=${apifyToken}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apifyToken}` },
-        body: JSON.stringify({
-          origin: from,
-          destination: to,
-          departureDate: departDate,
-          ...(returnDate ? { returnDate } : {}),
-          adults: passengers || 1,
-          currency: currency
-        })
-      });
-
-      if (!actorResponse.ok) {
-        const errText2 = await actorResponse.text();
-        console.error('❌ Harvest actor start failed:', actorResponse.status, errText2);
-        return new Response(
-          JSON.stringify({ error: `Failed to start flight search (${actorResponse.status})`, details: errText2, flights: [] }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+      console.error('❌ Actor start failed:', actorResponse.status, errText);
+      return new Response(
+        JSON.stringify({ error: `Failed to start flight search (${actorResponse.status})`, details: errText, flights: [] }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     actorData = await actorResponse.json();
