@@ -40,14 +40,30 @@ serve(async (req) => {
 
   try {
     console.log('🔔 search-flights invoked');
-    const apifyToken = Deno.env.get('APIFY_API_TOKEN') || Deno.env.get('APIFY_TOKEN');
-    console.log('🔐 APIFY token present:', Boolean(apifyToken));
+    const apifyToken = Deno.env.get('APIFY_API_TOKEN');
+    console.log('🔐 Environment variables check:', {
+      'APIFY_API_TOKEN': Boolean(Deno.env.get('APIFY_API_TOKEN')),
+      'APIFY_TOKEN': Boolean(Deno.env.get('APIFY_TOKEN')),
+      'All env keys': Object.keys(Deno.env.toObject()).filter(k => k.includes('APIFY'))
+    });
+    
     if (!apifyToken) {
+      console.error('❌ APIFY_API_TOKEN not found in environment');
       return new Response(
-        JSON.stringify({ error: 'Missing APIFY_API_TOKEN secret', code: 'missing_apify_secret', flights: [] }),
+        JSON.stringify({ 
+          error: 'APIFY_API_TOKEN secret not found', 
+          code: 'missing_apify_secret',
+          debug: {
+            envKeys: Object.keys(Deno.env.toObject()).filter(k => k.includes('APIFY')),
+            hasToken: Boolean(apifyToken)
+          },
+          flights: [] 
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    console.log('✅ APIFY token found, length:', apifyToken.length);
 
     const { from, to, departDate, returnDate, passengers } = await req.json();
     
