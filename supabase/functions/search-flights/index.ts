@@ -140,18 +140,46 @@ serve(async (req) => {
     const flights: SkyscannerFlight[] = results
       .map((item: any, index: number) => {
         try {
-          // Robust extraction from varying Apify schemas
-          const airlineName: string = item.airline || item.carrier || item.carrierName || item.operatingAirline || 'Unknown Airline';
-          const airlineCode: string = (item.airlineCode || item.carrierCode || (airlineName?.substring(0, 2)) || 'XX').toUpperCase();
-
-          // Try to read Skyscanner-style pricing_options shape
+          // Extract carrier ID from segment_id (-32213 in your example)
           const pricingOption = Array.isArray(item.pricing_options)
             ? item.pricing_options[0]
             : (Array.isArray(item.pricingOptions) ? item.pricingOptions[0] : null);
 
+          const segId: string | undefined = pricingOption?.fares?.[0]?.segment_id || pricingOption?.segment_ids?.[0] || item.id;
+          const carrierIdMatch = segId ? segId.match(/-(-?\d+)(?:-|$)/) : null;
+          const carrierId = carrierIdMatch ? carrierIdMatch[1] : null;
+          
+          console.log(`🔍 Flight ${index}: segId=${segId}, carrierId=${carrierId}`);
+
+          // Try multiple airline name sources
+          let airlineName = item.airline || item.carrier || item.carrierName || item.operatingAirline || 
+                           item.legs?.[0]?.airline || item.legs?.[0]?.carrier || item.segments?.[0]?.airline ||
+                           (item.carriers && Array.isArray(item.carriers) ? item.carriers[0]?.name : null);
+
+          // Look up airline by carrier ID if we have one
+          const airlineMapping: { [key: string]: { name: string; code: string } } = {
+            '-32213': { name: 'IndiGo', code: '6E' },
+            '-23951': { name: 'Air India', code: 'AI' },
+            '-31733': { name: 'SpiceJet', code: 'SG' },
+            '-32448': { name: 'Vistara', code: 'UK' },
+            '-23962': { name: 'GoAir', code: 'G8' }
+          };
+
+          if (carrierId && airlineMapping[carrierId]) {
+            airlineName = airlineMapping[carrierId].name;
+          }
+
+          airlineName = airlineName || 'Unknown Airline';
+          
+          const airlineCode: string = (item.airlineCode || item.carrierCode || 
+                                     (carrierId && airlineMapping[carrierId]?.code) ||
+                                     (airlineName?.substring(0, 2)) || 'XX').toUpperCase();
+
           const nestedPrice = pricingOption?.price?.amount ?? pricingOption?.items?.[0]?.price?.amount;
           const rawPrice = (nestedPrice ?? item.price ?? item.price_amount ?? Number(String(item.price_text || '').replace(/[^\d.]/g, '')));
           const finalPrice = Number.isFinite(rawPrice) ? Math.round(Number(rawPrice)) : Math.floor(Math.random() * 800) + 200;
+
+          console.log(`💰 Flight ${index}: rawPrice=${rawPrice}, finalPrice=${finalPrice}, airline=${airlineName}`);
 
           const derivedCurrency = item.currency || item.price_currency || (String(item.price_text || '').match(/[A-Z]{3}/)?.[0]) || currency;
 
@@ -162,7 +190,6 @@ serve(async (req) => {
           let depTime = depTimeDirect as string | undefined;
           let arrTime = arrTimeDirect as string | undefined;
 
-          const segId: string | undefined = pricingOption?.fares?.[0]?.segment_id || pricingOption?.segment_ids?.[0];
           if ((!depTime || !arrTime) && typeof segId === 'string') {
             const parts = segId.split('-');
             const depEpoch = Number(parts[2]);

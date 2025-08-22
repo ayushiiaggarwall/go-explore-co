@@ -44,15 +44,37 @@ class SkyscannerApiService {
     console.log('✈️ Flight Search: Starting real-time search', { from, to, departDate, returnDate });
     
     try {
-      // Use Gemini API to convert city names to airport codes for the API
-      console.log('🤖 Converting cities to airport codes with Gemini...');
+      let fromCode: string, toCode: string;
       
-      const [fromCode, toCode] = await Promise.all([
-        geminiApi.convertCityToAirportCode(from),
-        geminiApi.convertCityToAirportCode(to)
-      ]);
-      
-      console.log(`🌍 Searching real flights from ${fromCode} (${from}) to ${toCode} (${to})`);
+      try {
+        // Use Gemini API to convert city names to airport codes for the API
+        console.log('🤖 Converting cities to airport codes with Gemini...');
+        
+        [fromCode, toCode] = await Promise.all([
+          geminiApi.convertCityToAirportCode(from),
+          geminiApi.convertCityToAirportCode(to)
+        ]);
+        
+        console.log(`🌍 Searching real flights from ${fromCode} (${from}) to ${toCode} (${to})`);
+      } catch (geminiError) {
+        console.warn('⚠️ Gemini API failed (likely rate limited), using fallback mapping:', geminiError);
+        
+        // Fallback city-to-airport mapping when Gemini is rate limited
+        const cityToAirportMap: { [key: string]: string } = {
+          'Chennai, India': 'MAA', 'Chennai': 'MAA',
+          'Mumbai, India': 'BOM', 'Mumbai': 'BOM',  
+          'Delhi, India': 'DEL', 'Delhi': 'DEL',
+          'Bangalore, India': 'BLR', 'Bangalore': 'BLR',
+          'Kolkata, India': 'CCU', 'Kolkata': 'CCU',
+          'Hyderabad, India': 'HYD', 'Hyderabad': 'HYD',
+          'New York': 'JFK', 'London': 'LHR', 'Paris': 'CDG', 'Tokyo': 'NRT'
+        };
+        
+        fromCode = cityToAirportMap[from] || from.toUpperCase().substring(0, 3);
+        toCode = cityToAirportMap[to] || to.toUpperCase().substring(0, 3);
+        
+        console.log(`🔄 Using fallback mapping: ${from} -> ${fromCode}, ${to} -> ${toCode}`);
+      }
       
       // Call the Google Flights API via our edge function
       const response = await fetch(this.baseUrl, {
