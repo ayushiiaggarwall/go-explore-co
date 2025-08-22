@@ -140,34 +140,54 @@ serve(async (req) => {
     const flights: SkyscannerFlight[] = results
       .map((item: any, index: number) => {
         try {
-          const airline = item.airline || 'Unknown Airline';
-          const price = item.price || Math.floor(Math.random() * 800) + 200;
-          
+          // Robust extraction from varying Apify schemas
+          const airlineName: string = item.airline || item.carrier || item.carrierName || item.operatingAirline || 'Unknown Airline';
+          const airlineCode: string = (item.airlineCode || item.carrierCode || (airlineName?.substring(0, 2)) || 'XX').toUpperCase();
+
+          const rawPrice = (item.price ?? item.price_amount ?? Number(String(item.price_text || '').replace(/[^\d.]/g, '')));
+          const finalPrice = Number.isFinite(rawPrice) ? Math.round(Number(rawPrice)) : Math.floor(Math.random() * 800) + 200;
+
+          const derivedCurrency = item.currency || item.price_currency || (String(item.price_text || '').match(/[A-Z]{3}/)?.[0]) || currency;
+
+          const depTime = item.departureTime || item.departure_time || item.outbound?.departureTime || item.legs?.[0]?.departure?.time || '08:00';
+          const arrTime = item.arrivalTime || item.arrival_time || item.outbound?.arrivalTime || item.legs?.[0]?.arrival?.time || '12:00';
+
+          const durationStr = item.duration || item.duration_text || item.totalDuration || item.legs?.[0]?.duration || '4h 0m';
+
+          const stopCount = (item.stops ?? item.stopCount ?? (
+            Array.isArray(item.legs?.[0]?.segments) ? Math.max(0, item.legs[0].segments.length - 1) : 0
+          ));
+
+          const deepLink = item.bookingUrl || item.booking_url || item.deeplink || item.deepLink || `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate}/?adults=${passengers}`;
+
+          const departureCity = item.departureCity || item.fromCity || from;
+          const arrivalCity = item.arrivalCity || item.toCity || to;
+
           return {
-            price: Math.round(price),
-            currency: currency,
+            price: finalPrice,
+            currency: String(derivedCurrency || currency),
             airline: {
-              name: airline,
-              code: airline.substring(0, 2).toUpperCase(),
-              logo: `https://logos.skyscnr.com/images/airlines/favicon/${airline.substring(0, 2).toUpperCase()}.png`
+              name: airlineName,
+              code: airlineCode,
+              logo: `https://logos.skyscnr.com/images/airlines/favicon/${airlineCode}.png`
             },
-            flightNumber: `${airline.substring(0, 2).toUpperCase()}${Math.floor(Math.random() * 9000) + 1000}`,
+            flightNumber: String(item.flightNumber || item.flight_number || `${airlineCode}${Math.floor(Math.random() * 9000) + 1000}`),
             departure: {
-              time: item.departureTime || '08:00',
+              time: String(depTime),
               date: departDate,
               airport: from,
-              city: from
+              city: String(departureCity)
             },
             arrival: {
-              time: item.arrivalTime || '12:00',
+              time: String(arrTime),
               date: departDate,
               airport: to,
-              city: to
+              city: String(arrivalCity)
             },
-            duration: item.duration || '4h 0m',
-            stops: item.stops || 0,
-            bookingUrl: item.bookingUrl || `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate}/?adults=${passengers}`
-          };
+            duration: String(durationStr),
+            stops: Number.isFinite(stopCount) ? Number(stopCount) : 0,
+            bookingUrl: String(deepLink)
+          } as SkyscannerFlight;
         } catch (error) {
           console.error(`❌ Error parsing flight ${index}:`, error);
           return null;
