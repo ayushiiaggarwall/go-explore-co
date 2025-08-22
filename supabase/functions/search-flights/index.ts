@@ -45,7 +45,11 @@ serve(async (req) => {
 
     const { from, to, departDate, returnDate, passengers } = await req.json();
     
-    console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers });
+    // Detect India-to-India flights for INR pricing
+    const isIndiaToIndia = from.includes(', India') && to.includes(', India');
+    const currency = isIndiaToIndia ? 'INR' : 'USD';
+    
+    console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers, currency, isIndiaToIndia });
 
     // Actor configuration (override via secret APIFY_FLIGHTS_ACTOR_SLUG if needed)
     const preferredActorSlug = Deno.env.get('APIFY_FLIGHTS_ACTOR_SLUG') || 'jupri~skyscanner-flight';
@@ -85,7 +89,7 @@ serve(async (req) => {
           departureDate: departDate,
           ...(returnDate ? { returnDate } : {}),
           adults: passengers || 1,
-          currency: 'USD'
+          currency: currency
         })
       });
 
@@ -229,7 +233,7 @@ serve(async (req) => {
     }
 
     // Helper function to parse itinerary according to different Skyscanner data structures
-    function parseItinerary(item: any, index: number): SkyscannerFlight | null {
+    function parseItinerary(item: any, index: number, currency: string): SkyscannerFlight | null {
       try {
         console.log(`🔍 Parsing item ${index}:`, JSON.stringify(item, null, 2));
         
@@ -332,7 +336,7 @@ serve(async (req) => {
         
         const result: SkyscannerFlight = {
           price: Math.round(price),
-          currency: flightData.currency || 'USD',
+          currency: flightData.currency || currency,
           airline: {
             name: airline,
             code: airlineCode,
@@ -369,7 +373,7 @@ serve(async (req) => {
     let flights: SkyscannerFlight[] = [];
 
     flights = results
-      .map((item, index) => parseItinerary(item, index))
+      .map((item, index) => parseItinerary(item, index, currency))
       .filter((flight): flight is SkyscannerFlight => flight !== null)
       .slice(0, 20);
 
