@@ -27,18 +27,28 @@ serve(async (req) => {
 
   try {
     console.log('🔐 Checking Gemini API key...');
+    console.log('🔍 All environment variables:', Object.keys(Deno.env.toObject()));
+    console.log('🔍 Gemini-related env vars:', Object.keys(Deno.env.toObject()).filter(k => k.includes('GEMINI')));
+    
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
       console.error('❌ GEMINI_API_KEY not found in secrets');
+      console.error('🔍 Available env vars:', Object.keys(Deno.env.toObject()));
       return new Response(
-        JSON.stringify({ error: 'Gemini API key not configured' }),
+        JSON.stringify({ 
+          error: 'Gemini API key not configured',
+          debug: {
+            availableKeys: Object.keys(Deno.env.toObject()).filter(k => k.includes('API') || k.includes('KEY')),
+            allKeys: Object.keys(Deno.env.toObject())
+          }
+        }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500 
         }
       );
     }
-    console.log('✅ Gemini API key found');
+    console.log('✅ Gemini API key found, length:', apiKey.length);
 
     // Parse request body
     console.log('📝 Parsing request body...');
