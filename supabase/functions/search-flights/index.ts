@@ -133,40 +133,41 @@ serve(async (req) => {
     let actorData: any;
     let actorType = 'harvest/skyscanner-scraper';
     
-    console.log('🚀 Trying Harvest Skyscanner scraper first...');
-    actorResponse = await fetch(`https://api.apify.com/v2/acts/ehpgZWomxoDtIiZco/runs?token=${apifyToken}`, {
+    console.log('🚀 Trying jupri/skyscanner-flight actor first...');
+    actorType = 'jupri/skyscanner-flight';
+    actorResponse = await fetch(`https://api.apify.com/v2/acts/jupri~skyscanner-flight/runs?token=${apifyToken}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apifyToken}` },
       body: JSON.stringify({
-        origin: from,
-        destination: to,
-        departureDate: departDate,
-        ...(returnDate ? { returnDate } : {}),
-        adults: passengers || 1,
-        currency: 'USD'
+        "origin.0": from,
+        "target.0": to,
+        "depart.0": departDate,
+        ...(returnDate ? { "origin.1": to, "target.1": from, "depart.1": returnDate } : {})
       })
     });
 
     if (!actorResponse.ok) {
       const errText = await actorResponse.text();
-      console.error('❌ Harvest actor start failed:', actorResponse.status, errText);
+      console.error('❌ Jupri actor start failed:', actorResponse.status, errText);
 
-      console.log('🔁 Falling back to jupri/skyscanner-flight actor...');
-      actorType = 'jupri/skyscanner-flight';
-      actorResponse = await fetch(`https://api.apify.com/v2/acts/jupri~skyscanner-flight/runs?token=${apifyToken}`, {
+      console.log('🔁 Falling back to Harvest Skyscanner scraper...');
+      actorType = 'harvest/skyscanner-scraper';
+      actorResponse = await fetch(`https://api.apify.com/v2/acts/ehpgZWomxoDtIiZco/runs?token=${apifyToken}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apifyToken}` },
         body: JSON.stringify({
-          "origin.0": from,
-          "target.0": to,
-          "depart.0": departDate,
-          ...(returnDate ? { "origin.1": to, "target.1": from, "depart.1": returnDate } : {})
+          origin: from,
+          destination: to,
+          departureDate: departDate,
+          ...(returnDate ? { returnDate } : {}),
+          adults: passengers || 1,
+          currency: 'USD'
         })
       });
 
       if (!actorResponse.ok) {
         const errText2 = await actorResponse.text();
-        console.error('❌ Jupri actor start failed:', actorResponse.status, errText2);
+        console.error('❌ Harvest actor start failed:', actorResponse.status, errText2);
         return new Response(
           JSON.stringify({ error: `Failed to start flight search (${actorResponse.status})`, details: errText2, flights: [] }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
