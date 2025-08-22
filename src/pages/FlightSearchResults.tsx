@@ -14,7 +14,7 @@ export default function FlightSearchResults() {
   const [loading, setLoading] = useState(true);
   const [apiFlights, setApiFlights] = useState<SkyscannerFlight[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [priceRange, setPriceRange] = useState([0, 2000]);
+  const [priceRange, setPriceRange] = useState([0, 20000]);
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [flightsPerPage] = useState(5);
@@ -32,6 +32,11 @@ export default function FlightSearchResults() {
     passengers: parseInt(searchParams.get('passengers') || '1'),
     tripType: searchParams.get('tripType') || 'round-trip'
   };
+
+  // Detect if this is India-to-India flight for currency formatting
+  const isIndiaToIndia = searchData.from.includes(', India') && searchData.destination.includes(', India');
+  const currencySymbol = isIndiaToIndia ? '₹' : '$';
+  const maxPrice = isIndiaToIndia ? 20000 : 2000;
 
   // Time cleaning utility function
   const cleanTimeFormat = (timeString: string): string => {
@@ -126,7 +131,7 @@ export default function FlightSearchResults() {
   };
 
   const clearAllFilters = () => {
-    setPriceRange([0, 2000]);
+    setPriceRange([0, maxPrice]);
     setDepartureTimeFilter([]);
     setArrivalTimeFilter([]);
     setStopsFilter([]);
@@ -312,7 +317,7 @@ export default function FlightSearchResults() {
                 {/* Price Range Filter */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-3">
-                    Price Range: ${priceRange[0]} - ${priceRange[1]}
+                    Price Range: {currencySymbol}{priceRange[0]} - {currencySymbol}{priceRange[1]}
                   </label>
                   <Slider
                     value={priceRange}
@@ -320,9 +325,9 @@ export default function FlightSearchResults() {
                       setPriceRange(value);
                       setCurrentPage(1);
                     }}
-                    max={2000}
+                    max={maxPrice}
                     min={0}
-                    step={50}
+                    step={isIndiaToIndia ? 500 : 50}
                     className="w-full"
                   />
                 </div>
@@ -457,7 +462,9 @@ export default function FlightSearchResults() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-2xl font-bold text-primary">${flight.price}</div>
+                            <div className="text-2xl font-bold text-primary">
+                              {flight.currency === 'INR' ? '₹' : flight.currency === 'USD' ? '$' : ''}{flight.price}
+                            </div>
                             <div className="text-sm text-muted-foreground">{flight.currency} per person</div>
                           </div>
                         </div>
