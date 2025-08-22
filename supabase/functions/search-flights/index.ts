@@ -40,20 +40,95 @@ serve(async (req) => {
   try {
     const apifyToken = Deno.env.get('APIFY_API_TOKEN');
     if (!apifyToken) {
-      console.error('❌ APIFY_API_TOKEN not found in environment variables');
-      return new Response(
-        JSON.stringify({ error: 'API token not configured' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      console.warn('⚠️ APIFY_API_TOKEN not found. Will skip Apify fallback.');
     }
 
     const { from, to, departDate, returnDate, passengers } = await req.json();
     
     console.log('🚀 Flight Search: Starting search', { from, to, departDate, passengers });
 
+    // Try Kiwi Tequila API first if available (more reliable and affordable)
+    const tequilaKey = Deno.env.get('TEQUILA_API_KEY');
+    if (tequilaKey) {
+      try {
+        const toKiwiDate = (d: string) => {
+          const dateObj = new Date(d);
+          const dd = String(dateObj.getDate()).padStart(2, '0');
+          const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const yyyy = dateObj.getFullYear();
+          return `${dd}/${mm}/${yyyy}`;
+        };
+
+        const kiwiUrl = new URL('https://tequila-api.kiwi.com/v2/search');
+        kiwiUrl.searchParams.set('fly_from', from);
+        kiwiUrl.searchParams.set('fly_to', to);
+        kiwiUrl.searchParams.set('date_from', toKiwiDate(departDate));
+        kiwiUrl.searchParams.set('date_to', toKiwiDate(departDate));
+        if (returnDate) {
+          kiwiUrl.searchParams.set('return_from', toKiwiDate(returnDate));
+          kiwiUrl.searchParams.set('return_to', toKiwiDate(returnDate));
+        }
+        kiwiUrl.searchParams.set('adults', String(passengers || 1));
+        kiwiUrl.searchParams.set('curr', 'USD');
+        kiwiUrl.searchParams.set('limit', '30');
+
+        console.log('🟢 Querying Kiwi Tequila API...', kiwiUrl.toString());
+        const kiwiResp = await fetch(kiwiUrl.toString(), {
+          headers: { 'apikey': tequilaKey }
+        });
+        const kiwiJson = await kiwiResp.json();
+        const kiwiData = Array.isArray(kiwiJson?.data) ? kiwiJson.data : [];
+
+        if (kiwiResp.ok && kiwiData.length > 0) {
+          const flights: SkyscannerFlight[] = kiwiData.map((it: any, index: number) => {
+            const route = it.route || [];
+            const firstSeg = route[0] || {};
+            const lastSeg = route[route.length - 1] || {};
+            const airlineCode = firstSeg.airline || (Array.isArray(it.airlines) ? it.airlines[0] : 'XX');
+            const flightNumber = firstSeg.airline && firstSeg.flight_no ? `${firstSeg.airline}${firstSeg.flight_no}` : `${airlineCode}${1000 + index}`;
+            const totalMinutes = Math.round((it.duration?.total || 0) / 60);
+
+            return {
+              price: Math.round(it.price || it.fare?.adults?.total || 0),
+              currency: kiwiJson?.currency || 'USD',
+              airline: {
+                name: airlineCode,
+                code: airlineCode,
+                logo: `https://logos.skyscnr.com/images/airlines/favicon/${airlineCode}.png`
+              },
+              flightNumber,
+              departure: {
+                time: cleanTimeFormat(firstSeg.local_departure || it.local_departure || ''),
+                date: departDate,
+                airport: it.flyFrom || firstSeg.flyFrom || from,
+                city: it.cityFrom || from
+              },
+              arrival: {
+                time: cleanTimeFormat(lastSeg.local_arrival || it.local_arrival || ''),
+                date: returnDate || departDate,
+                airport: it.flyTo || lastSeg.flyTo || to,
+                city: it.cityTo || to
+              },
+              duration: totalMinutes ? minutesToHM(totalMinutes) : 'N/A',
+              stops: route.length ? Math.max(0, route.length - 1) : (it.has_stopover ? 1 : 0),
+              bookingUrl: it.deep_link || buildSkyscannerSearchUrl(from, to, departDate)
+            };
+          }).slice(0, 20);
+
+          console.log(`✅ Kiwi returned ${flights.length} flights`);
+          return new Response(
+            JSON.stringify({ flights, source: 'kiwi', totalResults: flights.length }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        } else {
+          console.warn('⚠️ Kiwi returned no data or error', { status: kiwiResp.status, body: kiwiJson });
+        }
+      } catch (e) {
+        console.error('❌ Kiwi Tequila API error:', e);
+      }
+    }
+
+    // Fallback to Apify scrapers
     let actorResponse: Response;
     let actorData: any;
     let actorType = 'harvest/skyscanner-scraper';
