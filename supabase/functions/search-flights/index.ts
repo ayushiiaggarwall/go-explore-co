@@ -59,20 +59,18 @@ serve(async (req) => {
     let actorType = 'skyscanner';
     
     console.log('🚀 Using Skyscanner scraper...');
-    actorResponse = await fetch(`https://api.apify.com/v2/acts/jupri~skyscanner-flight/runs?token=${apifyToken}`, {
+    actorResponse = await fetch(`https://api.apify.com/v2/acts/ehpgZWomxoDtIiZco/runs?token=${apifyToken}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        "origin.0": from,
-        "target.0": to,
-        "depart.0": departDate,
-        ...(returnDate ? { 
-          "origin.1": to, 
-          "target.1": from, 
-          "depart.1": returnDate 
-        } : {})
+        origin: from,
+        destination: to,
+        departureDate: departDate,
+        ...(returnDate ? { returnDate: returnDate } : {}),
+        adults: passengers || 1,
+        currency: 'USD'
       })
     });
 
@@ -210,91 +208,148 @@ serve(async (req) => {
       return `${h}h ${m}m`;
     }
 
-    // Helper function to parse itinerary according to Skyscanner data structure
-    function parseItinerary(itinerary: any): SkyscannerFlight | null {
-      const leg = itinerary.legs?.[0];
-      if (!leg) {
-        console.warn('No leg found in itinerary');
+    // Helper function to parse itinerary according to different Skyscanner data structures
+    function parseItinerary(item: any, index: number): SkyscannerFlight | null {
+      try {
+        console.log(`🔍 Parsing item ${index}:`, JSON.stringify(item, null, 2));
+        
+        // Handle different possible data structures
+        let flightData: any = {};
+        
+        // Try Harvest scraper format first
+        if (item.airline || item.price || item.departure || item.arrival) {
+          flightData = item;
+        }
+        // Try original format
+        else if (item.legs) {
+          const leg = item.legs?.[0];
+          if (!leg) {
+            console.warn('No leg found in itinerary');
+            return null;
+          }
+          
+          // Convert legacy format to our expected format
+          const carrierId = leg.marketing_carrier_ids?.[0];
+          const carrier = item._carriers?.[String(carrierId)];
+          
+          flightData = {
+            airline: carrier?.name || 'Unknown carrier',
+            airlineCode: carrier?.code || 'XX',
+            price: item.pricing_options?.[0]?.items?.[0]?.price?.amount || Math.floor(Math.random() * 800) + 200,
+            currency: item.pricing_options?.[0]?.items?.[0]?.price?.currency || 'USD',
+            departure: {
+              time: leg.departure,
+              airport: from,
+              city: from
+            },
+            arrival: {
+              time: leg.arrival,
+              airport: to,
+              city: to
+            },
+            duration: leg.duration,
+            stops: leg.stop_count || 0,
+            bookingUrl: item.pricing_options?.[0]?.items?.[0]?.url
+          };
+        }
+        
+        // Extract and clean the data
+        const airline = flightData.airline || flightData.carrier || 'Unknown Airline';
+        const airlineCode = flightData.airlineCode || flightData.carrierCode || airline.substring(0, 2).toUpperCase();
+        
+        // Handle price - could be in different locations
+        let price = 0;
+        if (typeof flightData.price === 'number') {
+          price = flightData.price;
+        } else if (flightData.price?.amount) {
+          price = flightData.price.amount;
+        } else if (flightData.totalPrice) {
+          price = flightData.totalPrice;
+        } else {
+          price = Math.floor(Math.random() * 800) + 200; // Fallback
+        }
+        
+        // Handle times
+        const departureTime = cleanTimeFormat(
+          flightData.departure?.time || 
+          flightData.departureTime || 
+          flightData.outbound?.departure || 
+          '08:00'
+        );
+        
+        const arrivalTime = cleanTimeFormat(
+          flightData.arrival?.time || 
+          flightData.arrivalTime || 
+          flightData.outbound?.arrival || 
+          '12:00'
+        );
+        
+        // Handle duration
+        let duration = 'N/A';
+        if (typeof flightData.duration === 'number') {
+          duration = minutesToHM(flightData.duration);
+        } else if (typeof flightData.duration === 'string') {
+          duration = flightData.duration;
+        } else if (flightData.totalDuration) {
+          duration = typeof flightData.totalDuration === 'number' ? 
+            minutesToHM(flightData.totalDuration) : flightData.totalDuration;
+        }
+        
+        // Handle stops
+        const stops = flightData.stops || flightData.stopCount || 0;
+        
+        // Generate flight number
+        const flightNumber = flightData.flightNumber || 
+          `${airlineCode}${Math.floor(Math.random() * 9000) + 1000}`;
+        
+        // Handle booking URL
+        let bookingUrl = flightData.bookingUrl || flightData.url;
+        if (bookingUrl && !bookingUrl.startsWith('http')) {
+          bookingUrl = `https://www.skyscanner.com${bookingUrl}`;
+        } else if (!bookingUrl) {
+          bookingUrl = buildSkyscannerSearchUrl(from, to, departDate);
+        }
+        
+        const result: SkyscannerFlight = {
+          price: Math.round(price),
+          currency: flightData.currency || 'USD',
+          airline: {
+            name: airline,
+            code: airlineCode,
+            logo: `https://logos.skyscnr.com/images/airlines/favicon/${airlineCode}.png`
+          },
+          flightNumber: flightNumber,
+          departure: {
+            time: departureTime,
+            date: departDate,
+            airport: from,
+            city: from
+          },
+          arrival: {
+            time: arrivalTime,
+            date: departDate,
+            airport: to,
+            city: to
+          },
+          duration: duration,
+          stops: stops,
+          bookingUrl: bookingUrl
+        };
+        
+        console.log(`✅ Successfully parsed flight ${index}:`, result);
+        return result;
+        
+      } catch (error) {
+        console.error(`❌ Error parsing flight ${index}:`, error);
         return null;
       }
-
-      // Resolve carrier info
-      const carrierId = leg.marketing_carrier_ids?.[0];
-      const carrier = itinerary._carriers?.[String(carrierId)];
-      const flightName = carrier?.name || 'Unknown carrier';
-      const carrierCode = carrier?.code || 'XX';
-
-      // Get flight number from first segment
-      const segmentId = leg.segment_ids?.[0];
-      const segment = itinerary._segments?.[segmentId];
-      const marketingFlightNumber = segment?.marketing_flight_number || '';
-      const flightNumber = marketingFlightNumber ? `${carrierCode}${marketingFlightNumber}` : `${carrierCode}${Math.floor(Math.random() * 9000) + 1000}`;
-
-      // Parse times
-      const departureTime = cleanTimeFormat(leg.departure);
-      const arrivalTime = cleanTimeFormat(leg.arrival);
-      
-      console.log(`🕐 Time parsing: ${leg.departure} → ${departureTime}, ${leg.arrival} → ${arrivalTime}`);
-
-      // Parse stops
-      let stopsCount = 0;
-      let stopsLabel = 'Non-stop';
-      if (leg.stop_count && leg.stop_count > 0) {
-        stopsCount = leg.stop_count;
-        const stopIds = Array.isArray(leg.stop_ids?.[0]) ? leg.stop_ids[0] : leg.stop_ids;
-        const viaNames = (stopIds || [])
-          .map((pid: number | string) => itinerary._places?.[String(pid)]?.display_code || itinerary._places?.[String(pid)]?.name)
-          .filter(Boolean);
-        stopsLabel = `${leg.stop_count} stop${leg.stop_count > 1 ? 's' : ''}${viaNames.length ? ` via ${viaNames.join(', ')}` : ''}`;
-      }
-
-      // Get deeplink URL
-      const rawUrl = itinerary.pricing_options?.[0]?.items?.[0]?.url;
-      const bookingUrl = rawUrl ? `https://www.skyscanner.com${rawUrl}` : buildSkyscannerSearchUrl(from, to, departDate);
-
-      // Get price - try different possible locations
-      let price = 0;
-      if (itinerary.pricing_options?.[0]?.items?.[0]?.price?.amount) {
-        price = Math.round(itinerary.pricing_options[0].items[0].price.amount);
-      } else if (itinerary.price?.amount) {
-        price = Math.round(itinerary.price.amount);
-      } else {
-        // Fallback price generation
-        price = Math.floor(Math.random() * 800) + 200;
-      }
-
-      return {
-        price: price,
-        currency: itinerary.pricing_options?.[0]?.items?.[0]?.price?.currency || 'USD',
-        airline: {
-          name: flightName,
-          code: carrierCode,
-          logo: `https://logos.skyscnr.com/images/airlines/favicon/${carrierCode}.png`
-        },
-        flightNumber: flightNumber,
-        departure: {
-          time: departureTime,
-          date: departDate,
-          airport: from,
-          city: from
-        },
-        arrival: {
-          time: arrivalTime,
-          date: departDate,
-          airport: to,
-          city: to
-        },
-        duration: leg.duration ? minutesToHM(leg.duration) : 'N/A',
-        stops: stopsCount,
-        bookingUrl: bookingUrl
-      };
     }
 
     // Transform results using the new parsing logic
     let flights: SkyscannerFlight[] = [];
 
     flights = results
-      .map(parseItinerary)
+      .map((item, index) => parseItinerary(item, index))
       .filter((flight): flight is SkyscannerFlight => flight !== null)
       .slice(0, 20);
 
