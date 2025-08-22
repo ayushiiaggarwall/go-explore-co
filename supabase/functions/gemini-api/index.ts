@@ -17,7 +17,7 @@ interface GeminiResponse {
 }
 
 serve(async (req) => {
-  console.log(`🤖 Gemini API called: ${req.method} ${req.url}`);
+  console.log(`🤖 Gemini API called - version 2.0: ${req.method} ${req.url}`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {

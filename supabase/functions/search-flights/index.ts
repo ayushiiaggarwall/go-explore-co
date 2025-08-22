@@ -39,7 +39,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🔔 search-flights invoked');
+    console.log('🔔 search-flights invoked - version 2.0');
     const apifyToken = Deno.env.get('APIFY_API_TOKEN');
     console.log('🔐 Environment variables check:', {
       'APIFY_API_TOKEN': Boolean(Deno.env.get('APIFY_API_TOKEN')),
