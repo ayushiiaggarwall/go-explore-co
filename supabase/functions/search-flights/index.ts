@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 interface SkyscannerFlight {
@@ -38,10 +39,12 @@ serve(async (req) => {
   }
 
   try {
-    const apifyToken = Deno.env.get('APIFY_API_TOKEN');
+    console.log('🔔 search-flights invoked');
+    const apifyToken = Deno.env.get('APIFY_API_TOKEN') || Deno.env.get('APIFY_TOKEN');
+    console.log('🔐 APIFY token present:', Boolean(apifyToken));
     if (!apifyToken) {
       return new Response(
-        JSON.stringify({ error: 'Missing APIFY_API_TOKEN secret', flights: [] }),
+        JSON.stringify({ error: 'Missing APIFY_API_TOKEN secret', code: 'missing_apify_secret', flights: [] }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
