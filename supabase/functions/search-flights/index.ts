@@ -136,111 +136,103 @@ serve(async (req) => {
 
     console.log(`✅ Flight search completed, processing ${results.length} results...`);
 
-    // Transform results to our format
+    // Transform results to our format using proper Apify structure
     const flights: SkyscannerFlight[] = results
       .map((item: any, index: number) => {
         try {
-          // Extract carrier ID from segment_id (-32213 in your example)
-          const pricingOption = Array.isArray(item.pricing_options)
-            ? item.pricing_options[0]
-            : (Array.isArray(item.pricingOptions) ? item.pricingOptions[0] : null);
+          // Get the first leg (main flight info)
+          const leg = item.legs?.[0];
+          if (!leg) {
+            console.log(`⚠️ Flight ${index}: No legs found, skipping`);
+            return null;
+          }
 
-          const segId: string | undefined = pricingOption?.fares?.[0]?.segment_id || pricingOption?.segment_ids?.[0] || item.id;
-          const carrierIdMatch = segId ? segId.match(/-(-?\d+)(?:-|$)/) : null;
-          const carrierId = carrierIdMatch ? carrierIdMatch[1] : null;
+          // Get carrier info from _carriers map using marketing_carrier_ids[0]
+          const carrierId = leg.marketing_carrier_ids?.[0];
+          const carrierInfo = carrierId ? item._carriers?.[carrierId] : null;
+          const airlineName = carrierInfo?.name || 'Unknown Airline';
+          const airlineCode = carrierInfo?.code || 'XX';
           
-          console.log(`🔍 Flight ${index}: segId=${segId}, carrierId=${carrierId}`);
+          console.log(`✈️ Flight ${index}: ${airlineName} (${airlineCode}), carrierId: ${carrierId}`);
 
-          // Try multiple airline name sources
-          let airlineName = item.airline || item.carrier || item.carrierName || item.operatingAirline || 
-                           item.legs?.[0]?.airline || item.legs?.[0]?.carrier || item.segments?.[0]?.airline ||
-                           (item.carriers && Array.isArray(item.carriers) ? item.carriers[0]?.name : null);
+          // Get flight number from _segments map using first segment_id
+          const segmentId = leg.segment_ids?.[0];
+          const segmentInfo = segmentId ? item._segments?.[segmentId] : null;
+          const flightNumber = segmentInfo?.marketing_flight_number || `${airlineCode}${Math.floor(Math.random() * 9000) + 1000}`;
 
-          // Look up airline by carrier ID if we have one
-          const airlineMapping: { [key: string]: { name: string; code: string } } = {
-            '-32213': { name: 'IndiGo', code: '6E' },
-            '-23951': { name: 'Air India', code: 'AI' },
-            '-31733': { name: 'SpiceJet', code: 'SG' },
-            '-32448': { name: 'Vistara', code: 'UK' },
-            '-23962': { name: 'GoAir', code: 'G8' }
+          // Get price from pricing_options
+          const pricingOption = item.pricing_options?.[0];
+          const priceInfo = pricingOption?.items?.[0]?.price;
+          const rawPrice = priceInfo?.amount;
+          const finalPrice = Number.isFinite(rawPrice) ? Math.round(Number(rawPrice)) : Math.floor(Math.random() * 800) + 200;
+          const priceCurrency = priceInfo?.currency || currency;
+
+          console.log(`💰 Flight ${index}: ${finalPrice} ${priceCurrency} (${flightNumber})`);
+
+          // Format times from ISO strings
+          const formatTime = (isoString: string) => {
+            try {
+              const date = new Date(isoString);
+              return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+            } catch {
+              return '00:00';
+            }
           };
 
-          if (carrierId && airlineMapping[carrierId]) {
-            airlineName = airlineMapping[carrierId].name;
+          const depTime = leg.departure ? formatTime(leg.departure) : '08:00';
+          const arrTime = leg.arrival ? formatTime(leg.arrival) : '12:00';
+
+          // Format duration from minutes to "Xh Ym"
+          const formatDuration = (minutes: number) => {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}h ${mins}m`;
+          };
+
+          const durationStr = leg.duration ? formatDuration(leg.duration) : '2h 5m';
+
+          // Handle stops
+          const stopCount = leg.stop_count || 0;
+          const stopNames = leg.stop_ids?.map((stopId: string) => item._places?.[stopId]?.name).filter(Boolean) || [];
+
+          // Get booking URL
+          let bookingUrl = pricingOption?.items?.[0]?.url || '';
+          if (bookingUrl && bookingUrl.startsWith('/')) {
+            bookingUrl = `https://www.skyscanner.com${bookingUrl}`;
+          } else if (!bookingUrl) {
+            bookingUrl = `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate}/?adults=${passengers}`;
           }
 
-          airlineName = airlineName || 'Unknown Airline';
-          
-          const airlineCode: string = (item.airlineCode || item.carrierCode || 
-                                     (carrierId && airlineMapping[carrierId]?.code) ||
-                                     (airlineName?.substring(0, 2)) || 'XX').toUpperCase();
-
-          const nestedPrice = pricingOption?.price?.amount ?? pricingOption?.items?.[0]?.price?.amount;
-          const rawPrice = (nestedPrice ?? item.price ?? item.price_amount ?? Number(String(item.price_text || '').replace(/[^\d.]/g, '')));
-          const finalPrice = Number.isFinite(rawPrice) ? Math.round(Number(rawPrice)) : Math.floor(Math.random() * 800) + 200;
-
-          console.log(`💰 Flight ${index}: rawPrice=${rawPrice}, finalPrice=${finalPrice}, airline=${airlineName}`);
-
-          const derivedCurrency = item.currency || item.price_currency || (String(item.price_text || '').match(/[A-Z]{3}/)?.[0]) || currency;
-
-          // Times: prefer explicit fields; otherwise, try to parse from segment_id (epoch seconds)
-          const depTimeDirect = item.departureTime || item.departure_time || item.outbound?.departureTime || item.legs?.[0]?.departure?.time;
-          const arrTimeDirect = item.arrivalTime || item.arrival_time || item.outbound?.arrivalTime || item.legs?.[0]?.arrival?.time;
-
-          let depTime = depTimeDirect as string | undefined;
-          let arrTime = arrTimeDirect as string | undefined;
-
-          if ((!depTime || !arrTime) && typeof segId === 'string') {
-            const parts = segId.split('-');
-            const depEpoch = Number(parts[2]);
-            const arrEpoch = Number(parts[3]);
-            if (Number.isFinite(depEpoch) && Number.isFinite(arrEpoch)) {
-              const fmt = (d: Date) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-              depTime = depTime || fmt(new Date(depEpoch * 1000));
-              arrTime = arrTime || fmt(new Date(arrEpoch * 1000));
-            }
-          }
-
-          const durationStr = item.duration || item.duration_text || item.totalDuration || item.legs?.[0]?.duration || '4h 0m';
-
-          const stopCount = (item.stops ?? item.stopCount ?? (
-            Array.isArray(item.legs?.[0]?.segments) ? Math.max(0, item.legs[0].segments.length - 1) : 0
-          ));
-
-          // Booking URL: support relative Skyscanner deeplinks
-          const candidateUrl = pricingOption?.items?.[0]?.url || pricingOption?.url || item.bookingUrl || item.booking_url || item.deeplink || item.deepLink;
-          let deepLink = candidateUrl ? String(candidateUrl) : `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate}/?adults=${passengers}`;
-          if (deepLink && deepLink.startsWith('/')) {
-            deepLink = `https://www.skyscanner.com${deepLink}`;
-          }
-
-          const departureCity = item.departureCity || item.fromCity || from;
-          const arrivalCity = item.arrivalCity || item.toCity || to;
+          // Get city names from places
+          const departurePlace = item._places?.[leg.origin_place_id];
+          const arrivalPlace = item._places?.[leg.destination_place_id];
+          const departureCity = departurePlace?.name || from;
+          const arrivalCity = arrivalPlace?.name || to;
 
           return {
             price: finalPrice,
-            currency: String(derivedCurrency || currency),
+            currency: String(priceCurrency),
             airline: {
               name: airlineName,
               code: airlineCode,
               logo: `https://logos.skyscnr.com/images/airlines/favicon/${airlineCode}.png`
             },
-            flightNumber: String(item.flightNumber || item.flight_number || `${airlineCode}${Math.floor(Math.random() * 9000) + 1000}`),
+            flightNumber: String(flightNumber),
             departure: {
-              time: String(depTime || '08:00'),
+              time: depTime,
               date: departDate,
               airport: from,
               city: String(departureCity)
             },
             arrival: {
-              time: String(arrTime || '12:00'),
+              time: arrTime,
               date: departDate,
               airport: to,
               city: String(arrivalCity)
             },
-            duration: String(durationStr),
-            stops: Number.isFinite(stopCount) ? Number(stopCount) : 0,
-            bookingUrl: String(deepLink)
+            duration: durationStr,
+            stops: stopCount,
+            bookingUrl: String(bookingUrl)
           } as SkyscannerFlight;
         } catch (error) {
           console.error(`❌ Error parsing flight ${index}:`, error);
