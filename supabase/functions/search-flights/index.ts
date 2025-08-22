@@ -144,13 +144,35 @@ serve(async (req) => {
           const airlineName: string = item.airline || item.carrier || item.carrierName || item.operatingAirline || 'Unknown Airline';
           const airlineCode: string = (item.airlineCode || item.carrierCode || (airlineName?.substring(0, 2)) || 'XX').toUpperCase();
 
-          const rawPrice = (item.price ?? item.price_amount ?? Number(String(item.price_text || '').replace(/[^\d.]/g, '')));
+          // Try to read Skyscanner-style pricing_options shape
+          const pricingOption = Array.isArray(item.pricing_options)
+            ? item.pricing_options[0]
+            : (Array.isArray(item.pricingOptions) ? item.pricingOptions[0] : null);
+
+          const nestedPrice = pricingOption?.price?.amount ?? pricingOption?.items?.[0]?.price?.amount;
+          const rawPrice = (nestedPrice ?? item.price ?? item.price_amount ?? Number(String(item.price_text || '').replace(/[^\d.]/g, '')));
           const finalPrice = Number.isFinite(rawPrice) ? Math.round(Number(rawPrice)) : Math.floor(Math.random() * 800) + 200;
 
           const derivedCurrency = item.currency || item.price_currency || (String(item.price_text || '').match(/[A-Z]{3}/)?.[0]) || currency;
 
-          const depTime = item.departureTime || item.departure_time || item.outbound?.departureTime || item.legs?.[0]?.departure?.time || '08:00';
-          const arrTime = item.arrivalTime || item.arrival_time || item.outbound?.arrivalTime || item.legs?.[0]?.arrival?.time || '12:00';
+          // Times: prefer explicit fields; otherwise, try to parse from segment_id (epoch seconds)
+          const depTimeDirect = item.departureTime || item.departure_time || item.outbound?.departureTime || item.legs?.[0]?.departure?.time;
+          const arrTimeDirect = item.arrivalTime || item.arrival_time || item.outbound?.arrivalTime || item.legs?.[0]?.arrival?.time;
+
+          let depTime = depTimeDirect as string | undefined;
+          let arrTime = arrTimeDirect as string | undefined;
+
+          const segId: string | undefined = pricingOption?.fares?.[0]?.segment_id || pricingOption?.segment_ids?.[0];
+          if ((!depTime || !arrTime) && typeof segId === 'string') {
+            const parts = segId.split('-');
+            const depEpoch = Number(parts[2]);
+            const arrEpoch = Number(parts[3]);
+            if (Number.isFinite(depEpoch) && Number.isFinite(arrEpoch)) {
+              const fmt = (d: Date) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+              depTime = depTime || fmt(new Date(depEpoch * 1000));
+              arrTime = arrTime || fmt(new Date(arrEpoch * 1000));
+            }
+          }
 
           const durationStr = item.duration || item.duration_text || item.totalDuration || item.legs?.[0]?.duration || '4h 0m';
 
@@ -158,7 +180,12 @@ serve(async (req) => {
             Array.isArray(item.legs?.[0]?.segments) ? Math.max(0, item.legs[0].segments.length - 1) : 0
           ));
 
-          const deepLink = item.bookingUrl || item.booking_url || item.deeplink || item.deepLink || `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate}/?adults=${passengers}`;
+          // Booking URL: support relative Skyscanner deeplinks
+          const candidateUrl = pricingOption?.items?.[0]?.url || pricingOption?.url || item.bookingUrl || item.booking_url || item.deeplink || item.deepLink;
+          let deepLink = candidateUrl ? String(candidateUrl) : `https://www.skyscanner.com/transport/flights/${from}/${to}/${departDate}/?adults=${passengers}`;
+          if (deepLink && deepLink.startsWith('/')) {
+            deepLink = `https://www.skyscanner.com${deepLink}`;
+          }
 
           const departureCity = item.departureCity || item.fromCity || from;
           const arrivalCity = item.arrivalCity || item.toCity || to;
@@ -173,13 +200,13 @@ serve(async (req) => {
             },
             flightNumber: String(item.flightNumber || item.flight_number || `${airlineCode}${Math.floor(Math.random() * 9000) + 1000}`),
             departure: {
-              time: String(depTime),
+              time: String(depTime || '08:00'),
               date: departDate,
               airport: from,
               city: String(departureCity)
             },
             arrival: {
-              time: String(arrTime),
+              time: String(arrTime || '12:00'),
               date: departDate,
               airport: to,
               city: String(arrivalCity)

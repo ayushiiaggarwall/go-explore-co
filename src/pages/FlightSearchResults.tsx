@@ -152,7 +152,18 @@ export default function FlightSearchResults() {
     });
     
     // Use the specific flight booking URL if available, otherwise fallback to search
-    const bookingUrl = flight.bookingUrl || (() => {
+    const bookingUrl = (() => {
+      const fromAirport = flight.departure.airport;
+      const toAirport = flight.arrival.airport;
+
+      // Normalize provided bookingUrl (handle relative Skyscanner deeplinks)
+      if (flight.bookingUrl) {
+        const url = String(flight.bookingUrl);
+        if (url.startsWith('http')) return url;
+        if (url.startsWith('/')) return `https://www.skyscanner.com${url}`;
+        return `https://www.skyscanner.com${url.startsWith('.') ? url.slice(1) : url}`;
+      }
+
       try {
         // Format date to YYYYMMDD
         const dateObj = new Date(searchData.departureDate);
@@ -160,18 +171,14 @@ export default function FlightSearchResults() {
         const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
         const day = dateObj.getDate().toString().padStart(2, '0');
         const formattedDate = `${year}${month}${day}`;
-        
-        // Build Skyscanner search URL as fallback
         const params = new URLSearchParams({
           adults: searchData.passengers.toString(),
           cabinclass: 'economy',
           rtn: '0'
         });
-        
-        return `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/${formattedDate}/?${params.toString()}`;
+        return `https://www.skyscanner.com/transport/flights/${fromAirport}/${toAirport}/${formattedDate}/?${params.toString()}`;
       } catch (error) {
-        // Fallback URL
-        return `https://www.skyscanner.com/transport/flights/${flight.departure.airport}/${flight.arrival.airport}/?adults=${searchData.passengers}&cabinclass=economy`;
+        return `https://www.skyscanner.com/transport/flights/${fromAirport}/${toAirport}/?adults=${searchData.passengers}&cabinclass=economy`;
       }
     })();
 
