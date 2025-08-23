@@ -49,7 +49,7 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('https://pzon8n.app.n8n.cloud/webhook/0c11cdc5-8085-4cba-a119-869630504a55', {
+      const response = await fetch('https://tavs.app.n8n.cloud/webhook/0c11cdc5-8085-4cba-a119-869630504a55', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
